@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Full Stack Todo Application — Django + React Vite</title>
+<style>
+  :root{--bg:#f5f7fb;--card:#fff;--ink:#172033;--muted:#5f6b7a;--primary:#2563eb;--primary2:#1d4ed8;--border:#dfe5ef;--code:#101827;--good:#0f766e;--warn:#b45309}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.65}
+  header{background:linear-gradient(135deg,#172554,#2563eb);color:white;padding:52px 20px}
+  .hero{max-width:1100px;margin:auto}.hero h1{font-size:42px;line-height:1.1;margin:0 0 15px}.hero p{max-width:850px;font-size:18px;opacity:.94}
+  .badge{display:inline-block;background:#ffffff20;border:1px solid #ffffff40;border-radius:999px;padding:6px 12px;font-size:13px;margin:4px}
+  main{max-width:1100px;margin:30px auto;padding:0 20px}.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:25px;margin:20px 0;box-shadow:0 5px 20px #1720330a}
+  h2{margin-top:0;color:#172554;border-bottom:2px solid #e8edf5;padding-bottom:10px} h3{color:#1e40af;margin-top:28px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}.mini{padding:17px;border:1px solid var(--border);border-radius:12px;background:#fbfcff}
+  .mini strong{display:block;margin-bottom:5px}.flow{font-weight:700;text-align:center;padding:20px;background:#eff6ff;border-radius:12px;color:#1e40af}
+  .step{display:flex;gap:15px;align-items:flex-start}.num{flex:0 0 38px;height:38px;border-radius:50%;background:var(--primary);color:#fff;text-align:center;padding-top:5px;font-weight:800}
+  pre{position:relative;background:var(--code);color:#e5e7eb;border-radius:12px;padding:20px;overflow:auto;font-size:14px;line-height:1.55;margin:15px 0}
+  code{font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace}.copy{position:absolute;right:10px;top:10px;border:1px solid #ffffff30;background:#ffffff12;color:#fff;padding:6px 10px;border-radius:7px;cursor:pointer}.copy:hover{background:#ffffff25}
+  .note{border-left:5px solid var(--primary);background:#eff6ff;padding:14px 17px;border-radius:8px;margin:15px 0}.warn{border-left-color:var(--warn);background:#fff7ed}.success{border-left-color:var(--good);background:#ecfdf5}
+  table{width:100%;border-collapse:collapse;margin:15px 0}th,td{border:1px solid var(--border);padding:10px;text-align:left;vertical-align:top}th{background:#f1f5f9}
+  .check{background:#f8fafc;border:1px solid var(--border);padding:10px 14px;border-radius:8px;margin:7px 0}
+  .toc a{color:#1d4ed8;text-decoration:none}.toc a:hover{text-decoration:underline}
+  footer{text-align:center;color:var(--muted);padding:35px}
+  @media(max-width:650px){.hero h1{font-size:31px}.card{padding:18px}}
+</style>
+</head>
+<body>
+<header>
+<div class="hero">
+<span class="badge">Django REST Framework</span><span class="badge">React + Vite</span><span class="badge">SQLite</span><span class="badge">Fetch API</span>
+<h1>Build a Full-Stack Todo Application</h1>
+<p>A from-scratch, classroom-friendly exercise where You build a real application with a Django backend and a React Vite frontend — while understanding every file, class, function, API request, and piece of state.</p>
+</div>
+</header>
+
+<main>
+<section class="card">
+<h2>🎯 What are we building?</h2>
+<p>We will build a Todo application where a user can:</p>
+<div class="grid">
+<div class="mini">➕ <strong>Add a task</strong>Enter a title and create a todo.</div>
+<div class="mini">📋 <strong>View tasks</strong>React loads tasks from Django.</div>
+<div class="mini">✅ <strong>Complete a task</strong>Toggle completed/pending.</div>
+<div class="mini">✏️ <strong>Edit a task</strong>Change the title.</div>
+<div class="mini">🗑️ <strong>Delete a task</strong>Remove it permanently.</div>
+<div class="mini">🔄 <strong>Refresh safely</strong>Data remains in the database.</div>
+</div>
+<div class="flow">React UI → HTTP Request → Django REST API → Database<br>Database → Django REST API → JSON Response → React UI</div>
+</section>
+
+<section class="card toc">
+<h2>🧭 Learning Roadmap</h2>
+<ol>
+<li><a href="#concepts">Understand the architecture first</a></li>
+<li><a href="#setup">Install and create the projects</a></li>
+<li><a href="#django">Build the Django backend</a></li>
+<li><a href="#api">Understand the REST API</a></li>
+<li><a href="#react">Build the React frontend</a></li>
+<li><a href="#connect">Connect React to Django</a></li>
+<li><a href="#crud">Implement complete CRUD</a></li>
+<li><a href="#debug">Debug common problems</a></li>
+<li><a href="#challenge">challenges and evaluation</a></li>
+</ol>
+</section>
+
+<section class="card" id="concepts">
+<h2>1. 🧠 Understand the Architecture Before Coding</h2>
+<p>Do not start by copying code. First understand the jobs of the two applications.</p>
+<table>
+<tr><th>Part</th><th>Responsibility</th><th>Technology</th></tr>
+<tr><td>Frontend</td><td>Shows the interface, accepts user input, displays API data.</td><td>React + Vite</td></tr>
+<tr><td>Backend</td><td>Receives requests, validates data, performs CRUD operations.</td><td>Django + Django REST Framework</td></tr>
+<tr><td>Database</td><td>Stores todos permanently.</td><td>SQLite</td></tr>
+<tr><td>Communication</td><td>Transfers data between frontend and backend.</td><td>HTTP + JSON</td></tr>
+</table>
+<div class="note"><strong>Important:</strong> React does not directly talk to SQLite. React talks to Django through HTTP. Django talks to the database.</div>
+<h3>The mental model</h3>
+<p>Imagine a restaurant:</p>
+<ul>
+<li><strong>React = customer/table</strong> — asks for what it wants and displays the result.</li>
+<li><strong>API = waiter</strong> — carries requests and responses.</li>
+<li><strong>Django = kitchen</strong> — decides what should happen.</li>
+<li><strong>Database = storage room</strong> — stores the actual data.</li>
+</ul>
+</section>
+
+<section class="card" id="setup">
+<h2>2. 🛠️ Setup From Scratch</h2>
+<h3>2.1 Check Python and Node.js</h3>
+<pre><button class="copy">Copy</button><code>python --version
+node --version
+npm --version</code></pre>
+<p>You should see installed versions. If <code>python</code> does not work on Windows, try <code>py --version</code>.</p>
+
+<h3>2.2 Create the main folder</h3>
+<pre><button class="copy">Copy</button><code>mkdir fullstack-todo
+cd fullstack-todo</code></pre>
+
+<h3>2.3 Create the Django backend</h3>
+<pre><button class="copy">Copy</button><code>python -m venv venv</code></pre>
+<p>A virtual environment keeps this project's Python packages separate from other projects.</p>
+<p><strong>Windows:</strong></p>
+<pre><button class="copy">Copy</button><code>venv\Scripts\activate</code></pre>
+<p><strong>macOS/Linux:</strong></p>
+<pre><button class="copy">Copy</button><code>source venv/bin/activate</code></pre>
+
+<h3>Install Django and Django REST Framework</h3>
+<pre><button class="copy">Copy</button><code>pip install django djangorestframework django-cors-headers</code></pre>
+<p><strong>Why these libraries?</strong></p>
+<ul>
+<li><strong>Django:</strong> web framework and database/model system.</li>
+<li><strong>Django REST Framework (DRF):</strong> tools for creating APIs that return JSON.</li>
+<li><strong>django-cors-headers:</strong> allows the React development server to make requests to Django when they run on different origins.</li>
+</ul>
+
+<h3>Create the Django project and app</h3>
+<pre><button class="copy">Copy</button><code>django-admin startproject backend .
+python manage.py startapp todos</code></pre>
+
+<h3>Create the React frontend</h3>
+<p>Open a second terminal. Keep the Django terminal available separately.</p>
+<pre><button class="copy">Copy</button><code>npm create vite@latest frontend -- --template react
+cd frontend
+npm install
+npm run dev</code></pre>
+<div class="success"><strong>Checkpoint:</strong> Vite should show a local address such as <code>http://localhost:5173</code>. Stop the server with Ctrl+C when necessary.</div>
+</section>
+
+<section class="card" id="django">
+<h2>3. 🐍 Build the Django Backend</h2>
+<h3>3.1 Understand the generated structure</h3>
+<pre><code>fullstack-todo/
+├── backend/
+│   ├── __init__.py
+│   ├── settings.py
+│   ├── urls.py
+│   ├── asgi.py
+│   └── wsgi.py
+├── todos/
+│   ├── migrations/
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── tests.py
+│   └── views.py
+├── manage.py
+├── venv/
+└── frontend/</code></pre>
+<div class="note"><strong>Key idea:</strong> <code>backend</code> is the Django project configuration. <code>todos</code> is the application containing our Todo feature.</div>
+
+<h3>3.2 Register the apps</h3>
+<p>Open <code>backend/settings.py</code>. Add the applications:</p>
+<pre><button class="copy">Copy</button><code>INSTALLED_APPS = [
+    # Django's built-in apps
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+
+    # Third-party app
+    "rest_framework",
+    "corsheaders",
+
+    # Our app
+    "todos",
+]</code></pre>
+<p>Now add CORS middleware near the top of the middleware list:</p>
+<pre><button class="copy">Copy</button><code>MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
+
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+]</code></pre>
+<p>For this classroom development project, allow the Vite development server:</p>
+<pre><button class="copy">Copy</button><code>CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]</code></pre>
+<div class="warn"><strong>Production note:</strong> Do not blindly allow every origin in a real deployed application. Configure only the frontend domains that should access your API.</div>
+
+<h3>3.3 Create the Todo model</h3>
+<p>Open <code>todos/models.py</code>:</p>
+<pre><button class="copy">Copy</button><code>from django.db import models
+
+
+class Todo(models.Model):
+    title = models.CharField(max_length=200)
+    completed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title</code></pre>
+
+<h3>🔍 Understand every line</h3>
+<table>
+<tr><th>Code</th><th>Meaning</th></tr>
+<tr><td><code>models.Model</code></td><td>Django's base class for database models. Our Todo class inherits database behavior from it.</td></tr>
+<tr><td><code>CharField</code></td><td>Stores text with a maximum length.</td></tr>
+<tr><td><code>BooleanField</code></td><td>Stores True/False.</td></tr>
+<tr><td><code>default=False</code></td><td>A newly created todo starts as incomplete.</td></tr>
+<tr><td><code>auto_now_add=True</code></td><td>Django automatically records the creation time.</td></tr>
+<tr><td><code>__str__</code></td><td>Controls the human-readable representation of a Todo object, useful in Django admin and debugging.</td></tr>
+</table>
+
+<h3>3.4 Create the database table</h3>
+<pre><button class="copy">Copy</button><code>python manage.py makemigrations
+python manage.py migrate</code></pre>
+<p><strong>What happened?</strong> <code>makemigrations</code> creates instructions describing the database change. <code>migrate</code> applies those instructions to the database.</p>
+
+<h3>3.5 Create a serializer</h3>
+<p>Create a new file: <code>todos/serializers.py</code></p>
+<pre><button class="copy">Copy</button><code>from rest_framework import serializers
+from .models import Todo
+
+
+class TodoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Todo
+        fields = ["id", "title", "completed", "created_at"]</code></pre>
+
+<h3>Why do we need a serializer?</h3>
+<p>Django gives us Python objects. The browser normally communicates using JSON. A serializer converts between these representations.</p>
+<div class="flow">Python Todo object ⇄ TodoSerializer ⇄ JSON</div>
+<p><code>ModelSerializer</code> is a helper class from DRF. It can automatically create many serializer fields from the Django model, reducing repetitive code.</p>
+
+<h3>3.6 Create API views</h3>
+<p>Open <code>todos/views.py</code>:</p>
+<pre><button class="copy">Copy</button><code>from rest_framework import generics
+from .models import Todo
+from .serializers import TodoSerializer
+
+
+class TodoListCreateView(generics.ListCreateAPIView):
+    queryset = Todo.objects.all().order_by("-created_at")
+    serializer_class = TodoSerializer
+
+
+class TodoDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Todo.objects.all()
+    serializer_class = TodoSerializer</code></pre>
+
+<h3>Understand the generic API views</h3>
+<table>
+<tr><th>Class</th><th>Purpose</th></tr>
+<tr><td><code>ListCreateAPIView</code></td><td>Provides GET for a list and POST for creating an object.</td></tr>
+<tr><td><code>RetrieveUpdateDestroyAPIView</code></td><td>Provides GET one object, PUT/PATCH update, and DELETE.</td></tr>
+<tr><td><code>queryset</code></td><td>Tells the view which database records it works with.</td></tr>
+<tr><td><code>serializer_class</code></td><td>Tells DRF how to convert/validate Todo data.</td></tr>
+</table>
+<div class="note"><strong>Why use these classes?</strong> We could write all HTTP handling manually, but DRF's generic views already implement common CRUD behavior. The You should understand that this is a reusable framework abstraction, not magic.</div>
+
+<h3>3.7 Create API URLs</h3>
+<p>Create <code>todos/urls.py</code>:</p>
+<pre><button class="copy">Copy</button><code>from django.urls import path
+from .views import TodoListCreateView, TodoDetailView
+
+
+urlpatterns = [
+    path("todos/", TodoListCreateView.as_view(), name="todo-list-create"),
+    path("todos/&lt;int:pk&gt;/", TodoDetailView.as_view(), name="todo-detail"),
+]</code></pre>
+<p><code>as_view()</code> converts the class-based view into something Django's URL system can call when a request arrives.</p>
+
+<h3>Connect app URLs to project URLs</h3>
+<p>Open <code>backend/urls.py</code>:</p>
+<pre><button class="copy">Copy</button><code>from django.contrib import admin
+from django.urls import include, path
+
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("api/", include("todos.urls")),
+]</code></pre>
+<p>Our final endpoints are therefore:</p>
+<table>
+<tr><th>HTTP</th><th>URL</th><th>Purpose</th></tr>
+<tr><td>GET</td><td>/api/todos/</td><td>Get all todos</td></tr>
+<tr><td>POST</td><td>/api/todos/</td><td>Create a todo</td></tr>
+<tr><td>GET</td><td>/api/todos/1/</td><td>Get todo #1</td></tr>
+<tr><td>PUT/PATCH</td><td>/api/todos/1/</td><td>Update todo #1</td></tr>
+<tr><td>DELETE</td><td>/api/todos/1/</td><td>Delete todo #1</td></tr>
+</table>
+
+<h3>3.8 Run and test Django</h3>
+<pre><button class="copy">Copy</button><code>python manage.py runserver</code></pre>
+<p>Open <code>http://127.0.0.1:8000/api/todos/</code>. Initially you should see an empty list.</p>
+</section>
+
+<section class="card" id="api">
+<h2>4. 🌐 Understand the API Before React</h2>
+<p>You should understand HTTP before connecting React.</p>
+<table>
+<tr><th>Method</th><th>Meaning</th><th>Todo action</th></tr>
+<tr><td>GET</td><td>Read data</td><td>List or retrieve todos</td></tr>
+<tr><td>POST</td><td>Create data</td><td>Add a todo</td></tr>
+<tr><td>PUT/PATCH</td><td>Change data</td><td>Edit or complete a todo</td></tr>
+<tr><td>DELETE</td><td>Remove data</td><td>Delete a todo</td></tr>
+</table>
+
+<h3>Example JSON</h3>
+<pre><code>{
+  "id": 1,
+  "title": "Learn React",
+  "completed": false,
+  "created_at": "2026-09-22T10:30:00Z"
+}</code></pre>
+<p>The frontend does not need to know how SQLite works. It only needs to understand the API contract: send the correct HTTP request and process the JSON response.</p>
+</section>
+
+<section class="card" id="react">
+<h2>5. ⚛️ Build the React Frontend</h2>
+<h3>5.1 Understand the Vite structure</h3>
+<pre><code>frontend/
+├── src/
+│   ├── App.jsx
+│   ├── App.css
+│   ├── main.jsx
+│   └── index.css
+├── package.json
+└── vite.config.js</code></pre>
+
+<h3>5.2 Create the application state</h3>
+<p>Replace <code>src/App.jsx</code> with:</p>
+<pre><button class="copy">Copy</button><code>import { useEffect, useState } from "react";
+import "./App.css";
+
+const API_URL = "http://127.0.0.1:8000/api/todos/";
+
+function App() {
+  const [todos, setTodos] = useState([]);
+  const [title, setTitle] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [editingTitle, setEditingTitle] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  return (
+    &lt;div className="app"&gt;
+      &lt;h1&gt;My Todo App&lt;/h1&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<h3>🔍 Why useState?</h3>
+<p><code>useState</code> is a React Hook. It gives a component a value that can change over time and a function that updates that value.</p>
+<table>
+<tr><th>State</th><th>Purpose</th></tr>
+<tr><td><code>todos</code></td><td>Stores the list received from Django.</td></tr>
+<tr><td><code>title</code></td><td>Stores the text currently typed into the add form.</td></tr>
+<tr><td><code>editingId</code></td><td>Stores which todo is currently being edited.</td></tr>
+<tr><td><code>editingTitle</code></td><td>Stores the edited text.</td></tr>
+<tr><td><code>loading</code></td><td>Shows whether an API operation is in progress.</td></tr>
+<tr><td><code>error</code></td><td>Stores an error message to display to the user.</td></tr>
+</table>
+
+<h3>5.3 Fetch todos when the component loads</h3>
+<p>Add this function and effect inside <code>App</code>:</p>
+<pre><button class="copy">Copy</button><code>async function fetchTodos() {
+  try {
+    setLoading(true);
+    setError("");
+
+    const response = await fetch(API_URL);
+
+    if (!response.ok) {
+      throw new Error("Could not load todos.");
+    }
+
+    const data = await response.json();
+    setTodos(data);
+  } catch (error) {
+    setError(error.message);
+  } finally {
+    setLoading(false);
+  }
+}
+
+useEffect(() => {
+  fetchTodos();
+}, []);</code></pre>
+
+<p><strong>Understand the flow:</strong></p>
+<ol>
+<li><code>fetch()</code> sends a GET request.</li>
+<li><code>await</code> waits for the server response.</li>
+<li><code>response.ok</code> checks whether the HTTP response was successful.</li>
+<li><code>response.json()</code> converts JSON into a JavaScript value.</li>
+<li><code>setTodos(data)</code> updates React state.</li>
+<li>React re-renders the UI using the new state.</li>
+</ol>
+
+<p><code>useEffect(..., [])</code> runs after the component's first render because the dependency array is empty.</p>
+
+<h3>5.4 Add a Todo</h3>
+<pre><button class="copy">Copy</button><code>async function addTodo(event) {
+  event.preventDefault();
+
+  if (!title.trim()) {
+    return;
+  }
+
+  try {
+    setError("");
+
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: title,
+        completed: false,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Could not create todo.");
+    }
+
+    const newTodo = await response.json();
+
+    setTodos((currentTodos) => [newTodo, ...currentTodos]);
+    setTitle("");
+  } catch (error) {
+    setError(error.message);
+  }
+}</code></pre>
+<p><strong>Why JSON.stringify?</strong> JavaScript objects are not automatically sent as JSON text. <code>JSON.stringify()</code> converts the object into a JSON string suitable for the HTTP request body.</p>
+
+<h3>5.5 Toggle completed status</h3>
+<pre><button class="copy">Copy</button><code>async function toggleTodo(todo) {
+  try {
+    const response = await fetch(`${API_URL}${todo.id}/`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        completed: !todo.completed,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Could not update todo.");
+    }
+
+    const updatedTodo = await response.json();
+
+    setTodos((currentTodos) =>
+      currentTodos.map((item) =>
+        item.id === updatedTodo.id ? updatedTodo : item
+      )
+    );
+  } catch (error) {
+    setError(error.message);
+  }
+}</code></pre>
+<p>The <code>map()</code> operation creates a new array. Only the todo whose ID matches the server response is replaced.</p>
+
+<h3>5.6 Delete a Todo</h3>
+<pre><button class="copy">Copy</button><code>async function deleteTodo(id) {
+  try {
+    const response = await fetch(`${API_URL}${id}/`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      throw new Error("Could not delete todo.");
+    }
+
+    setTodos((currentTodos) =>
+      currentTodos.filter((todo) => todo.id !== id)
+    );
+  } catch (error) {
+    setError(error.message);
+  }
+}</code></pre>
+<p><code>filter()</code> creates a new array containing every todo except the one with the deleted ID.</p>
+
+<h3>5.7 Edit a Todo</h3>
+<pre><button class="copy">Copy</button><code>function startEditing(todo) {
+  setEditingId(todo.id);
+  setEditingTitle(todo.title);
+}
+
+function cancelEditing() {
+  setEditingId(null);
+  setEditingTitle("");
+}
+
+async function saveTodo(id) {
+  if (!editingTitle.trim()) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}${id}/`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: editingTitle,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Could not edit todo.");
+    }
+
+    const updatedTodo = await response.json();
+
+    setTodos((currentTodos) =>
+      currentTodos.map((todo) =>
+        todo.id === updatedTodo.id ? updatedTodo : todo
+      )
+    );
+
+    cancelEditing();
+  } catch (error) {
+    setError(error.message);
+  }
+}</code></pre>
+</section>
+
+<section class="card" id="connect">
+<h2>6. 🧩 Put the React UI Together</h2>
+<p>Now replace the complete <code>src/App.jsx</code> with this version. You should compare it with the individual pieces above.</p>
+<pre><button class="copy">Copy</button><code>import { useEffect, useState } from "react";
+import "./App.css";
+
+const API_URL = "http://127.0.0.1:8000/api/todos/";
+
+function App() {
+  const [todos, setTodos] = useState([]);
+  const [title, setTitle] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [editingTitle, setEditingTitle] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function fetchTodos() {
+    try {
+      setLoading(true);
+      setError("");
+
+      const response = await fetch(API_URL);
+
+      if (!response.ok) {
+        throw new Error("Could not load todos.");
+      }
+
+      const data = await response.json();
+      setTodos(data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchTodos();
+  }, []);
+
+  async function addTodo(event) {
+    event.preventDefault();
+
+    if (!title.trim()) {
+      return;
+    }
+
+    try {
+      setError("");
+
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: title,
+          completed: false,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Could not create todo.");
+      }
+
+      const newTodo = await response.json();
+
+      setTodos((currentTodos) => [newTodo, ...currentTodos]);
+      setTitle("");
+    } catch (error) {
+      setError(error.message);
+    }
+  }
+
+  async function toggleTodo(todo) {
+    try {
+      const response = await fetch(`${API_URL}${todo.id}/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          completed: !todo.completed,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Could not update todo.");
+      }
+
+      const updatedTodo = await response.json();
+
+      setTodos((currentTodos) =>
+        currentTodos.map((item) =>
+          item.id === updatedTodo.id ? updatedTodo : item
+        )
+      );
+    } catch (error) {
+      setError(error.message);
+    }
+  }
+
+  async function deleteTodo(id) {
+    try {
+      const response = await fetch(`${API_URL}${id}/`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Could not delete todo.");
+      }
+
+      setTodos((currentTodos) =>
+        currentTodos.filter((todo) => todo.id !== id)
+      );
+    } catch (error) {
+      setError(error.message);
+    }
+  }
+
+  function startEditing(todo) {
+    setEditingId(todo.id);
+    setEditingTitle(todo.title);
+  }
+
+  function cancelEditing() {
+    setEditingId(null);
+    setEditingTitle("");
+  }
+
+  async function saveTodo(id) {
+    if (!editingTitle.trim()) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}${id}/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: editingTitle,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Could not edit todo.");
+      }
+
+      const updatedTodo = await response.json();
+
+      setTodos((currentTodos) =>
+        currentTodos.map((todo) =>
+          todo.id === updatedTodo.id ? updatedTodo : todo
+        )
+      );
+
+      cancelEditing();
+    } catch (error) {
+      setError(error.message);
+    }
+  }
+
+  return (
+    <div className="app">
+      <div className="todo-card">
+        <h1>My Todo App</h1>
+        <p className="subtitle">Django + React</p>
+
+        <form onSubmit={addTodo} className="add-form">
+          <input
+            type="text"
+            placeholder="What do you need to do?"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+          />
+          <button type="submit">Add</button>
+        </form>
+
+        {error && <p className="error">{error}</p>}
+
+        {loading ? (
+          <p>Loading...</p>
+        ) : todos.length === 0 ? (
+          <p className="empty">No tasks yet. Add your first task!</p>
+        ) : (
+          <div className="todo-list">
+            {todos.map((todo) => (
+              <div
+                key={todo.id}
+                className={`todo-item ${todo.completed ? "completed" : ""}`}
+              >
+                {editingId === todo.id ? (
+                  <>
+                    <input
+                      value={editingTitle}
+                      onChange={(event) =>
+                        setEditingTitle(event.target.value)
+                      }
+                    />
+                    <button onClick={() => saveTodo(todo.id)}>
+                      Save
+                    </button>
+                    <button onClick={cancelEditing}>
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className="todo-content">
+                      <input
+                        type="checkbox"
+                        checked={todo.completed}
+                        onChange={() => toggleTodo(todo)}
+                      />
+
+                      <span>{todo.title}</span>
+                    </div>
+
+                    <div className="actions">
+                      <button onClick={() => startEditing(todo)}>
+                        Edit
+                      </button>
+
+                      <button onClick={() => deleteTodo(todo.id)}>
+                        Delete
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default App;</code></pre>
+
+<h3>6.1 Add the CSS</h3>
+<p>Replace <code>src/App.css</code>:</p>
+<pre><button class="copy">Copy</button><code>.app {
+  min-height: 100vh;
+  padding: 50px 20px;
+  background: #f1f5f9;
+}
+
+.todo-card {
+  max-width: 700px;
+  margin: auto;
+  background: white;
+  padding: 30px;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+h1 {
+  margin-bottom: 5px;
+}
+
+.subtitle {
+  color: #64748b;
+  margin-top: 0;
+}
+
+.add-form {
+  display: flex;
+  gap: 10px;
+  margin: 25px 0;
+}
+
+.add-form input {
+  flex: 1;
+}
+
+input[type="text"],
+.todo-item input:not([type="checkbox"]) {
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+}
+
+button {
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #2563eb;
+  color: white;
+}
+
+button:hover {
+  background: #1d4ed8;
+}
+
+.todo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.todo-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 15px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.todo-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.todo-item.completed span {
+  text-decoration: line-through;
+  color: #94a3b8;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+}
+
+.error {
+  color: #b91c1c;
+  background: #fee2e2;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.empty {
+  text-align: center;
+  color: #64748b;
+}
+
+@media (max-width: 600px) {
+  .add-form {
+    flex-direction: column;
+  }
+
+  .todo-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .actions {
+    width: 100%;
+  }
+}</code></pre>
+
+<h3>6.2 Check the application</h3>
+<p>Make sure two servers are running:</p>
+<table>
+<tr><th>Application</th><th>Command</th><th>Address</th></tr>
+<tr><td>Django</td><td><code>python manage.py runserver</code></td><td>127.0.0.1:8000</td></tr>
+<tr><td>React</td><td><code>npm run dev</code></td><td>localhost:5173</td></tr>
+</table>
+<div class="success"><strong>Expected result:</strong> Add a task in React → Django receives POST → SQLite stores it → Django returns JSON → React displays the new task.</div>
+</section>
+
+<section class="card" id="crud">
+<h2>7. 🔬 Understand CRUD End-to-End</h2>
+<h3>Create</h3>
+<div class="flow">User types → React state → POST → Django serializer → Todo model → SQLite → JSON → React state</div>
+<h3>Read</h3>
+<div class="flow">React loads → GET → Django queryset → serializer → JSON → setTodos() → React renders</div>
+<h3>Update</h3>
+<div class="flow">Checkbox/Edit → PATCH → Django finds object by ID → serializer/model update → JSON → React replaces item</div>
+<h3>Delete</h3>
+<div class="flow">Delete button → DELETE → Django deletes database row → React filters local list</div>
+
+<h3>Why does React update immediately?</h3>
+<p>React does not need to reload the entire browser page. When <code>setTodos()</code> changes state, React renders the component again using the new state.</p>
+<p>This is one of the key ideas You should understand: <strong>state is the data that drives the UI.</strong></p>
+</section>
+
+<section class="card">
+<h2>8. 🧪 Testing the Backend Without React</h2>
+<p>You should learn to test APIs independently. The Django REST Framework browser interface can help during development. They can also use Postman, Insomnia, or a command-line HTTP client.</p>
+<h3>POST example</h3>
+<pre><code>POST http://127.0.0.1:8000/api/todos/
+
+{
+  "title": "Study Django",
+  "completed": false
+}</code></pre>
+<h3>PATCH example</h3>
+<pre><code>PATCH http://127.0.0.1:8000/api/todos/1/
+
+{
+  "completed": true
+}</code></pre>
+<h3>DELETE example</h3>
+<pre><code>DELETE http://127.0.0.1:8000/api/todos/1/</code></pre>
+<div class="note"><strong>Teaching point:</strong> If the API works in Postman but not in React, the backend is probably working and the You should inspect the frontend request, URL, browser console, or CORS configuration.</div>
+</section>
+
+<section class="card" id="debug">
+<h2>9. 🐛 Common Errors and How to Think About Them</h2>
+<table>
+<tr><th>Error</th><th>Likely reason</th><th>What to inspect</th></tr>
+<tr><td>Failed to fetch</td><td>Django isn't running, wrong URL, or CORS issue.</td><td>Django terminal, API URL, CORS setting.</td></tr>
+<tr><td>404 Not Found</td><td>Incorrect endpoint.</td><td><code>backend/urls.py</code>, browser Network tab.</td></tr>
+<tr><td>401/403</td><td>Authentication/permission or request protection issue.</td><td>Response body and Django/DRF configuration.</td></tr>
+<tr><td>500</td><td>Backend exception.</td><td>Django terminal traceback.</td></tr>
+<tr><td>Data doesn't appear</td><td>State not updated or API response unexpected.</td><td>Network tab and <code>console.log()</code>.</td></tr>
+<tr><td>CORS error</td><td>Frontend origin isn't allowed.</td><td><code>CORS_ALLOWED_ORIGINS</code>.</td></tr>
+<tr><td>Changes disappear after refresh</td><td>Only frontend state was changed, not backend data.</td><td>Network request and database/API response.</td></tr>
+</table>
+
+<h3>Useful debugging habit</h3>
+<pre><button class="copy">Copy</button><code>console.log("Sending todo:", title);
+console.log("API response:", data);</code></pre>
+<p>Teach You not to randomly change code. Ask: <strong>What did I send? What URL did I call? What did the server return? What did React put into state?</strong></p>
+</section>
+
+<section class="card">
+<h2>10. 🔐 Optional Improvement: Better Backend Validation</h2>
+<p>Once the basic project works, You can learn that backend validation matters even if React already validates the input.</p>
+<p>Update <code>todos/serializers.py</code>:</p>
+<pre><button class="copy">Copy</button><code>from rest_framework import serializers
+from .models import Todo
+
+
+class TodoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Todo
+        fields = ["id", "title", "completed", "created_at"]
+
+    def validate_title(self, value):
+        value = value.strip()
+
+        if not value:
+            raise serializers.ValidationError(
+                "Title cannot be empty."
+            )
+
+        return value</code></pre>
+<p><strong>Why validate on the backend?</strong> A user can bypass React completely and send an HTTP request directly to Django. The server must protect its own data.</p>
+</section>
+
+<section class="card">
+<h2>11. 🧠 Important Concepts You Must Be Able to Explain</h2>
+<div class="check">☐ What is a frontend and what is a backend?</div>
+<div class="check">☐ Why can't React directly access the Django SQLite database?</div>
+<div class="check">☐ What is an API?</div>
+<div class="check">☐ What is JSON?</div>
+<div class="check">☐ What are GET, POST, PATCH, and DELETE?</div>
+<div class="check">☐ What is a Django model?</div>
+<div class="check">☐ What is a migration?</div>
+<div class="check">☐ What is a serializer and why do we need it?</div>
+<div class="check">☐ What is a Django class-based generic view?</div>
+<div class="check">☐ Why do we use <code>as_view()</code>?</div>
+<div class="check">☐ What is React state?</div>
+<div class="check">☐ Why do we use <code>useEffect()</code>?</div>
+<div class="check">☐ Why do we use <code>fetch()</code>?</div>
+<div class="check">☐ Why is <code>JSON.stringify()</code> needed for POST/PATCH?</div>
+<div class="check">☐ What do <code>map()</code> and <code>filter()</code> do in this application?</div>
+<div class="check">☐ What is CORS and why did this project need it?</div>
+</section>
+
+<section class="card" id="challenge">
+<h2>12. 🚀 Challenge: Take the Todo App Further</h2>
+<p>The base application is only the starting point. You should now extend it without being given the complete solution.</p>
+<h3>Level 1 — UI improvements</h3>
+<ul>
+<li>Add a task counter: Total / Completed / Pending.</li>
+<li>Add a "Clear completed" button.</li>
+<li>Show the creation date.</li>
+<li>Display a confirmation before deleting.</li>
+</ul>
+<h3>Level 2 — Filtering</h3>
+<ul>
+<li>All</li><li>Pending</li><li>Completed</li>
+</ul>
+<p>You must implement filtering in React without deleting records from the database.</p>
+<h3>Level 3 — Search</h3>
+<p>Add a search box that filters todos by title.</p>
+<h3>Level 4 — Backend filtering</h3>
+<p>Create an API query such as:</p>
+<pre><code>GET /api/todos/?completed=true</code></pre>
+<p>Make Django filter the database results instead of filtering everything in React.</p>
+<h3>Level 5 — Categories</h3>
+<p>Modify the model to support a category such as Work, Study, Personal, or Shopping. Update the serializer, API, and React form.</p>
+<h3>Level 6 — Authentication</h3>
+<p>Allow different users to have different todo lists. This introduces Django authentication, relationships, permissions, and authenticated API requests.</p>
+</section>
+
+<section class="card">
+<h2>13. 📝 Suggested Assignment Brief</h2>
+<div class="note">
+<strong>Task:</strong> Build and deploy a full-stack Todo Management Application using Django REST Framework as the backend and React with Vite as the frontend.
+</div>
+<h3>Minimum requirements</h3>
+<ul>
+<li>Create, read, update, and delete todos.</li>
+<li>Store todos in a Django database.</li>
+<li>Expose CRUD functionality through REST API endpoints.</li>
+<li>Consume the API from React using HTTP requests.</li>
+<li>Use React state to manage the user interface.</li>
+<li>Handle loading and error states.</li>
+<li>Provide a clean and responsive interface.</li>
+</ul>
+<h3>Submission</h3>
+<ul>
+<li>GitHub repository containing both frontend and backend.</li>
+<li>README explaining installation and execution.</li>
+<li>Screenshots of the working application.</li>
+<li>API endpoint documentation.</li>
+<li>Deployed frontend/backend links if deployment is required.</li>
+</ul>
+
+<h3>Suggested evaluation — 20 marks</h3>
+<table>
+<tr><th>Component</th><th>Marks</th><th>What is checked</th></tr>
+<tr><td>Backend</td><td>5</td><td>Model, migrations, serializer, API endpoints, validation.</td></tr>
+<tr><td>Frontend</td><td>5</td><td>React state, components, forms, API integration, UI.</td></tr>
+<tr><td>CRUD functionality</td><td>4</td><td>Create, read, update, delete work correctly.</td></tr>
+<tr><td>Code understanding</td><td>3</td><td>You can explain libraries, classes, hooks, functions and data flow.</td></tr>
+<tr><td>Creativity</td><td>2</td><td>Useful features and interface improvements.</td></tr>
+<tr><td>Documentation</td><td>1</td><td>README and setup instructions.</td></tr>
+</table>
+</section>
+
+<section class="card">
+<h2>14. 🎤 Viva Questions</h2>
+<ol>
+<li>Why did you choose Django for the backend?</li>
+<li>Why did we need Django REST Framework?</li>
+<li>What does a Django model represent?</li>
+<li>What happens when <code>makemigrations</code> is executed?</li>
+<li>What is the difference between migration and migrate?</li>
+<li>Why is a serializer needed?</li>
+<li>What does <code>ModelSerializer</code> provide?</li>
+<li>What does <code>ListCreateAPIView</code> do?</li>
+<li>Why does the URL contain <code>&lt;int:pk&gt;</code>?</li>
+<li>Why do we use <code>as_view()</code>?</li>
+<li>What happens when the Add button is clicked?</li>
+<li>What is the purpose of <code>event.preventDefault()</code>?</li>
+<li>Why do we use <code>useState()</code>?</li>
+<li>Why do we use <code>useEffect()</code>?</li>
+<li>Why is <code>JSON.stringify()</code> used?</li>
+<li>What is the difference between <code>map()</code> and <code>filter()</code>?</li>
+<li>What is CORS?</li>
+<li>Why does React run on port 5173 while Django runs on port 8000?</li>
+<li>What happens if Django is stopped while React is running?</li>
+<li>What happens to the todo data when the browser is refreshed?</li>
+</ol>
+</section>
+
+<section class="card">
+<h2>15. 🧩 Final Mental Model</h2>
+<p>You should be able to draw this without looking at the notes:</p>
+<pre><code>                 USER
+                   │
+                   ▼
+        ┌────────────────────┐
+        │   React + Vite     │
+        │                    │
+        │ useState()         │
+        │ useEffect()        │
+        │ fetch()            │
+        └─────────┬──────────┘
+                  │ HTTP + JSON
+                  ▼
+        ┌────────────────────┐
+        │   Django REST API  │
+        │                    │
+        │ URL → View         │
+        │ View → Serializer  │
+        │ Serializer → Model │
+        └─────────┬──────────┘
+                  │
+                  ▼
+        ┌────────────────────┐
+        │      SQLite        │
+        │                    │
+        │ Todo records       │
+        └────────────────────┘
+
+Create:  POST
+Read:    GET
+Update:  PATCH / PUT
+Delete:  DELETE</code></pre>
+<div class="success"><strong>Golden rule:</strong> React owns the user interface state. Django owns the application/data logic. The database owns persistent storage. The API connects them.</div>
+</section>
+
+<section class="card">
+<h2>16. 🏁 Final Checklist</h2>
+<div class="check">☐ I can create a Django project and app.</div>
+<div class="check">☐ I can create a Django model and migrate it.</div>
+<div class="check">☐ I understand serializers.</div>
+<div class="check">☐ I can create GET/POST/PATCH/DELETE API endpoints.</div>
+<div class="check">☐ I understand what DRF generic views do.</div>
+<div class="check">☐ I can create a React Vite project.</div>
+<div class="check">☐ I understand React state.</div>
+<div class="check">☐ I can use useEffect to load API data.</div>
+<div class="check">☐ I can send JSON using fetch.</div>
+<div class="check">☐ I can update React state after an API operation.</div>
+<div class="check">☐ I can explain CORS.</div>
+<div class="check">☐ I can debug an API request using the browser Network tab.</div>
+<div class="check">☐ I can explain the complete request-response flow without memorizing the code.</div>
+</section>
+</main>
+
+<footer>
+<p><strong>Full-Stack Todo Exercise</strong> · Django REST Framework + React Vite</p>
+<p>Designed as a learning-first practical exercise: understand the architecture, write the code, test each layer, then extend it.</p>
+</footer>
+
+<script>
+document.querySelectorAll(".copy").forEach(button => {
+  button.addEventListener("click", async () => {
+    const code = button.parentElement.querySelector("code").innerText;
+    try {
+      await navigator.clipboard.writeText(code);
+      const old = button.innerText;
+      button.innerText = "Copied!";
+      setTimeout(() => button.innerText = old, 1200);
+    } catch (e) {
+      const range = document.createRange();
+      range.selectNode(button.parentElement.querySelector("code"));
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      button.innerText = "Select & Copy";
+      setTimeout(() => button.innerText = "Copy", 1500);
+    }
+  });
+});
+</script>
+</body>
+</html>

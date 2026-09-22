@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Development Exercises</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --ink: #172033;
+      --muted: #64748b;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --border: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--ink);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 60px 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 580px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px 28px;
+      box-shadow: 0 4px 20px rgba(23, 32, 51, 0.05);
+      height: fit-content;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #edf2f7;
+    }
+
+    ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    li a {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    li a:hover {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: var(--primary-hover);
+      transform: translateX(4px);
+    }
+
+    li a::after {
+      content: "→";
+      font-size: 1.1rem;
+      opacity: 0.6;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    li a:hover::after {
+      opacity: 1;
+      transform: translateX(2px);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Web Development Exercises</h1>
+    <ul>
+      <li><a href="exercise-1.html">Exercise 1</a></li>
+      <!-- <li><a href="exercise-2.html">Exercise 2</a></li>
+      <li><a href="exercise-3.html">Exercise 3</a></li> -->
+    </ul>
+  </div>
+</body>
+</html>

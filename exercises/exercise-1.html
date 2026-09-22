@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Exercise 1: Semantic HTML5 & Personal Portfolio structure.">
+  <title>Exercise 01: Semantic HTML5 & Personal Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="exercise.css">
+  <style>
+    /* Demo specific styles */
+    .profile-card {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .profile-avatar {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #06b6d4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.25rem;
+      font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+    }
+    .skill-badges {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+    }
+    .skill-badge {
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <nav class="top-nav" aria-label="Breadcrumb">
+      <a href="../index.html" class="back-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        <span>Back to All Exercises</span>
+      </a>
+      <span class="exercise-badge">Lab #01 &bull; HTML5</span>
+    </nav>
+
+    <header class="exercise-hero">
+      <h1>Exercise 01: Semantic HTML5 Structure</h1>
+      <p>Master the proper usage of modern semantic landmarks (<header>, <nav>, <main>, <article>, <section>, <aside>, <footer>) to build accessible and SEO-friendly document trees.</p>
+    </header>
+
+    <section class="content-box">
+      <h2>1. Live Semantic Output Preview</h2>
+      <div class="demo-stage">
+        <!-- Semantic Profile Demo -->
+        <article class="profile-card">
+          <div class="profile-avatar">JS</div>
+          <div>
+            <header>
+              <h3 style="font-family: var(--font-display); font-size: 1.4rem; color: #fff;">Alex Chen</h3>
+              <p style="color: #94a3b8; font-size: 0.95rem;">Full-Stack Web Architect & Open Source Contributor</p>
+            </header>
+            <main style="margin: 0.75rem 0;">
+              <p style="color: #cbd5e1; font-size: 0.9rem;">Passionate about high-performance web applications, semantic accessible interfaces, and modern CSS architecture.</p>
+              <div class="skill-badges">
+                <span class="skill-badge">HTML5 Semantics</span>
+                <span class="skill-badge">WAI-ARIA</span>
+                <span class="skill-badge">SEO Optimization</span>
+              </div>
+            </main>
+            <footer>
+              <small style="color: #64748b;">San Francisco, CA &bull; Available for contracts</small>
+            </footer>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="content-box">
+      <h2>2. Semantic Landmark Hierarchy</h2>
+      <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Personal Portfolio&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;header&gt;
+      &lt;nav&gt;&lt;!-- Global site navigation --&gt;&lt;/nav&gt;
+    &lt;/header&gt;
+
+    &lt;main&gt;
+      &lt;article&gt;
+        &lt;header&gt;&lt;h1&gt;Project Title&lt;/h1&gt;&lt;/header&gt;
+        &lt;section&gt;&lt;p&gt;Content section...&lt;/p&gt;&lt;/section&gt;
+      &lt;/article&gt;
+      &lt;aside&gt;&lt;!-- Related info or sidebar --&gt;&lt;/aside&gt;
+    &lt;/main&gt;
+
+    &lt;footer&gt;
+      &lt;p&gt;&amp;copy; 2026 Developer Portfolio&lt;/p&gt;
+    &lt;/footer&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+    </section>
+  </div>
+</body>
+</html>

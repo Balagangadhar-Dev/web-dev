@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Exercise 2: Responsive CSS Layouts using Flexbox and CSS Grid.">
+  <title>Exercise 02: Responsive Flexbox & Grid</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="exercise.css">
+  <style>
+    /* Demo grid gallery */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .gallery-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 1.25rem;
+      text-align: center;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .gallery-card:hover {
+      transform: translateY(-4px);
+      border-color: #6366f1;
+    }
+    .card-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <nav class="top-nav" aria-label="Breadcrumb">
+      <a href="../index.html" class="back-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        <span>Back to All Exercises</span>
+      </a>
+      <span class="exercise-badge">Lab #02 &bull; CSS3</span>
+    </nav>
+
+    <header class="exercise-hero">
+      <h1>Exercise 02: Responsive Flexbox &amp; Grid Layouts</h1>
+      <p>Explore fluid auto-fitting responsive grids using `repeat(auto-fit, minmax(...))` and flexible multi-axis alignment with Flexbox.</p>
+    </header>
+
+    <section class="content-box">
+      <h2>1. Responsive Auto-Fitting Grid</h2>
+      <p style="color: #94a3b8; font-size: 0.95rem;">Resize your browser window to watch the layout automatically rearrange columns smoothly without media queries.</p>
+      
+      <div class="demo-stage">
+        <div class="gallery-grid">
+          <div class="gallery-card">
+            <div class="card-icon">⚡</div>
+            <strong style="color: #f1f5f9;">Fast Performance</strong>
+            <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 0.3rem;">Zero layout shift</p>
+          </div>
+          <div class="gallery-card">
+            <div class="card-icon">📱</div>
+            <strong style="color: #f1f5f9;">Adaptive Mobile</strong>
+            <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 0.3rem;">Responsive columns</p>
+          </div>
+          <div class="gallery-card">
+            <div class="card-icon">🎨</div>
+            <strong style="color: #f1f5f9;">Modern Aesthetics</strong>
+            <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 0.3rem;">Fluid CSS Grid</p>
+          </div>
+          <div class="gallery-card">
+            <div class="card-icon">🛡️</div>
+            <strong style="color: #f1f5f9;">Robust Layout</strong>
+            <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 0.3rem;">Auto-wrap fallback</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-box">
+      <h2>2. Key CSS Declaration</h2>
+      <pre><code>.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}</code></pre>
+    </section>
+  </div>
+</body>
+</html>
