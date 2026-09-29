@@ -1,12 +1,310 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Exercise 2</title>
-</head>
-<body>
-  <h1>Exercise 2</h1>
-  <p><a href="index.html">Back to Exercises</a></p>
-</body>
-</html>
+<!doctype html><html><head><meta charset='utf-8'><title>Django SmartShop Exercise</title><style>body{font-family:Arial;max-width:1050px;margin:auto;padding:30px;background:#f5f7fb;color:#172033;line-height:1.6}section{background:white;padding:25px;margin:20px 0;border-radius:12px}h1,h2{color:#0f766e}pre{background:#111827;color:#e5e7eb;padding:18px;border-radius:9px;overflow:auto;position:relative}.note{padding:14px;background:#ecfdf5;border-left:5px solid #0f766e}.tree{white-space:pre;background:#111827;color:#bbf7d0;padding:18px;border-radius:9px}table{width:100%;border-collapse:collapse}td,th{border:1px solid #ddd;padding:9px;text-align:left}button{float:right}</style><script>function cp(b){navigator.clipboard.writeText(b.parentElement.querySelector('code').innerText);b.innerText='Copied!'}</script></head><body>
+<h1>🛒 SmartShop — Django Messages, Sessions & Cookies</h1><p>Build one Django application using Django Templates. The application uses a session-based shopping cart, one-time Django messages, a session visit counter, and cookies for display-name and theme preferences.</p>
+<section><h2>1. What You Will Build</h2><div class='tree'>Browser → Django URLs → Views
+                         ├─ Messages
+                         ├─ Sessions
+                         ├─ Cookies
+                         └─ Context
+                              ↓
+                       Django Templates</div><p class='note'>Core idea: messages provide temporary feedback; sessions remember server-side visitor state across requests; cookies store small pieces of information in the browser.</p></section>
+<section><h2>2. Why Sessions and Cookies?</h2><p>HTTP is stateless. A later request does not automatically remember an earlier request. A shopping cart therefore needs a mechanism for remembering what happened.</p><table><tr><th>Feature</th><th>Purpose</th><th>Example</th></tr><tr><td>Messages</td><td>Temporary feedback</td><td>Product added successfully</td></tr><tr><td>Session</td><td>Visitor-specific state across requests</td><td>Shopping cart</td></tr><tr><td>Cookie</td><td>Small browser-side value</td><td>Theme preference</td></tr></table></section>
+<section><h2>3. Create the Project</h2><pre><button onclick='cp(this)'>Copy</button><code>python -m venv venv
+source venv/bin/activate
+pip install django
+django-admin startproject smartshop
+cd smartshop
+python manage.py startapp store
+python manage.py migrate
+python manage.py runserver</code></pre><p>On Windows activate with <code>venv\Scripts\activate</code>. <code>migrate</code> creates Django's built-in database tables, including tables required by the default database session backend.</p></section>
+<section><h2>4. Register store</h2><p>Add <code>"store"</code> to <code>INSTALLED_APPS</code>. Notice that normal Django projects already include <code>django.contrib.sessions</code> and <code>django.contrib.messages</code>.</p><pre><button onclick='cp(this)'>Copy</button><code>INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "store",
+]</code></pre><p>Also notice <code>SessionMiddleware</code> and <code>MessageMiddleware</code> in <code>MIDDLEWARE</code>. They make session and message functionality available during request/response processing.</p></section>
+<section><h2>5. URLs</h2><p>Create <code>store/urls.py</code>:</p><pre><button onclick='cp(this)'>Copy</button><code>from django.urls import path
+from . import views
+
+app_name = "store"
+
+urlpatterns = [
+    path("", views.home, name="home"),
+    path("products/", views.products, name="products"),
+    path("cart/", views.cart, name="cart"),
+    path("add/&lt;int:product_id&gt;/", views.add_to_cart, name="add_to_cart"),
+    path("remove/&lt;int:product_id&gt;/", views.remove_from_cart, name="remove_from_cart"),
+    path("clear-cart/", views.clear_cart, name="clear_cart"),
+    path("preferences/", views.preferences, name="preferences"),
+    path("clear-preferences/", views.clear_preferences, name="clear_preferences"),
+]</code></pre><p>In <code>smartshop/urls.py</code>:</p><pre><button onclick='cp(this)'>Copy</button><code>from django.contrib import admin
+from django.urls import include, path
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("", include("store.urls")),
+]</code></pre></section>
+<section><h2>6. Product Data</h2><p>To keep attention on messages, sessions and cookies, use a simple Python list instead of a database model.</p><pre><button onclick='cp(this)'>Copy</button><code>PRODUCTS = [
+ {"id":1,"name":"Wireless Headphones","price":2499,"category":"Electronics"},
+ {"id":2,"name":"Smart Watch","price":3999,"category":"Electronics"},
+ {"id":3,"name":"Laptop Backpack","price":1299,"category":"Accessories"},
+ {"id":4,"name":"Mechanical Keyboard","price":3499,"category":"Electronics"},
+]</code></pre></section>
+<section><h2>7. Templates</h2><div class='tree'>store/templates/store/
+├── base.html
+├── home.html
+├── products.html
+├── cart.html
+└── preferences.html</div><p>Django template inheritance lets one base template contain common navigation, styles and messages.</p></section>
+<section><h2>8. base.html + Messages</h2><pre><button onclick='cp(this)'>Copy</button><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+ &lt;title&gt;{% block title %}SmartShop{% endblock %}&lt;/title&gt;
+ &lt;link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"&gt;
+ &lt;style&gt;
+ body.dark-theme{background:#121212;color:white}
+ .dark-theme .card{background:#1f1f1f;color:white}
+ &lt;/style&gt;
+&lt;/head&gt;
+&lt;body class="{% if request.COOKIES.theme == 'dark' %}dark-theme{% endif %}"&gt;
+&lt;nav class="navbar navbar-dark bg-dark"&gt;&lt;div class="container"&gt;
+ &lt;a class="navbar-brand" href="{% url 'store:home' %}"&gt;SmartShop&lt;/a&gt;
+ &lt;div&gt;
+  &lt;a class="btn btn-outline-light" href="{% url 'store:products' %}"&gt;Products&lt;/a&gt;
+  &lt;a class="btn btn-outline-light" href="{% url 'store:cart' %}"&gt;Cart&lt;/a&gt;
+  &lt;a class="btn btn-outline-light" href="{% url 'store:preferences' %}"&gt;Preferences&lt;/a&gt;
+ &lt;/div&gt;
+&lt;/div&gt;&lt;/nav&gt;
+&lt;div class="container mt-4"&gt;
+ {% if messages %}
+  {% for message in messages %}
+   &lt;div class="alert alert-{{ message.tags }}"&gt;{{ message }}&lt;/div&gt;
+  {% endfor %}
+ {% endif %}
+ {% block content %}{% endblock %}
+&lt;/div&gt;
+&lt;/body&gt;&lt;/html&gt;</code></pre><p><code>{{ message }}</code> prints the temporary message. <code>{{ message.tags }}</code> exposes its level/tag so Bootstrap can style success, warning and info messages differently.</p></section>
+<section><h2>9. Session Visit Counter</h2><pre><button onclick='cp(this)'>Copy</button><code>def home(request):
+    visits = request.session.get("visits", 0) + 1
+    request.session["visits"] = visits
+    return render(request, "store/home.html", {"visits": visits})</code></pre><p><code>request.session.get("visits", 0)</code> reads the current value or returns 0 if it does not exist. Assigning to <code>request.session[...]</code> saves session state.</p><p>Create <code>home.html</code>:</p><pre><button onclick='cp(this)'>Copy</button><code>{% extends "store/base.html" %}
+{% block content %}
+&lt;h1&gt;Welcome {% if request.COOKIES.display_name %}{{ request.COOKIES.display_name }}{% endif %}&lt;/h1&gt;
+&lt;p&gt;Home page visits in this session: &lt;strong&gt;{{ visits }}&lt;/strong&gt;&lt;/p&gt;
+{% endblock %}</code></pre></section>
+<section><h2>10. How Sessions Work</h2><div class='tree'>Browser
+  │ session identifier cookie
+  ▼
+Django
+  │ finds corresponding session
+  ▼
+Server-side data
+{"visits": 3, "cart": [1,2]}</div><p class='note'>A session and a cookie are not the same thing. With the default database-backed session setup, Django stores session data server-side and uses a browser cookie containing a session identifier to associate requests with that data.</p></section>
+<section><h2>11. Products Template</h2><pre><button onclick='cp(this)'>Copy</button><code>def products(request):
+    return render(request, "store/products.html", {"products": PRODUCTS})</code></pre><pre><button onclick='cp(this)'>Copy</button><code>{% extends "store/base.html" %}
+{% block content %}
+&lt;h1&gt;Products&lt;/h1&gt;
+&lt;div class="row"&gt;
+{% for product in products %}
+ &lt;div class="col-md-3 mb-3"&gt;&lt;div class="card p-3"&gt;
+  &lt;h5&gt;{{ product.name }}&lt;/h5&gt;
+  &lt;p&gt;{{ product.category }}&lt;/p&gt;
+  &lt;h4&gt;₹{{ product.price }}&lt;/h4&gt;
+  &lt;a class="btn btn-primary" href="{% url 'store:add_to_cart' product.id %}"&gt;Add to Cart&lt;/a&gt;
+ &lt;/div&gt;&lt;/div&gt;
+{% endfor %}
+&lt;/div&gt;
+{% endblock %}</code></pre></section>
+<section><h2>12. Add to Cart: Sessions + Messages</h2><pre><button onclick='cp(this)'>Copy</button><code>from django.shortcuts import render, redirect
+from django.contrib import messages
+
+def get_product(product_id):
+    for product in PRODUCTS:
+        if product["id"] == product_id:
+            return product
+    return None
+
+def add_to_cart(request, product_id):
+    product = get_product(product_id)
+
+    if product is None:
+        messages.error(request, "Product not found.")
+        return redirect("store:products")
+
+    cart = request.session.get("cart", [])
+
+    if product_id in cart:
+        messages.warning(request, f"{product['name']} is already in your cart.")
+    else:
+        cart.append(product_id)
+        request.session["cart"] = cart
+        messages.success(request, f"{product['name']} added to cart.")
+
+    return redirect("store:products")</code></pre><div class='tree'>Click Add
+ ↓
+Read request.session["cart"]
+ ↓
+Modify cart
+ ↓
+Save session
+ ↓
+messages.success()
+ ↓
+redirect()
+ ↓
+base.html displays message</div></section>
+<section><h2>13. Display the Cart</h2><pre><button onclick='cp(this)'>Copy</button><code>def cart(request):
+    cart_ids = request.session.get("cart", [])
+    cart_products = [p for p in PRODUCTS if p["id"] in cart_ids]
+    total = sum(p["price"] for p in cart_products)
+    return render(request, "store/cart.html", {
+        "cart_products": cart_products,
+        "total": total,
+    })</code></pre><pre><button onclick='cp(this)'>Copy</button><code>{% extends "store/base.html" %}
+{% block content %}
+&lt;h1&gt;Your Cart&lt;/h1&gt;
+{% if cart_products %}
+&lt;table class="table"&gt;
+{% for product in cart_products %}
+&lt;tr&gt;
+ &lt;td&gt;{{ product.name }}&lt;/td&gt;
+ &lt;td&gt;₹{{ product.price }}&lt;/td&gt;
+ &lt;td&gt;&lt;a class="btn btn-danger btn-sm" href="{% url 'store:remove_from_cart' product.id %}"&gt;Remove&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+{% endfor %}
+&lt;/table&gt;
+&lt;h3&gt;Total: ₹{{ total }}&lt;/h3&gt;
+&lt;a class="btn btn-warning" href="{% url 'store:clear_cart' %}"&gt;Clear Cart&lt;/a&gt;
+{% else %}
+&lt;div class="alert alert-info"&gt;Your cart is empty.&lt;/div&gt;
+{% endif %}
+{% endblock %}</code></pre></section>
+<section><h2>14. Remove and Clear Session Data</h2><pre><button onclick='cp(this)'>Copy</button><code>def remove_from_cart(request, product_id):
+    cart = request.session.get("cart", [])
+    if product_id in cart:
+        cart.remove(product_id)
+        request.session["cart"] = cart
+        messages.info(request, "Product removed from cart.")
+    else:
+        messages.warning(request, "Product is not in the cart.")
+    return redirect("store:cart")
+
+def clear_cart(request):
+    if "cart" in request.session:
+        del request.session["cart"]
+        messages.success(request, "Cart cleared successfully.")
+    else:
+        messages.info(request, "The cart is already empty.")
+    return redirect("store:cart")</code></pre><p><code>del request.session["cart"]</code> deletes only one session key. <code>request.session.flush()</code> is stronger: it removes the current session data and session identifier.</p></section>
+<section><h2>15. Cookies: Browser-Side Preferences</h2><div class='tree'>Django response
+  │ Set-Cookie
+  ▼
+Browser stores value
+  │ later request
+  ▼
+request.COOKIES</div><p>We will store a display name and light/dark theme.</p></section>
+<section><h2>16. Preferences Form</h2><pre><button onclick='cp(this)'>Copy</button><code>{% extends "store/base.html" %}
+{% block content %}
+&lt;h1&gt;Preferences&lt;/h1&gt;
+&lt;form method="POST"&gt;
+ {% csrf_token %}
+ &lt;label&gt;Display Name&lt;/label&gt;
+ &lt;input class="form-control" name="display_name" value="{{ request.COOKIES.display_name|default:'' }}"&gt;
+ &lt;label class="mt-3"&gt;Theme&lt;/label&gt;
+ &lt;select class="form-select" name="theme"&gt;
+  &lt;option value="light"&gt;Light&lt;/option&gt;
+  &lt;option value="dark"&gt;Dark&lt;/option&gt;
+ &lt;/select&gt;
+ &lt;button class="btn btn-success mt-3"&gt;Save Preferences&lt;/button&gt;
+&lt;/form&gt;
+&lt;a class="btn btn-outline-danger mt-3" href="{% url 'store:clear_preferences' %}"&gt;Clear Preferences&lt;/a&gt;
+{% endblock %}</code></pre><p><code>{% csrf_token %}</code> is required for Django's normal CSRF protection on POST forms.</p></section>
+<section><h2>17. Set Cookies</h2><pre><button onclick='cp(this)'>Copy</button><code>def preferences(request):
+    if request.method == "POST":
+        display_name = request.POST.get("display_name", "").strip()
+        theme = request.POST.get("theme", "light")
+
+        if theme not in ["light", "dark"]:
+            theme = "light"
+
+        response = redirect("store:home")
+        response.set_cookie(
+            "display_name", display_name,
+            max_age=60 * 60 * 24 * 30,
+            samesite="Lax"
+        )
+        response.set_cookie(
+            "theme", theme,
+            max_age=60 * 60 * 24 * 30,
+            samesite="Lax"
+        )
+        messages.success(request, "Preferences saved.")
+        return response
+
+    return render(request, "store/preferences.html")</code></pre><p>A cookie is set on the <strong>response</strong> because the browser receives the response and stores the cookie. <code>60 * 60 * 24 * 30</code> represents approximately 30 days in seconds.</p></section>
+<section><h2>18. Read and Delete Cookies</h2><pre><button onclick='cp(this)'>Copy</button><code># Read in a view
+name = request.COOKIES.get("display_name", "Guest")
+theme = request.COOKIES.get("theme", "light")
+
+# Delete
+def clear_preferences(request):
+    response = redirect("store:home")
+    response.delete_cookie("display_name")
+    response.delete_cookie("theme")
+    messages.info(request, "Saved preferences were cleared.")
+    return response</code></pre><p>Cookies can also be read in templates through <code>request.COOKIES</code>, as already used in <code>base.html</code> and <code>home.html</code>.</p></section>
+<section><h2>19. Cookie Security</h2><p class='note'><strong>Do not store passwords, secret keys, payment-card data or other secrets in ordinary cookies.</strong></p><pre><button onclick='cp(this)'>Copy</button><code>response.set_cookie(
+    "example",
+    "value",
+    max_age=3600,
+    httponly=True,
+    secure=True,
+    samesite="Lax",
+)</code></pre><table><tr><th>Option</th><th>Meaning</th></tr><tr><td>httponly</td><td>Prevents normal JavaScript from reading the cookie.</td></tr><tr><td>secure</td><td>Sends it only over HTTPS.</td></tr><tr><td>samesite</td><td>Controls cross-site sending behavior.</td></tr><tr><td>max_age</td><td>Lifetime in seconds.</td></tr></table></section>
+<section><h2>20. Complete Concept Flow</h2><div class='tree'>MESSAGES
+Action → messages.success() → redirect → display once
+
+SESSIONS
+Request → request.session → server-side state → later request
+
+COOKIES
+response.set_cookie() → browser stores value
+browser → later request → request.COOKIES</div></section>
+<section><h2>21. Experiments</h2><p>1. Add the same product twice and observe the warning message.</p><p>2. Add products, move between pages and refresh. Observe that the cart remains.</p><p>3. Change the theme, refresh and navigate to another page.</p><p>4. Inspect cookies in browser Developer Tools → Application/Storage → Cookies.</p><p>5. Delete the preference cookies manually and reload.</p><p>6. Clear only the cart and check whether the visit counter remains.</p><p>7. Compare deleting one session key with <code>request.session.flush()</code>.</p></section>
+<section><h2>22. Final Project Structure</h2><div class='tree'>smartshop/
+├── manage.py
+├── smartshop/
+│   ├── settings.py
+│   └── urls.py
+└── store/
+    ├── urls.py
+    ├── views.py
+    └── templates/store/
+        ├── base.html
+        ├── home.html
+        ├── products.html
+        ├── cart.html
+        └── preferences.html</div></section>
+<section><h2>23. Debugging Guide</h2><table><tr><th>Problem</th><th>Check</th></tr><tr><td>Messages do not appear</td><td>Messages app, MessageMiddleware and message loop in base.html.</td></tr><tr><td>Cart disappears</td><td>Check session operations and whether flush() is being called.</td></tr><tr><td>Cookie is not created</td><td>set_cookie() must be called on the response that is returned.</td></tr><tr><td>POST gives CSRF error</td><td>Add {% csrf_token %} inside the form.</td></tr><tr><td>NoReverseMatch</td><td>Check URL namespace, URL name and parameters.</td></tr></table></section>
+<section><h2>24. Extend the Application</h2><p>After the core application works, add cart quantities, recently viewed products using sessions, a currency-preference cookie, a returning-visitor message, a checkout action that clears the cart, and eventually replace the Python product list with a Django <code>Product</code> model.</p></section>
+<section><h2>25. Final Build Check</h2><p>☐ Django project runs.</p><p>☐ Templates use inheritance.</p><p>☐ Products render with a template loop.</p><p>☐ Cart uses <code>request.session</code>.</p><p>☐ Visit counter uses the session.</p><p>☐ Success, warning, info and error messages can be displayed.</p><p>☐ Preferences create cookies.</p><p>☐ Cookies are read on later requests.</p><p>☐ Cookies can be deleted.</p><p>☐ Cart can be removed without deleting unrelated session data.</p><p>☐ Cookies can be inspected in browser developer tools.</p></section>
+<section><h2>26. What This Exercise Demonstrates</h2><div class='tree'>HTTP is stateless
+      ↓
+Django request/response
+      ↓
+Django Templates
+      ↓
+Messages Framework
+      ↓
+Sessions
+      ↓
+Session Cart + Visit Counter
+      ↓
+Cookies
+      ↓
+Preferences
+      ↓
+Messages + Sessions + Cookies together</div><p class='note'>The most important distinction is where the information lives and how long it is needed: use messages for short-lived feedback, sessions for visitor-specific server-side state, and cookies for small browser-side values such as preferences.</p></section>
+</body></html>
