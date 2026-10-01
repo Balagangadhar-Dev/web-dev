@@ -1,12 +1,1074 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Exercise 3</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SmartShop 2 — Django Permissions, Decorators & Custom User Model</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+body{background:#f4f7fb;color:#182230;font-family:Inter,Arial,sans-serif;line-height:1.7}.hero{background:linear-gradient(135deg,#111827,#1d4ed8,#0f766e);color:white;padding:58px 0}.hero h1{font-weight:800}.hero p{max-width:900px;color:#e5e7eb}.section{background:white;border:1px solid #e3e8ef;border-radius:18px;padding:30px;margin:24px 0;box-shadow:0 10px 30px rgba(15,23,42,.06)}h2{color:#174ea6;font-weight:750;margin-bottom:18px}h3{color:#0f766e;margin-top:28px}h4{color:#334155;margin-top:22px}.note{border-left:5px solid #2563eb;background:#eff6ff;padding:16px 18px;border-radius:10px}.why{border-left:5px solid #059669;background:#ecfdf5;padding:16px 18px;border-radius:10px}.warning{border-left:5px solid #d97706;background:#fff7ed;padding:16px 18px;border-radius:10px}.concept{border-left:5px solid #7c3aed;background:#f5f3ff;padding:16px 18px;border-radius:10px}.tree{background:#0f172a;color:#dbeafe;border-radius:12px;padding:20px;white-space:pre;overflow:auto;font-family:Consolas,monospace}.codewrap{position:relative;margin:15px 0}pre{background:#0b1220;color:#e5e7eb;border-radius:12px;padding:20px;overflow:auto;line-height:1.55;margin:0}pre code{font-family:Consolas,Menlo,monospace;font-size:14px}.copy{position:absolute;right:10px;top:10px;background:#334155;color:#fff;border:0;border-radius:7px;padding:7px 11px;cursor:pointer}.copy:hover{background:#475569}.badge-soft{display:inline-block;background:#e0ecff;color:#174ea6;padding:5px 10px;border-radius:999px;margin:3px;font-size:.85rem}.cardx{height:100%;border:1px solid #e5e7eb;border-radius:14px;padding:18px;background:#fbfdff}.table thead th{background:#eff6ff}.small-muted{color:#64748b}.check{font-size:17px}.flow{font-weight:700;color:#334155}.footer{padding:35px 0 60px;color:#64748b;text-align:center}@media(max-width:700px){.section{padding:21px}.hero{padding:42px 0}.hero h1{font-size:2rem}}
+</style>
+<script>
+function copyCode(btn){const code=btn.parentElement.querySelector('code').innerText;navigator.clipboard.writeText(code).then(()=>{const old=btn.innerText;btn.innerText='Copied!';setTimeout(()=>btn.innerText=old,1000)});}
+</script>
 </head>
 <body>
-  <h1>Exercise 3</h1>
-  <p><a href="index.html">Back to Exercises</a></p>
+<header class="hero"><div class="container">
+<span class="badge-soft">Django Templates</span><span class="badge-soft">Authentication</span><span class="badge-soft">Permissions</span><span class="badge-soft">Decorators</span><span class="badge-soft">Custom User Model</span>
+<h1 class="display-5 mt-3">🛒 SmartShop 2 — Permissions, Decorators & Custom Users</h1>
+<p class="lead mt-3">Extend the earlier SmartShop application that already introduced Django Messages, Sessions and Cookies. This exercise adds authentication, a custom user model, roles, Django's built-in permissions, protected views, decorators and polished templates.</p>
+</div></header>
+<main class="container">
+<section class="section"><h2>1. Where This Exercise Starts</h2>
+<div class="note"><strong>Important:</strong> The earlier SmartShop exercise already covered the Messages Framework, Sessions and Cookies. This exercise keeps those ideas and builds the next layer on top: <strong>who the user is, what the user is allowed to do, and how Django protects views.</strong></div>
+<div class="tree mt-3">Browser
+   ↓
+Django URL
+   ↓
+Authentication
+   ↓
+Is the request user logged in?
+   ↓
+Permissions / role checks
+   ↓
+Decorator-protected view
+   ↓
+Messages + Session + Cookies
+   ↓
+Django Template</div>
+<p class="mt-3">The final SmartShop application will have two broad experiences:</p>
+<div class="row g-3"><div class="col-md-6"><div class="cardx"><h4>Customer area</h4><p>Login, browse products, maintain the session cart, save preferences in cookies, and see feedback messages.</p></div></div><div class="col-md-6"><div class="cardx"><h4>Shop manager area</h4><p>Access a protected dashboard and product-management actions only when the authenticated user has the required permission.</p></div></div></div>
+</section>
+
+<section class="section"><h2>2. What New Concepts Are Being Added?</h2>
+<table class="table table-bordered align-middle"><thead><tr><th>Concept</th><th>What it answers</th><th>Example in SmartShop</th></tr></thead><tbody>
+<tr><td>Authentication</td><td>Who is this user?</td><td>Login/logout</td></tr>
+<tr><td>Custom User Model</td><td>What information should a user account contain?</td><td>Role / department / profile fields</td></tr>
+<tr><td>Permission</td><td>What action is this user allowed to perform?</td><td>Add or change products</td></tr>
+<tr><td>Decorator</td><td>Should this view be allowed to execute?</td><td><code>@login_required</code>, <code>@permission_required</code></td></tr>
+<tr><td>Role</td><td>What broad category does the account belong to?</td><td>Customer or Manager</td></tr>
+</tbody></table>
+<div class="concept"><strong>Authentication ≠ Authorization.</strong><br>Authentication identifies a user. Authorization decides what that authenticated user can access or do.</div>
+</section>
+
+<section class="section"><h2>3. A Critical Django Decision: Custom User Model</h2>
+<p>Django provides a built-in user model. That is convenient, but real applications often need additional account information such as a role, employee code, phone number, department or other business-specific fields.</p>
+<p>For this exercise, we will create a custom user model using Django's <code>AbstractUser</code>.</p>
+<div class="why"><strong>Why AbstractUser?</strong> It keeps Django's normal username/password, groups, permissions and authentication behavior, while allowing us to add our own fields. It is usually much easier to extend than implementing authentication completely from scratch.</div>
+<div class="warning"><strong>Very important:</strong> Django projects should normally define <code>AUTH_USER_MODEL</code> before the first migration that creates user-related tables. Changing the user model after a project has already accumulated migrations and relationships can require significant migration work. Since the earlier SmartShop project already exists, the cleanest learning setup is to create a fresh database/project copy for this extension, or reset the development database before introducing the custom user model.</div>
+</section>
+
+<section class="section"><h2>4. Create the Extended Project Safely</h2>
+<p>If you are continuing from the previous SmartShop code, keep the earlier templates and store logic, but use a clean development database for this version. If you want the cleanest path, create a project copy named <code>smartshop2</code>.</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>python -m venv venv
+
+# macOS / Linux
+source venv/bin/activate
+
+# Windows
+# venv\Scripts\activate
+
+pip install django
+
+django-admin startproject smartshop2
+cd smartshop2
+python manage.py startapp accounts
+python manage.py startapp store</code></pre></div>
+<p>Do not run <code>migrate</code> yet. First define the custom user model and <code>AUTH_USER_MODEL</code>.</p>
+</section>
+
+<section class="section"><h2>5. Create the Custom User Model</h2>
+<p>Open <code>accounts/models.py</code>:</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>from django.contrib.auth.models import AbstractUser
+from django.db import models
+
+
+class User(AbstractUser):
+    ROLE_CHOICES = [
+        ("customer", "Customer"),
+        ("manager", "Shop Manager"),
+    ]
+
+    role = models.CharField(
+        max_length=20,
+        choices=ROLE_CHOICES,
+        default="customer"
+    )
+
+    department = models.CharField(
+        max_length=100,
+        blank=True
+    )
+
+    def __str__(self):
+        return self.username</code></pre></div>
+<h3>Understand every piece</h3>
+<table class="table table-bordered"><tbody>
+<tr><th><code>AbstractUser</code></th><td>Django's reusable user implementation containing standard authentication fields and behavior.</td></tr>
+<tr><th><code>class User(AbstractUser)</code></th><td>Creates our own user model while inheriting the standard Django user functionality.</td></tr>
+<tr><th><code>ROLE_CHOICES</code></th><td>A list of allowed role values and their human-readable labels.</td></tr>
+<tr><th><code>role</code></th><td>A database field storing the user's broad application role.</td></tr>
+<tr><th><code>choices=ROLE_CHOICES</code></th><td>Restricts the normal form/admin selection to the defined choices.</td></tr>
+<tr><th><code>blank=True</code></th><td>Allows the field to be left empty in Django form validation.</td></tr>
+<tr><th><code>__str__</code></th><td>Controls how the user is represented as text in the admin and other displays.</td></tr>
+</tbody></table>
+</section>
+
+<section class="section"><h2>6. Register Both Apps</h2>
+<p>Open <code>smartshop2/settings.py</code> and add the apps:</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "accounts",
+    "store",
+]</code></pre></div>
+<p>The earlier exercise used <code>django.contrib.sessions</code> and <code>django.contrib.messages</code>. They remain important because the login system uses sessions and the application will continue to use messages for feedback.</p>
+</section>
+
+<section class="section"><h2>7. Tell Django About the Custom User</h2>
+<p>In <code>settings.py</code>, add this outside <code>INSTALLED_APPS</code>:</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>AUTH_USER_MODEL = "accounts.User"</code></pre></div>
+<p>The value means:</p>
+<div class="tree">accounts → Django app label
+User     → model class
+
+AUTH_USER_MODEL = "accounts.User"
+              ↓
+Django authentication uses accounts.User</div>
+<div class="warning">Use the exact model reference in this setting. Once the custom user model is established, other models that refer to users should normally use <code>settings.AUTH_USER_MODEL</code> or <code>get_user_model()</code> rather than importing a concrete built-in User model directly.</div>
+</section>
+
+<section class="section"><h2>8. Create the Database Tables</h2>
+<p>Now that the custom user model exists:</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>python manage.py makemigrations
+python manage.py migrate</code></pre></div>
+<p><code>makemigrations</code> creates migration instructions based on model changes. <code>migrate</code> applies those instructions to the database.</p>
+</section>
+
+<section class="section"><h2>9. Make the Custom User Visible in Admin</h2>
+<p>Open <code>accounts/admin.py</code>:</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from .models import User
+
+
+@admin.register(User)
+class CustomUserAdmin(UserAdmin):
+    fieldsets = UserAdmin.fieldsets + (
+        ("SmartShop Information", {
+            "fields": ("role", "department")
+        }),
+    )</code></pre></div>
+<p><code>UserAdmin</code> is Django's existing admin configuration for user accounts. We extend it rather than rebuilding the entire user administration screen.</p>
+</section>
+
+<section class="section"><h2>10. Create a Superuser</h2>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>python manage.py createsuperuser</code></pre></div>
+<p>Enter the requested username, email and password. Then run:</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>python manage.py runserver</code></pre></div>
+<p>Open the Django admin and inspect the custom User model. The additional <code>role</code> and <code>department</code> fields should be visible.</p>
+</section>
+
+<section class="section"><h2>11. Understand Django's Built-in Permission System</h2>
+<p>Django automatically creates model permissions such as:</p>
+<ul><li><code>add</code> — can create objects</li><li><code>change</code> — can modify objects</li><li><code>delete</code> — can remove objects</li><li><code>view</code> — can view objects</li></ul>
+<p>For a model named <code>Product</code> in an app named <code>store</code>, a permission may be represented as:</p>
+<div class="tree">store.add_product
+store.change_product
+store.delete_product
+store.view_product</div>
+<p>The format is <code>app_label.codename</code>.</p>
+<div class="why"><strong>Important distinction:</strong> A role such as <code>manager</code> is our application's business concept. A Django permission is an explicit authorization capability. Groups can be used to bundle permissions together.</div>
+</section>
+
+<section class="section"><h2>12. Create a Product Model</h2>
+<p>To make permissions meaningful, replace the earlier simple product list with a database model. In <code>store/models.py</code>:</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>from django.db import models
+
+
+class Product(models.Model):
+    name = models.CharField(max_length=120)
+    category = models.CharField(max_length=80)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    stock = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return self.name</code></pre></div>
+<p>Now create and apply the migration:</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>python manage.py makemigrations
+python manage.py migrate</code></pre></div>
+<p>Django will create the four standard permissions for Product automatically.</p>
+</section>
+
+<section class="section"><h2>13. Create a Manager Group</h2>
+<p>Groups provide a convenient way to assign a collection of permissions to multiple users.</p>
+<p>In the Django admin:</p>
+<ol><li>Open <strong>Groups</strong>.</li><li>Create a group called <strong>Shop Managers</strong>.</li><li>Give it Product permissions such as view, add and change.</li><li>Save the group.</li><li>Open a user account.</li><li>Add that user to <strong>Shop Managers</strong>.</li></ol>
+<div class="concept"><strong>Why groups?</strong> Imagine 20 managers. Instead of manually assigning the same permissions to each person, define the permission set once in a group and assign users to the group.</div>
+</section>
+
+<section class="section"><h2>14. User Permissions vs Groups vs Superuser</h2>
+<table class="table table-bordered"><thead><tr><th>Mechanism</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>Direct user permission</td><td>A particular user receives a permission directly.</td></tr>
+<tr><td>Group permission</td><td>A user receives permissions through group membership.</td></tr>
+<tr><td>Superuser</td><td>Django treats the account as having all permissions.</td></tr>
+<tr><td>Role field</td><td>Application-specific classification such as customer/manager. It does not automatically create Django permissions.</td></tr>
+</tbody></table>
+</section>
+
+<section class="section"><h2>15. Login and Logout with Django's Authentication System</h2>
+<p>Django provides authentication views. We can use them instead of manually writing password verification.</p>
+<p>In <code>smartshop2/urls.py</code>:</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>from django.contrib import admin
+from django.urls import include, path
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("accounts/", include("django.contrib.auth.urls")),
+    path("", include("store.urls")),
+]</code></pre></div>
+<p>This adds routes such as login and logout. Django's authentication views still need templates. We will create a custom login page so the application has a consistent design.</p>
+</section>
+
+<section class="section"><h2>16. Login Template</h2>
+<p>Create <code>templates/registration/login.html</code>. First configure the template directory in <code>settings.py</code>:</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        # keep the remaining generated options unchanged
+    },
+]</code></pre></div>
+<p>Login page:</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>{% extends "base.html" %}
+
+{% block title %}Login | SmartShop{% endblock %}
+
+{% block content %}
+&lt;div class="row justify-content-center"&gt;
+  &lt;div class="col-md-6 col-lg-5"&gt;
+    &lt;div class="card shadow-lg border-0 rounded-4"&gt;
+      &lt;div class="card-body p-4 p-md-5"&gt;
+        &lt;h2 class="fw-bold mb-2"&gt;Welcome back&lt;/h2&gt;
+        &lt;p class="text-secondary"&gt;Sign in to continue to SmartShop.&lt;/p&gt;
+
+        &lt;form method="post"&gt;
+          {% csrf_token %}
+          {{ form.as_p }}
+          &lt;button class="btn btn-primary w-100 py-2"&gt;
+            Sign in
+          &lt;/button&gt;
+        &lt;/form&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+{% endblock %}</code></pre></div>
+<h3>Why csrf_token?</h3>
+<p><code>csrf_token</code> protects POST forms against Cross-Site Request Forgery attacks. It should be included in Django POST forms.</p>
+</section>
+
+<section class="section"><h2>17. Add Login/Logout Navigation</h2>
+<p>In <code>base.html</code>, the navigation can react to the current authentication state:</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>{% if user.is_authenticated %}
+  &lt;span class="text-light me-3"&gt;
+    Hello, {{ user.username }}
+  &lt;/span&gt;
+
+  &lt;form method="post" action="{% url 'logout' %}" class="d-inline"&gt;
+    {% csrf_token %}
+    &lt;button class="btn btn-outline-light btn-sm"&gt;
+      Logout
+    &lt;/button&gt;
+  &lt;/form&gt;
+{% else %}
+  &lt;a class="btn btn-light btn-sm" href="{% url 'login' %}"&gt;
+    Login
+  &lt;/a&gt;
+{% endif %}</code></pre></div>
+<p>Notice that <code>user</code> is available in templates when Django's authentication context processor is enabled, which is part of the normal generated settings.</p>
+</section>
+
+<section class="section"><h2>18. The First Decorator: login_required</h2>
+<p>Suppose the manager dashboard should not be accessible to anonymous visitors.</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+
+
+@login_required
+def dashboard(request):
+    return render(request, "store/dashboard.html")</code></pre></div>
+<h3>What is a decorator?</h3>
+<p>A decorator is Python syntax that wraps a function and adds behavior without rewriting the function's core body.</p>
+<div class="tree">Request
+  ↓
+@login_required
+  ↓
+Is user authenticated?
+  ├── No  → redirect to login
+  └── Yes → run dashboard()</div>
+<p>The <code>@login_required</code> line is therefore a protection layer around the view.</p>
+</section>
+
+<section class="section"><h2>19. Add Permission Protection</h2>
+<p>Login alone is not enough. A logged-in customer should not automatically be allowed to manage products.</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>from django.contrib.auth.decorators import login_required, permission_required
+
+
+@login_required
+@permission_required("store.view_product", raise_exception=True)
+def product_dashboard(request):
+    return render(request, "store/product_dashboard.html")</code></pre></div>
+<h3>Read the decorators from top to bottom</h3>
+<div class="tree">@login_required
+      ↓
+User must be logged in
+      ↓
+@permission_required(...)
+      ↓
+User must have store.view_product
+      ↓
+product_dashboard()</div>
+<p><code>raise_exception=True</code> tells Django to raise a permission-related exception rather than redirecting to the login page when the user is authenticated but lacks the permission.</p>
+</section>
+
+<section class="section"><h2>20. Permission Checks Inside a View</h2>
+<p>A decorator is excellent when an entire view requires a permission. Sometimes the view needs conditional behavior.</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>from django.contrib import messages
+from django.shortcuts import redirect, render
+
+
+def products(request):
+    can_add = request.user.has_perm("store.add_product")
+
+    return render(
+        request,
+        "store/products.html",
+        {"can_add": can_add}
+    )</code></pre></div>
+<p>Now the template can conditionally display an Add Product button.</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>{% if can_add %}
+  &lt;a href="{% url 'store:add_product' %}" class="btn btn-primary"&gt;
+    + Add Product
+  &lt;/a&gt;
+{% endif %}</code></pre></div>
+<div class="warning"><strong>Do not rely only on hiding a button.</strong> A user can type a URL manually. The view itself must enforce authorization. Template checks improve the interface; decorators/permission checks protect the actual endpoint.</div>
+</section>
+
+<section class="section"><h2>21. Create Product Views</h2>
+<p>In <code>store/views.py</code>:</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>from django.contrib import messages
+from django.contrib.auth.decorators import login_required, permission_required
+from django.shortcuts import get_object_or_404, redirect, render
+
+from .models import Product
+
+
+def products(request):
+    items = Product.objects.all()
+    return render(request, "store/products.html", {"products": items})
+
+
+@login_required
+@permission_required("store.add_product", raise_exception=True)
+def add_product(request):
+    if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+        category = request.POST.get("category", "").strip()
+        price = request.POST.get("price", "0")
+        stock = request.POST.get("stock", "0")
+
+        if not name or not category:
+            messages.error(request, "Name and category are required.")
+            return render(request, "store/add_product.html")
+
+        Product.objects.create(
+            name=name,
+            category=category,
+            price=price,
+            stock=stock
+        )
+
+        messages.success(request, "Product added successfully.")
+        return redirect("store:products")
+
+    return render(request, "store/add_product.html")</code></pre></div>
+<p>Here the earlier Messages Framework is being reused: successful and invalid operations produce temporary feedback.</p>
+</section>
+
+<section class="section"><h2>22. Protect Product Editing</h2>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>@login_required
+@permission_required("store.change_product", raise_exception=True)
+def edit_product(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+
+    if request.method == "POST":
+        product.name = request.POST.get("name", "").strip()
+        product.category = request.POST.get("category", "").strip()
+        product.price = request.POST.get("price", "0")
+        product.stock = request.POST.get("stock", "0")
+        product.save()
+
+        messages.success(request, "Product updated successfully.")
+        return redirect("store:products")
+
+    return render(
+        request,
+        "store/edit_product.html",
+        {"product": product}
+    )</code></pre></div>
+<p><code>get_object_or_404()</code> is a Django shortcut. It retrieves the object or automatically returns a 404 response when it does not exist.</p>
+</section>
+
+<section class="section"><h2>23. Delete Protection</h2>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>@login_required
+@permission_required("store.delete_product", raise_exception=True)
+def delete_product(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+
+    if request.method == "POST":
+        product.delete()
+        messages.success(request, "Product deleted.")
+        return redirect("store:products")
+
+    return render(
+        request,
+        "store/confirm_delete.html",
+        {"product": product}
+    )</code></pre></div>
+<div class="warning">Use POST for destructive operations such as deletion. Avoid designing a delete action that changes data through a simple GET link.</div>
+</section>
+
+<section class="section"><h2>24. URL Configuration</h2>
+<p>Create or update <code>store/urls.py</code>:</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>from django.urls import path
+from . import views
+
+app_name = "store"
+
+urlpatterns = [
+    path("", views.home, name="home"),
+    path("products/", views.products, name="products"),
+    path("products/add/", views.add_product, name="add_product"),
+    path("products/&lt;int:product_id&gt;/edit/", views.edit_product, name="edit_product"),
+    path("products/&lt;int:product_id&gt;/delete/", views.delete_product, name="delete_product"),
+    path("dashboard/", views.product_dashboard, name="product_dashboard"),
+]</code></pre></div>
+<p>Remember: a URL does not itself provide security. The view reached by that URL must enforce the required permission.</p>
+</section>
+
+<section class="section"><h2>25. Build a Polished Base Template</h2>
+<p>Create <code>templates/base.html</code>. This template continues the earlier SmartShop styling but adds a more professional layout.</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>{% load static %}
+&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+  &lt;title&gt;{% block title %}SmartShop{% endblock %}&lt;/title&gt;
+  &lt;link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"&gt;
+  &lt;style&gt;
+    body { background:#f4f7fb; }
+    .navbar-brand { font-weight:800; letter-spacing:.3px; }
+    .hero-card { background:linear-gradient(135deg,#111827,#1d4ed8); color:white; border:0; }
+    .soft-card { border:0; border-radius:18px; box-shadow:0 10px 30px rgba(15,23,42,.07); }
+    .product-card { border:0; border-radius:16px; transition:.2s; }
+    .product-card:hover { transform:translateY(-4px); box-shadow:0 12px 28px rgba(15,23,42,.12); }
+    .role-pill { background:#e0ecff; color:#174ea6; padding:4px 9px; border-radius:999px; font-size:.8rem; }
+    .message-stack { position:fixed; top:80px; right:20px; z-index:1080; width:min(380px,calc(100% - 40px)); }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm"&gt;
+  &lt;div class="container"&gt;
+    &lt;a class="navbar-brand" href="{% url 'store:home' %}"&gt;🛒 SmartShop&lt;/a&gt;
+    &lt;div class="d-flex align-items-center gap-2"&gt;
+      &lt;a class="btn btn-outline-light btn-sm" href="{% url 'store:products' %}"&gt;Products&lt;/a&gt;
+      {% if user.is_authenticated %}
+        &lt;a class="btn btn-outline-info btn-sm" href="{% url 'store:product_dashboard' %}"&gt;Dashboard&lt;/a&gt;
+        &lt;span class="text-light small"&gt;{{ user.username }}&lt;/span&gt;
+        &lt;form method="post" action="{% url 'logout' %}" class="d-inline"&gt;
+          {% csrf_token %}
+          &lt;button class="btn btn-light btn-sm"&gt;Logout&lt;/button&gt;
+        &lt;/form&gt;
+      {% else %}
+        &lt;a class="btn btn-light btn-sm" href="{% url 'login' %}"&gt;Login&lt;/a&gt;
+      {% endif %}
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/nav&gt;
+
+{% if messages %}
+&lt;div class="message-stack"&gt;
+  {% for message in messages %}
+    &lt;div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow" role="alert"&gt;
+      {{ message }}
+      &lt;button type="button" class="btn-close" data-bs-dismiss="alert"&gt;&lt;/button&gt;
+    &lt;/div&gt;
+  {% endfor %}
+&lt;/div&gt;
+{% endif %}
+
+&lt;main class="container py-4"&gt;
+  {% block content %}{% endblock %}
+&lt;/main&gt;
+
+&lt;script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre></div>
+<p>This template demonstrates template inheritance, Bootstrap components, Django URL tags, authentication context, messages and a reusable page structure.</p>
+</section>
+
+<section class="section"><h2>26. Products Template with Permission-Aware UI</h2>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>{% extends "base.html" %}
+
+{% block title %}Products | SmartShop{% endblock %}
+
+{% block content %}
+&lt;div class="d-flex justify-content-between align-items-center mb-4"&gt;
+  &lt;div&gt;
+    &lt;h1 class="fw-bold mb-1"&gt;Products&lt;/h1&gt;
+    &lt;p class="text-secondary mb-0"&gt;Browse the SmartShop catalogue.&lt;/p&gt;
+  &lt;/div&gt;
+
+  {% if perms.store.add_product %}
+    &lt;a href="{% url 'store:add_product' %}" class="btn btn-primary"&gt;
+      + Add Product
+    &lt;/a&gt;
+  {% endif %}
+&lt;/div&gt;
+
+&lt;div class="row g-4"&gt;
+  {% for product in products %}
+    &lt;div class="col-md-6 col-lg-4"&gt;
+      &lt;div class="card product-card h-100 shadow-sm"&gt;
+        &lt;div class="card-body p-4"&gt;
+          &lt;span class="badge text-bg-light mb-2"&gt;{{ product.category }}&lt;/span&gt;
+          &lt;h4 class="fw-bold"&gt;{{ product.name }}&lt;/h4&gt;
+          &lt;p class="text-secondary"&gt;Stock: {{ product.stock }}&lt;/p&gt;
+          &lt;h5 class="text-primary"&gt;₹{{ product.price }}&lt;/h5&gt;
+
+          {% if perms.store.change_product %}
+            &lt;a href="{% url 'store:edit_product' product.id %}" class="btn btn-outline-primary btn-sm"&gt;
+              Edit
+            &lt;/a&gt;
+          {% endif %}
+
+          {% if perms.store.delete_product %}
+            &lt;a href="{% url 'store:delete_product' product.id %}" class="btn btn-outline-danger btn-sm"&gt;
+              Delete
+            &lt;/a&gt;
+          {% endif %}
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  {% empty %}
+    &lt;div class="col-12"&gt;
+      &lt;div class="alert alert-info"&gt;No products are available yet.&lt;/div&gt;
+    &lt;/div&gt;
+  {% endfor %}
+&lt;/div&gt;
+{% endblock %}</code></pre></div>
+<p><code>perms.store.add_product</code> is a powerful template feature. Django exposes the current user's permissions through the <code>perms</code> context object.</p>
+</section>
+
+<section class="section"><h2>27. Create the Add Product Form</h2>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>{% extends "base.html" %}
+
+{% block title %}Add Product | SmartShop{% endblock %}
+
+{% block content %}
+&lt;div class="row justify-content-center"&gt;
+  &lt;div class="col-lg-7"&gt;
+    &lt;div class="card soft-card"&gt;
+      &lt;div class="card-body p-4 p-md-5"&gt;
+        &lt;h2 class="fw-bold"&gt;Add Product&lt;/h2&gt;
+        &lt;p class="text-secondary"&gt;Create a new item for the catalogue.&lt;/p&gt;
+
+        &lt;form method="post" class="mt-4"&gt;
+          {% csrf_token %}
+          &lt;div class="mb-3"&gt;
+            &lt;label class="form-label fw-semibold"&gt;Name&lt;/label&gt;
+            &lt;input name="name" class="form-control" placeholder="Wireless Headphones" required&gt;
+          &lt;/div&gt;
+
+          &lt;div class="mb-3"&gt;
+            &lt;label class="form-label fw-semibold"&gt;Category&lt;/label&gt;
+            &lt;input name="category" class="form-control" placeholder="Electronics" required&gt;
+          &lt;/div&gt;
+
+          &lt;div class="row g-3"&gt;
+            &lt;div class="col-md-6"&gt;
+              &lt;label class="form-label fw-semibold"&gt;Price&lt;/label&gt;
+              &lt;input name="price" type="number" step="0.01" class="form-control" required&gt;
+            &lt;/div&gt;
+            &lt;div class="col-md-6"&gt;
+              &lt;label class="form-label fw-semibold"&gt;Stock&lt;/label&gt;
+              &lt;input name="stock" type="number" min="0" class="form-control" required&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+
+          &lt;button class="btn btn-primary w-100 mt-4"&gt;Save Product&lt;/button&gt;
+        &lt;/form&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+{% endblock %}</code></pre></div>
+</section>
+
+<section class="section"><h2>28. A Custom Decorator for the Manager Role</h2>
+<p>Django's <code>login_required</code> and <code>permission_required</code> solve common authorization problems. Sometimes an application also needs a business-specific rule, such as “only users whose role is manager may enter this page.”</p>
+<p>Create <code>store/decorators.py</code>:</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>from functools import wraps
+
+from django.contrib import messages
+from django.shortcuts import redirect
+
+
+def manager_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect("login")
+
+        if request.user.role != "manager":
+            messages.error(
+                request,
+                "You need a manager account to access this page."
+            )
+            return redirect("store:home")
+
+        return view_func(request, *args, **kwargs)
+
+    return wrapper</code></pre></div>
+<h3>Understand the helper pieces</h3>
+<table class="table table-bordered"><tbody>
+<tr><th><code>wraps</code></th><td>Preserves useful metadata from the original view function when it is wrapped.</td></tr>
+<tr><th><code>view_func</code></th><td>The original Django view function being protected.</td></tr>
+<tr><th><code>*args, **kwargs</code></th><td>Allows the wrapper to accept whatever positional and keyword arguments Django passes to the view.</td></tr>
+<tr><th><code>request.user</code></th><td>The currently authenticated user associated with the request.</td></tr>
+<tr><th><code>request.user.role</code></th><td>Our custom field from the User model.</td></tr>
+<tr><th><code>return view_func(...)</code></th><td>If the checks pass, execute the original view.</td></tr>
+</tbody></table>
+</section>
+
+<section class="section"><h2>29. Use the Custom Decorator</h2>
+<p>Import it into <code>views.py</code>:</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>from .decorators import manager_required</code></pre></div>
+<p>Then protect a manager-only dashboard:</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>@manager_required
+def manager_dashboard(request):
+    products_count = Product.objects.count()
+
+    return render(
+        request,
+        "store/manager_dashboard.html",
+        {"products_count": products_count}
+    )</code></pre></div>
+<p>This is a useful example of combining the custom user model with a custom decorator. The permission system and role system are different mechanisms and can coexist.</p>
+</section>
+
+<section class="section"><h2>30. Role Check vs Permission Check</h2>
+<table class="table table-bordered"><thead><tr><th>Role check</th><th>Permission check</th></tr></thead><tbody>
+<tr><td><code>request.user.role == "manager"</code></td><td><code>request.user.has_perm("store.add_product")</code></td></tr>
+<tr><td>Business classification</td><td>Specific authorization capability</td></tr>
+<tr><td>Useful for broad application areas</td><td>Useful for precise actions</td></tr>
+<tr><td>Custom logic defined by the application</td><td>Provided by Django's auth framework</td></tr>
+</tbody></table>
+<div class="why">For maintainable authorization, use Django permissions when the rule is about a concrete capability and use a role check when the application genuinely needs a broad business category.</div>
+</section>
+
+<section class="section"><h2>31. Custom User Model + Messages + Sessions</h2>
+<p>The new concepts connect naturally to the earlier exercise.</p>
+<div class="tree">User logs in
+    ↓
+Django authentication
+    ↓
+Authentication information stored through session mechanism
+    ↓
+request.user available in later requests
+    ↓
+Permission / role check
+    ↓
+View executes
+    ↓
+messages.success(...)
+    ↓
+Next page displays one-time feedback</div>
+<p>The exact session storage details depend on Django's configured session backend, but the default project setup uses database-backed sessions.</p>
+</section>
+
+<section class="section"><h2>32. Add a Session-Based “Last Seen” Feature</h2>
+<p>Use a session to remember a value across requests.</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>from django.utils import timezone
+
+
+def home(request):
+    visits = request.session.get("visits", 0)
+    visits += 1
+    request.session["visits"] = visits
+
+    return render(
+        request,
+        "store/home.html",
+        {"visits": visits}
+    )</code></pre></div>
+<p>This continues the previous Sessions concept. The user's login identity and application session data are separate ideas, but both rely on Django's session mechanism.</p>
+</section>
+
+<section class="section"><h2>33. Continue Using Cookies for Preferences</h2>
+<p>Cookies are still useful for small browser-side preferences such as a display theme.</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>from django.shortcuts import redirect, render
+
+
+def preferences(request):
+    theme = request.COOKIES.get("theme", "light")
+
+    return render(
+        request,
+        "store/preferences.html",
+        {"theme": theme}
+    )
+
+
+def set_theme(request, theme):
+    response = redirect("store:home")
+    response.set_cookie("theme", theme, max_age=60 * 60 * 24 * 30)
+    return response</code></pre></div>
+<p>Do not store passwords or sensitive authentication information in ordinary cookies created this way. Authentication cookies are managed by Django's authentication/session system.</p>
+</section>
+
+<section class="section"><h2>34. Manager Dashboard Template</h2>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>{% extends "base.html" %}
+
+{% block title %}Manager Dashboard | SmartShop{% endblock %}
+
+{% block content %}
+&lt;div class="card hero-card shadow-lg rounded-4 mb-4"&gt;
+  &lt;div class="card-body p-4 p-md-5"&gt;
+    &lt;span class="badge bg-light text-primary mb-3"&gt;Manager Area&lt;/span&gt;
+    &lt;h1 class="fw-bold"&gt;Welcome, {{ user.username }}&lt;/h1&gt;
+    &lt;p class="mb-0 opacity-75"&gt;
+      This page is protected by the custom manager_required decorator.
+    &lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div class="row g-4"&gt;
+  &lt;div class="col-md-4"&gt;
+    &lt;div class="card soft-card h-100"&gt;
+      &lt;div class="card-body p-4"&gt;
+        &lt;p class="text-secondary mb-1"&gt;Products&lt;/p&gt;
+        &lt;h2 class="fw-bold"&gt;{{ products_count }}&lt;/h2&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class="col-md-4"&gt;
+    &lt;div class="card soft-card h-100"&gt;
+      &lt;div class="card-body p-4"&gt;
+        &lt;p class="text-secondary mb-1"&gt;Role&lt;/p&gt;
+        &lt;h4&gt;{{ user.get_role_display }}&lt;/h4&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class="col-md-4"&gt;
+    &lt;div class="card soft-card h-100"&gt;
+      &lt;div class="card-body p-4"&gt;
+        &lt;p class="text-secondary mb-1"&gt;Department&lt;/p&gt;
+        &lt;h4&gt;{{ user.department|default:"Not specified" }}&lt;/h4&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+{% endblock %}</code></pre></div>
+<p><code>get_role_display()</code> is automatically available for fields using <code>choices</code>. It converts the stored value such as <code>manager</code> into its human-readable label such as <code>Shop Manager</code>.</p>
+</section>
+
+<section class="section"><h2>35. Improve the User Experience with Permission-Aware Messages</h2>
+<p>For example, when an authenticated customer tries to open a manager-only area, the custom decorator can create an error message:</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>messages.error(
+    request,
+    "You need a manager account to access this page."
+)</code></pre></div>
+<p>The base template already displays messages. This means the authorization layer and the earlier Messages Framework work together without duplicating notification logic on every page.</p>
+</section>
+
+<section class="section"><h2>36. Recommended Project Structure</h2>
+<div class="tree">smartshop2/
+├── manage.py
+├── smartshop2/
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+│
+├── accounts/
+│   ├── admin.py
+│   ├── models.py
+│   ├── migrations/
+│   └── ...
+│
+├── store/
+│   ├── admin.py
+│   ├── decorators.py
+│   ├── models.py
+│   ├── urls.py
+│   ├── views.py
+│   ├── migrations/
+│   └── templates/
+│       └── store/
+│           ├── home.html
+│           ├── products.html
+│           ├── add_product.html
+│           ├── edit_product.html
+│           ├── confirm_delete.html
+│           └── manager_dashboard.html
+│
+└── templates/
+    ├── base.html
+    └── registration/
+        └── login.html</div>
+</section>
+
+<section class="section"><h2>37. Register Product in Admin</h2>
+<p>Open <code>store/admin.py</code>:</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>from django.contrib import admin
+from .models import Product
+
+
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ("name", "category", "price", "stock")
+    search_fields = ("name", "category")</code></pre></div>
+<p>This gives a convenient way to create initial products while testing the permission system.</p>
+</section>
+
+<section class="section"><h2>38. Test the Permission Flow</h2>
+<ol>
+<li>Create a normal user with role <code>customer</code>.</li>
+<li>Log in as that user.</li>
+<li>Open the Products page.</li>
+<li>Confirm that manager-only controls are not displayed.</li>
+<li>Try opening the manager dashboard URL manually.</li>
+<li>Confirm the custom decorator blocks the request.</li>
+<li>Create another user with role <code>manager</code>.</li>
+<li>Add that user to the <strong>Shop Managers</strong> group.</li>
+<li>Give the group the required Product permissions.</li>
+<li>Log in as the manager.</li>
+<li>Confirm that Add/Edit/Delete controls appear according to permissions.</li>
+</ol>
+<div class="warning"><strong>Important test:</strong> Do not test only the buttons. Test the actual URLs. Security is enforced on the server-side view, not by whether a button happens to be visible.</div>
+</section>
+
+<section class="section"><h2>39. Trace a Protected Request</h2>
+<div class="tree">GET /products/add/
+       ↓
+URL dispatcher
+       ↓
+add_product(request)
+       ↓
+@login_required
+       ↓
+Authenticated?
+   ├── No → login page
+   └── Yes
+       ↓
+@permission_required("store.add_product")
+       ↓
+Has permission?
+   ├── No → PermissionDenied
+   └── Yes
+       ↓
+View executes
+       ↓
+Template displayed
+       ↓
+POST submitted
+       ↓
+Product created
+       ↓
+messages.success(...)
+       ↓
+redirect to products</div>
+</section>
+
+<section class="section"><h2>40. Understand Decorator Order</h2>
+<p>For:</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>@login_required
+@permission_required("store.add_product", raise_exception=True)
+def add_product(request):
+    ...</code></pre></div>
+<p>The decorators wrap the function. Keeping authentication before authorization expresses the natural security flow: first establish that a user is authenticated, then evaluate whether that user has the required capability.</p>
+</section>
+
+<section class="section"><h2>41. Custom Decorator with functools.wraps</h2>
+<p>It is worth understanding why <code>@wraps</code> is not just decorative syntax.</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>from functools import wraps
+
+def my_decorator(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        # extra behavior
+        return view_func(request, *args, **kwargs)
+
+    return wrapper</code></pre></div>
+<p>Without <code>wraps</code>, metadata such as the wrapped function's name and documentation can be replaced by the wrapper function. <code>wraps</code> preserves that useful metadata.</p>
+</section>
+
+<section class="section"><h2>42. A Cleaner Permission Decorator for One Permission</h2>
+<p>You can also build a small reusable decorator when a particular business rule appears repeatedly:</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>from functools import wraps
+from django.core.exceptions import PermissionDenied
+
+
+def require_product_management(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            raise PermissionDenied
+
+        if not request.user.has_perm("store.change_product"):
+            raise PermissionDenied
+
+        return view_func(request, *args, **kwargs)
+
+    return wrapper</code></pre></div>
+<p>This example shows that decorators are simply reusable Python functions. Django's built-in decorators are preferable when they already solve the problem; custom decorators are useful when the application has a repeated rule of its own.</p>
+</section>
+
+<section class="section"><h2>43. Why Not Put All Authorization in Templates?</h2>
+<p>Consider:</p>
+<div class="codewrap"><button class="copy" onclick="copyCode(this)">Copy</button><pre><code>{% if perms.store.delete_product %}
+  &lt;a href="..."&gt;Delete&lt;/a&gt;
+{% endif %}</code></pre></div>
+<p>This is good UI behavior because users should not see controls they cannot use. But it is not enough as security.</p>
+<div class="tree">Template hiding
+      ≠
+Server-side authorization
+
+Good application:
+Template hides unauthorized control
+        +
+View rejects unauthorized request</div>
+</section>
+
+<section class="section"><h2>44. Custom User Model: When to Add Fields</h2>
+<p>The custom user model should contain information that is genuinely part of the identity/account domain. For example:</p>
+<ul><li>Role</li><li>Department</li><li>Employee code</li><li>Phone number</li><li>Account-specific preferences</li></ul>
+<p>Do not put every unrelated business record directly into the User model. For more complex profiles, a separate profile model related to the user can be more appropriate.</p>
+<div class="why">The important design lesson is to decide the user model early. Authentication models are foundational because many other database tables and authentication components may reference them.</div>
+</section>
+
+<section class="section"><h2>45. Custom User Model vs User Profile</h2>
+<table class="table table-bordered"><thead><tr><th>Custom User Model</th><th>Separate Profile Model</th></tr></thead><tbody>
+<tr><td>Changes the authentication user model itself.</td><td>Keeps the authentication user and adds a related model.</td></tr>
+<tr><td>Good when additional account fields are fundamental.</td><td>Good when optional or domain-specific profile information is extensive.</td></tr>
+<tr><td>Should be planned at project start.</td><td>Can often be introduced later with less disruption.</td></tr>
+</tbody></table>
+</section>
+
+<section class="section"><h2>46. Common Errors and How to Understand Them</h2>
+<table class="table table-bordered"><thead><tr><th>Problem</th><th>Likely reason</th><th>What to inspect</th></tr></thead><tbody>
+<tr><td>“AUTH_USER_MODEL refers to model that has not been installed”</td><td>The accounts app is missing or the model name is wrong.</td><td><code>INSTALLED_APPS</code> and <code>AUTH_USER_MODEL</code>.</td></tr>
+<tr><td>Custom user migration problems</td><td>The custom user model was introduced after existing migrations/database state.</td><td>Use a clean development DB/project for learning this setup.</td></tr>
+<tr><td>Permission button does not appear</td><td>The logged-in account lacks the permission.</td><td>Check group/user permissions and <code>perms.store...</code>.</td></tr>
+<tr><td>Permission denied even though role is manager</td><td>Role and Django permissions are separate.</td><td>Check both <code>user.role</code> and <code>user.has_perm()</code>.</td></tr>
+<tr><td>Login page not found</td><td>Auth URLs or login template path is missing.</td><td><code>include("django.contrib.auth.urls")</code> and <code>templates/registration/login.html</code>.</td></tr>
+<tr><td>POST form rejected</td><td>CSRF token missing.</td><td>Add <code>{% csrf_token %}</code>.</td></tr>
+<tr><td>Decorator redirects unexpectedly</td><td>The user is anonymous or lacks the required condition.</td><td>Inspect <code>request.user.is_authenticated</code> and permissions.</td></tr>
+</tbody></table>
+</section>
+
+<section class="section"><h2>47. Final Application Architecture</h2>
+<div class="tree">                    SMARTSHOP 2
+                         │
+        ┌────────────────┼─────────────────┐
+        ↓                ↓                 ↓
+ Authentication      Store logic       Templates
+        │                │                 │
+ Custom User       Product model       base.html
+        │                │                 │
+ Role             Permissions        Bootstrap UI
+        │                │                 │
+ Groups           Decorators         Messages
+        │                │                 │
+        └────────────────┼─────────────────┘
+                         ↓
+                  Protected Views
+                         ↓
+              Sessions + Cookies + DB</div>
+</section>
+
+<section class="section"><h2>48. Final Concept Comparison</h2>
+<table class="table table-bordered"><thead><tr><th>Feature</th><th>Question answered</th><th>Where you use it</th></tr></thead><tbody>
+<tr><td>Messages</td><td>How do I give temporary feedback?</td><td>“Product added successfully.”</td></tr>
+<tr><td>Session</td><td>How do I remember server-side state between requests?</td><td>Cart, visit count, authentication session.</td></tr>
+<tr><td>Cookie</td><td>How do I remember a small browser-side preference?</td><td>Theme preference.</td></tr>
+<tr><td>Authentication</td><td>Who is making this request?</td><td><code>request.user</code>.</td></tr>
+<tr><td>Custom User</td><td>What account fields does this application need?</td><td>Role and department.</td></tr>
+<tr><td>Permission</td><td>What action can this user perform?</td><td><code>store.add_product</code>.</td></tr>
+<tr><td>Group</td><td>How can permissions be assigned as a reusable set?</td><td>Shop Managers.</td></tr>
+<tr><td>Decorator</td><td>Should this view be allowed to run?</td><td><code>@login_required</code>, <code>@permission_required</code>, custom decorator.</td></tr>
+</tbody></table>
+</section>
+
+<section class="section"><h2>49. Final Verification Checklist</h2>
+<p class="check">☐ A custom <code>User</code> model extends <code>AbstractUser</code>.</p>
+<p class="check">☐ <code>AUTH_USER_MODEL = "accounts.User"</code> is configured.</p>
+<p class="check">☐ Migrations were created after defining the custom user.</p>
+<p class="check">☐ The custom user appears in Django admin.</p>
+<p class="check">☐ A Product model exists.</p>
+<p class="check">☐ Product permissions exist.</p>
+<p class="check">☐ A Shop Managers group has product permissions.</p>
+<p class="check">☐ Login and logout work.</p>
+<p class="check">☐ <code>@login_required</code> protects authenticated pages.</p>
+<p class="check">☐ <code>@permission_required</code> protects specific capabilities.</p>
+<p class="check">☐ <code>request.user.has_perm()</code> can be used for conditional logic.</p>
+<p class="check">☐ Templates use <code>perms</code> to adapt the interface.</p>
+<p class="check">☐ A custom decorator checks the application-specific manager role.</p>
+<p class="check">☐ Unauthorized users are blocked at the view level.</p>
+<p class="check">☐ Messages continue to provide feedback.</p>
+<p class="check">☐ Sessions continue to store application state.</p>
+<p class="check">☐ Cookies continue to store small client-side preferences.</p>
+<p class="check">☐ Templates have a consistent Bootstrap-based design.</p>
+</section>
+
+<section class="section"><h2>50. Final Mental Model</h2>
+<div class="tree">REQUEST
+  ↓
+Who are you?
+  ↓
+request.user
+  ↓
+Are you authenticated?
+  ↓
+@login_required
+  ↓
+What are you allowed to do?
+  ↓
+Permissions / Groups / Role
+  ↓
+@permission_required or custom decorator
+  ↓
+VIEW EXECUTES
+  ↓
+Database / Session / Cookie
+  ↓
+Django Messages
+  ↓
+TEMPLATE
+  ↓
+Polished HTML response</div>
+<div class="note mt-3"><strong>The key idea:</strong> authentication identifies the account, authorization controls access, decorators enforce rules around views, permissions describe capabilities, the custom user model defines the account structure, and the earlier Messages/Sessions/Cookies features continue to support the user experience.</div>
+</section>
+</main>
+<footer class="footer"><div class="container">SmartShop 2 · Django Templates · Authentication · Permissions · Decorators · Custom User Model</div></footer>
 </body>
 </html>
