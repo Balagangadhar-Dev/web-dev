@@ -1,0 +1,940 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>React MovieBoard — Deep JSX, Components, State & Props Exercise</title><style>body{margin:0;background:#f5f7fb;color:#172033;font:16px/1.65 Arial}header{background:#172554;color:#fff;padding:48px 20px}main{max-width:1100px;margin:auto;padding:20px}.box{background:#fff;border:1px solid #dbe2ea;border-radius:14px;padding:26px;margin:18px 0}h1{font-size:40px}h2{color:#1d4ed8;border-bottom:2px solid #e8eef8;padding-bottom:8px}h3{color:#1e40af}pre{position:relative;background:#0f172a;color:#e5e7eb;padding:20px;border-radius:10px;overflow:auto}code{font-family:Consolas,monospace}.copy{position:absolute;right:8px;top:8px;background:#334155;color:white;border:0;padding:7px;border-radius:5px}.note{padding:14px;background:#eff6ff;border-left:5px solid #2563eb}.why{padding:14px;background:#ecfdf5;border-left:5px solid #059669}.warn{padding:14px;background:#fff7ed;border-left:5px solid #d97706}.tree{background:#111827;color:#bfdbfe;padding:18px;border-radius:10px;white-space:pre;overflow:auto}table{width:100%;border-collapse:collapse}th,td{border:1px solid #dbe2ea;padding:9px;text-align:left;vertical-align:top}th{background:#eff6ff}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.card{border:1px solid #dbe2ea;border-radius:10px;padding:14px}</style>
+<style>
+.learning-box{background:#fff;border:1px solid #dbe2ea;border-radius:14px;padding:26px;margin:18px 0;box-shadow:0 5px 18px rgba(15,23,42,.05)}
+.learning-box h2{color:#1d4ed8;border-bottom:2px solid #e8eef8;padding-bottom:8px}
+.learning-box h3{color:#1e40af}
+.explain{background:#eff6ff;border-left:5px solid #2563eb;padding:14px;margin:14px 0}
+.whydeep{background:#ecfdf5;border-left:5px solid #059669;padding:14px;margin:14px 0}
+.warn2{background:#fff7ed;border-left:5px solid #d97706;padding:14px;margin:14px 0}
+.step{background:#f5f3ff;border-left:5px solid #7c3aed;padding:14px;margin:14px 0}
+.mini{background:#f8fafc;border-left:5px solid #64748b;padding:14px;margin:14px 0}
+.flow{background:#111827;color:#bfdbfe;padding:18px;border-radius:10px;white-space:pre;overflow:auto}
+.learning-box table{width:100%;border-collapse:collapse;margin:14px 0}
+.learning-box th,.learning-box td{border:1px solid #dbe2ea;padding:10px;vertical-align:top;text-align:left}
+.learning-box th{background:#eff6ff}
+.learning-box .code-note{color:#475569}
+</style>
+<script>function cp(b){navigator.clipboard.writeText(b.parentElement.querySelector('code').innerText).then(()=>{let x=b.innerText;b.innerText='Copied!';setTimeout(()=>b.innerText=x,900)})}</script></head><body><header><main><h1>🎬 MovieBoard — React from the Ground Up: Deep Learning Edition</h1><p>One continuous practical exercise covering JSX, React Components, Function Components, Class Components, the React Component API, Lifecycle, State, Props, and State vs Props. Every concept is introduced before it is used.</p></main></header><main>
+<section class="box"><h2>1. What We Will Build</h2><div class="note"><b>MovieBoard</b> starts as an empty React project and gradually becomes a small movie dashboard. The same application is used throughout so each new concept has a reason to exist.</div><div class="grid"><div class="card"><b>JSX</b><br>Describe UI inside JavaScript.</div><div class="card"><b>Components</b><br>Split UI into reusable pieces.</div><div class="card"><b>Class Components</b><br>Understand the older React component model.</div><div class="card"><b>Lifecycle</b><br>Understand mount, update and unmount.</div><div class="card"><b>State</b><br>Manage changing component data.</div><div class="card"><b>Props</b><br>Pass data from parent to child.</div></div></section>
+
+<section class="learning-box">
+<h2>🧠 How to Use This Exercise Properly</h2>
+<p>The earlier version introduced the concepts. This version adds the missing layer: <strong>why the concept exists, what problem it solves, how the code should be read, and how the concepts connect.</strong></p>
+<div class="step"><strong>Use this cycle for every section:</strong><br>
+1. Read the problem.<br>
+2. Predict what the code should do.<br>
+3. Type/run the code.<br>
+4. Observe the browser and console.<br>
+5. Read the line-by-line explanation.<br>
+6. Change one value and run it again.<br>
+7. Explain the result in your own words.</div>
+<p>Do not try to memorize React syntax before understanding the flow. React becomes much easier when you can answer two questions: <strong>“Where did this value come from?”</strong> and <strong>“What caused this UI to change?”</strong></p>
+</section>
+
+<section class="learning-box">
+<h2>🔍 1A. First Understand the Three Layers</h2>
+<p>When reading React code, separate it into three layers.</p>
+<table>
+<tr><th>Layer</th><th>Examples</th><th>Question to ask</th></tr>
+<tr><td>JavaScript</td><td>variables, functions, arrays, objects, map(), filter()</td><td>What data or logic is being calculated?</td></tr>
+<tr><td>React</td><td>components, props, state, Hooks</td><td>Who owns the data and how does React know the UI needs updating?</td></tr>
+<tr><td>JSX</td><td>&lt;div&gt;, &lt;MovieCard /&gt;, {value}</td><td>What UI should be described?</td></tr>
+</table>
+<div class="explain"><strong>Example:</strong> In <code>&lt;MovieCard movie={movie} /&gt;</code>, <code>MovieCard</code> is React, <code>movie</code> is JavaScript data, and the surrounding syntax is JSX.</div>
+</section>
+
+<section class="learning-box">
+<h2>🔵 1B. JSX: Understand It Before Memorizing Its Rules</h2>
+<p>JSX is often the first confusing React topic because it looks like HTML but lives inside JavaScript.</p>
+<pre><code>function Welcome() {
+  const name = "Alex";
+
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;Hello {name}&lt;/h1&gt;
+      &lt;p&gt;Welcome to MovieBoard&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h3>Read the code in two directions</h3>
+<p><strong>JavaScript direction:</strong> <code>const name = "Alex"</code> creates data.</p>
+<p><strong>UI direction:</strong> <code>&lt;h1&gt;Hello {name}&lt;/h1&gt;</code> describes what should appear.</p>
+<p>The curly braces are the bridge between them. Inside JSX, <code>{name}</code> means: <strong>“evaluate this JavaScript expression and place its result here.”</strong></p>
+<div class="flow">JavaScript value
+      ↓
+   { name }
+      ↓
+     JSX
+      ↓
+ rendered UI</div>
+<h3>What can go inside { }</h3>
+<pre><code>&lt;p&gt;{name}&lt;/p&gt;
+&lt;p&gt;{2 + 3}&lt;/p&gt;
+&lt;p&gt;{movie.name}&lt;/p&gt;
+&lt;p&gt;{isLoggedIn ? "Logout" : "Login"}&lt;/p&gt;</code></pre>
+<p>The important word is <strong>expression</strong>. JSX can display the result of an expression. It is not a place to write arbitrary JavaScript statements.</p>
+</section>
+
+<section class="learning-box">
+<h2>🔵 1C. JSX vs HTML — Why Does React Change the Syntax?</h2>
+<table>
+<tr><th>HTML</th><th>JSX</th><th>Reason</th></tr>
+<tr><td><code>class</code></td><td><code>className</code></td><td>JSX uses JavaScript-oriented property naming.</td></tr>
+<tr><td><code>onclick</code></td><td><code>onClick</code></td><td>React event props use camelCase.</td></tr>
+<tr><td>Multiple top-level elements</td><td>One enclosing tree/Fragment</td><td>A component returns one JSX tree.</td></tr>
+<tr><td>Plain text only</td><td>Can embed JavaScript expressions</td><td>JSX is part of JavaScript source.</td></tr>
+</table>
+<div class="whydeep"><strong>Do not think “React changed HTML.”</strong> Think “JSX is a JavaScript syntax that looks similar to HTML because UI markup is easier for humans to read that way.”</div>
+</section>
+
+<section class="learning-box">
+<h2>🧩 1D. What Exactly Is a Component?</h2>
+<p>A component is not simply “a file” and not simply “some HTML.” A component is a reusable unit that describes part of the UI and can contain the logic/data needed for that part.</p>
+<pre><code>function MovieCard() {
+  return (
+    &lt;article&gt;
+      &lt;h2&gt;Inception&lt;/h2&gt;
+    &lt;/article&gt;
+  );
+}</code></pre>
+<p>The function is the component definition. When React encounters:</p>
+<pre><code>&lt;MovieCard /&gt;</code></pre>
+<p>it uses that component to produce the corresponding UI.</p>
+<div class="whydeep"><strong>Important distinction:</strong> <code>MovieCard.jsx</code> is a file; <code>MovieCard</code> is the component; <code>&lt;MovieCard /&gt;</code> is JSX that asks React to render that component.</div>
+</section>
+
+<section class="learning-box">
+<h2>🧩 1E. Function Component: Read It Like a Normal JavaScript Function</h2>
+<pre><code>function MovieCard({ movie }) {
+  return (
+    &lt;article&gt;
+      &lt;h2&gt;{movie.name}&lt;/h2&gt;
+    &lt;/article&gt;
+  );
+}</code></pre>
+<p>Start from the outside:</p>
+<ol>
+<li><code>function MovieCard(...)</code> creates a JavaScript function.</li>
+<li><code>{ movie }</code> receives one property from the props object.</li>
+<li><code>return</code> gives React the UI description.</li>
+<li><code>{movie.name}</code> reads JavaScript data and inserts it into JSX.</li>
+</ol>
+<div class="mini"><strong>Therefore:</strong> a function component is still a JavaScript function. React gives that function a special role: its returned value describes part of the UI.</div>
+</section>
+
+<section class="learning-box">
+<h2>📦 1F. Props: The Most Useful Mental Model</h2>
+<p>Think of a component as a function with named inputs.</p>
+<pre><code>function add(a, b) {
+  return a + b;
+}
+
+add(10, 20);</code></pre>
+<p>Similarly, a component can receive named inputs:</p>
+<pre><code>&lt;MovieCard
+  name="Inception"
+  year={2010}
+/&gt;</code></pre>
+<p>Inside:</p>
+<pre><code>function MovieCard(props) {
+  console.log(props);
+
+  return (
+    &lt;h2&gt;{props.name}&lt;/h2&gt;
+  );
+}</code></pre>
+<p>Conceptually, React gives the component an object like:</p>
+<pre><code>{
+  name: "Inception",
+  year: 2010
+}</code></pre>
+<p>That object is the component's <strong>props</strong>.</p>
+<h3>Why are props important?</h3>
+<p>Without props, every MovieCard would need hard-coded information. With props, one component can display hundreds of different movies.</p>
+</section>
+
+<section class="learning-box">
+<h2>📦 1G. Props Are Not “Global Variables”</h2>
+<p>Props belong to the relationship between a parent and child component.</p>
+<div class="flow">App
+ │
+ │ movie={movie}
+ ↓
+MovieCard
+ │
+ └── reads movie from props</div>
+<p>This is different from a global variable. The parent explicitly provides the data to the child.</p>
+<div class="whydeep"><strong>One-way data flow:</strong> Parent → Child. A child does not automatically reach into its parent's state and change it.</div>
+</section>
+
+<section class="learning-box">
+<h2>🏛️ 1H. Class Components: Understand the Structure</h2>
+<pre><code>class MovieCard extends Component {
+  render() {
+    return (
+      &lt;article&gt;
+        &lt;h2&gt;Movie</h2&gt;
+      &lt;/article&gt;
+    );
+  }
+}</code></pre>
+<p>A class component has a different shape from a function component.</p>
+<table>
+<tr><th>Function</th><th>Class</th></tr>
+<tr><td><code>function MovieCard()</code></td><td><code>class MovieCard extends Component</code></td></tr>
+<tr><td><code>return JSX</code></td><td><code>render() { return JSX }</code></td></tr>
+<tr><td>props parameter</td><td><code>this.props</code></td></tr>
+<tr><td><code>useState()</code></td><td><code>this.state</code></td></tr>
+</table>
+<p>The class syntax can look complicated initially, but the underlying questions remain the same: what data does the component receive, what data does it own, and what UI should it display?</p>
+</section>
+
+<section class="learning-box">
+<h2>🏛️ 1I. Why Does a Class Component Use this?</h2>
+<p><code>this</code> is JavaScript class syntax. It refers to the current object/instance.</p>
+<pre><code>class MovieCounter extends Component {
+  constructor() {
+    super();
+    this.state = { count: 0 };
+  }
+
+  render() {
+    return &lt;p&gt;{this.state.count}&lt;/p&gt;;
+  }
+}</code></pre>
+<p>Here <code>this.state</code> means the <code>state</code> belonging to this component instance.</p>
+<p>Likewise, <code>this.props</code> means the props belonging to this component instance.</p>
+<div class="mini"><strong>Simple reading rule:</strong> when you see <code>this.state</code>, read it as “this component's state.” When you see <code>this.props</code>, read it as “this component's props.”</div>
+</section>
+
+<section class="learning-box">
+<h2>⏱️ 1J. Lifecycle: Understand the Story, Not Just the Method Names</h2>
+<p>Imagine placing a MovieCard on the screen, changing its favorite status, and then removing it.</p>
+<div class="flow">Component created
+      ↓
+     MOUNT
+      ↓
+Component is visible
+      ↓
+     UPDATE
+      ↓
+State/props change
+      ↓
+Component is rendered again
+      ↓
+    UNMOUNT
+      ↓
+Component is removed</div>
+<p>The lifecycle methods are hooks into this story.</p>
+<p><strong>Mount:</strong> “The component has appeared.”</p>
+<p><strong>Update:</strong> “Something affecting the component changed.”</p>
+<p><strong>Unmount:</strong> “The component is going away.”</p>
+<div class="whydeep">The reason lifecycle matters is not the names themselves. The reason is <strong>timing</strong>: some work should happen only after a component exists, some work should respond to updates, and some resources must be cleaned up before removal.</div>
+</section>
+
+<section class="learning-box">
+<h2>⏱️ 1K. Lifecycle Example with a Timer</h2>
+<p>A timer is a useful mental example because it creates an external resource that needs cleanup.</p>
+<pre><code>class Timer extends Component {
+  componentDidMount() {
+    this.timerId = setInterval(() =&gt; {
+      console.log("tick");
+    }, 1000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.timerId);
+  }
+
+  render() {
+    return &lt;p&gt;Timer is running&lt;/p&gt;;
+  }
+}</code></pre>
+<p>Why clean it up?</p>
+<p>If the component disappears but the interval continues running, the application may keep doing unnecessary work. The cleanup method gives the component a place to release resources it created.</p>
+</section>
+
+<section class="learning-box">
+<h2>❤️ 1L. State: Ask “What Must the Component Remember?”</h2>
+<p>A good way to identify state is to ask:</p>
+<div class="step"><strong>“If the user does something, what information must the component remember so that the screen can show the new situation?”</strong></div>
+<p>Examples:</p>
+<table>
+<tr><th>Situation</th><th>Possible state</th></tr>
+<tr><td>Favorite button clicked</td><td><code>favorite</code></td></tr>
+<tr><td>Search box contains text</td><td><code>search</code></td></tr>
+<tr><td>Modal is open</td><td><code>isModalOpen</code></td></tr>
+<tr><td>Selected movie</td><td><code>selectedMovie</code></td></tr>
+<tr><td>Counter value</td><td><code>count</code></td></tr>
+</table>
+<p>These are different from static information such as the fixed label “MovieBoard.”</p>
+</section>
+
+<section class="learning-box">
+<h2>❤️ 1M. Why setState/useState Setter Instead of Direct Assignment?</h2>
+<p>Consider:</p>
+<pre><code>count = count + 1;</code></pre>
+<p>This changes a JavaScript variable. It does not communicate the state transition through React's state API.</p>
+<p>With React state:</p>
+<pre><code>setCount(count + 1);</code></pre>
+<p>you are asking React to update the state value and schedule the necessary rendering work.</p>
+<div class="flow">User action
+   ↓
+state setter
+   ↓
+React records the new state
+   ↓
+component renders with new state
+   ↓
+UI reflects the new state</div>
+</section>
+
+<section class="learning-box">
+<h2>⚖️ 1N. State vs Props — Use Ownership to Understand the Difference</h2>
+<p>Definitions are useful, but <strong>ownership</strong> makes the distinction much easier.</p>
+<table>
+<tr><th>If you ask...</th><th>Think...</th></tr>
+<tr><td>“Who gave this value to me?”</td><td>Props</td></tr>
+<tr><td>“Who owns this changing value?”</td><td>State</td></tr>
+<tr><td>“Can this child directly rewrite its parent's value?”</td><td>No. It receives props; the parent owns its state.</td></tr>
+<tr><td>“How can a child request a change?”</td><td>Call a callback passed by the parent.</td></tr>
+</table>
+<div class="flow">Parent owns state
+      │
+      ├── value ───────→ Child as prop
+      │
+      └── setter/callback → Child as prop
+                              │
+                              ↓
+                         user event
+                              │
+                              ↓
+                         callback runs
+                              │
+                              ↓
+                       Parent updates state</div>
+</section>
+
+<section class="learning-box">
+<h2>🔄 1O. The Complete React Data Cycle</h2>
+<p>Most beginner confusion disappears once this cycle is clear.</p>
+<div class="flow">1. Component has data
+        ↓
+2. JSX describes UI using that data
+        ↓
+3. Browser displays the UI
+        ↓
+4. User interacts
+        ↓
+5. Event handler runs
+        ↓
+6. State setter is called
+        ↓
+7. React renders with new state
+        ↓
+8. UI reflects the new state</div>
+<p>Props fit into this cycle when data is passed from a parent:</p>
+<div class="flow">Parent state
+    ↓
+props
+    ↓
+Child UI
+    ↓
+callback
+    ↓
+Parent state update</div>
+</section>
+
+<section class="learning-box">
+<h2>🧪 1P. Debugging Exercise: Predict Before You Run</h2>
+<p>Look at this code before running it:</p>
+<pre><code>function Counter() {
+  const [count, setCount] = useState(0);
+
+  function increase() {
+    setCount(previous =&gt; previous + 1);
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;p&gt;Count: {count}&lt;/p&gt;
+      &lt;button onClick={increase}&gt;
+        Increase
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+<p>Think through these questions:</p>
+<ol>
+<li>What is the initial value of <code>count</code>?</li>
+<li>What happens when the button is clicked?</li>
+<li>Where is the new value stored?</li>
+<li>Why does the displayed number change?</li>
+<li>What is the difference between <code>increase</code> and <code>increase()</code> in the event handler?</li>
+</ol>
+<div class="step"><strong>Expected reasoning:</strong> <code>increase</code> is passed as the event handler. When the click occurs, React calls it. The setter calculates the next state, React renders again, and <code>{count}</code> now displays the updated value.</div>
+</section>
+
+<section class="learning-box">
+<h2>🧪 1Q. Debugging Exercise: Props or State?</h2>
+<table>
+<tr><th>Value</th><th>Ask yourself</th><th>Likely answer</th></tr>
+<tr><td>Movie name received from parent</td><td>Who supplied it?</td><td>Prop</td></tr>
+<tr><td>Whether a card is currently favorite</td><td>Does it change because of interaction?</td><td>State</td></tr>
+<tr><td>Search text</td><td>Does the user change it?</td><td>State</td></tr>
+<tr><td>Movie object supplied by MovieList</td><td>Who supplies it?</td><td>Prop</td></tr>
+<tr><td>Number of items selected by the user</td><td>Does the application need to remember it?</td><td>State</td></tr>
+</table>
+<p>When your answer is unclear, go back to the ownership question: <strong>who should be responsible for this value?</strong></p>
+</section>
+
+<section class="learning-box">
+<h2>🧱 1R. Component API — Organize the Ideas</h2>
+<p>Instead of memorizing method names as a list, group them by purpose.</p>
+<table>
+<tr><th>Purpose</th><th>Class component API</th><th>Meaning</th></tr>
+<tr><td>Describe UI</td><td><code>render()</code></td><td>What should this component display?</td></tr>
+<tr><td>Receive data</td><td><code>this.props</code></td><td>What did the parent provide?</td></tr>
+<tr><td>Own changing data</td><td><code>this.state</code></td><td>What does this component remember?</td></tr>
+<tr><td>Change state</td><td><code>this.setState()</code></td><td>How should the state be updated?</td></tr>
+<tr><td>React to lifecycle stages</td><td>Lifecycle methods</td><td>When should stage-specific work happen?</td></tr>
+</table>
+<p>This grouping makes the API easier to reason about because every method has a job.</p>
+</section>
+
+<section class="learning-box">
+<h2>🧭 1S. What to Look for When Reading Any New React Code</h2>
+<ol>
+<li>Find the component definition.</li>
+<li>Find its props. Ask where each prop comes from.</li>
+<li>Find its state. Ask what each state value represents.</li>
+<li>Find event handlers. Ask what user action triggers them.</li>
+<li>Find state setters. Ask what changes after the event.</li>
+<li>Find child components. Follow the props passed to them.</li>
+<li>If it is a class, find lifecycle methods.</li>
+<li>Trace the data flow from parent to child.</li>
+</ol>
+<div class="whydeep"><strong>Professional reading habit:</strong> Do not read React code only from top to bottom. Trace <strong>data ownership and data flow</strong>.</div>
+</section>
+
+<section class="learning-box">
+<h2>🎯 1T. Final “Explain It Yourself” Challenge</h2>
+<p>Without looking back at the explanations, explain the following chain:</p>
+<div class="flow">JSX
+ ↓
+Component
+ ↓
+Props
+ ↓
+State
+ ↓
+Event
+ ↓
+State update
+ ↓
+Re-render
+ ↓
+Updated UI</div>
+<p>Then explain this second chain:</p>
+<div class="flow">Parent owns state
+ ↓
+Parent passes value as props
+ ↓
+Child displays the value
+ ↓
+Child triggers callback
+ ↓
+Parent updates state
+ ↓
+New props flow downward</div>
+<div class="mini"><strong>If you can explain these two flows clearly, you have moved beyond memorizing React syntax and started understanding the React programming model.</strong></div>
+</section>
+
+<section class="box"><h2>2. What Is React?</h2><p>React is a JavaScript library for building user interfaces with reusable components.</p><table><tr><th>Tool</th><th>Why it is used</th></tr><tr><td>React</td><td>Defines components and UI behavior.</td></tr><tr><td>React DOM</td><td>Connects React to the browser DOM.</td></tr><tr><td>Vite</td><td>Development server and build tooling.</td></tr><tr><td>JavaScript</td><td>Programming language used by the application.</td></tr></table><div class="why"><b>Important:</b> Vite is not React. React is the UI library; Vite is the tool that helps develop and build the project.</div></section>
+<section class="box"><h2>3. Create the Project</h2><pre><button class="copy" onclick="cp(this)">Copy</button><code>node -v
+npm -v
+npm create vite@latest movieboard -- --template react
+cd movieboard
+npm install
+npm run dev</code></pre><p><b>Node.js</b> runs JavaScript tooling. <b>npm</b> installs packages. <b>Vite</b> starts the development environment.</p><pre><button class="copy" onclick="cp(this)">Copy</button><code>movieboard/
+├── src/
+│   ├── App.jsx
+│   ├── main.jsx
+│   ├── App.css
+│   └── index.css
+├── index.html
+├── package.json
+└── vite.config.js</code></pre></section>
+<section class="box"><h2>4. Understand main.jsx</h2><pre><button class="copy" onclick="cp(this)">Copy</button><code>import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App.jsx";
+import "./index.css";
+
+createRoot(document.getElementById("root")).render(
+  &lt;StrictMode&gt;
+    &lt;App /&gt;
+  &lt;/StrictMode&gt;
+);</code></pre><table><tr><th>Part</th><th>Meaning</th></tr><tr><td><code>StrictMode</code></td><td>Development helper that can reveal potential problems.</td></tr><tr><td><code>createRoot()</code></td><td>Creates the React root connected to the browser DOM.</td></tr><tr><td><code>document.getElementById("root")</code></td><td>Finds the HTML element where React starts.</td></tr><tr><td><code>&lt;App /&gt;</code></td><td>Uses the App component.</td></tr></table></section>
+<section class="box"><h2>5. JSX</h2><p>JSX is syntax that lets us write markup-like UI inside JavaScript. It is transformed by the React toolchain.</p><pre><button class="copy" onclick="cp(this)">Copy</button><code>function App() {
+  const title = "MovieBoard";
+  const year = 2026;
+
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;{title}&lt;/h1&gt;
+      &lt;p&gt;Current year: {year}&lt;/p&gt;
+      &lt;p&gt;2 + 3 = {2 + 3}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default App;</code></pre><p>Curly braces insert JavaScript expressions into JSX.</p><h3>Important JSX rules</h3><pre><button class="copy" onclick="cp(this)">Copy</button><code>&lt;div className="card"&gt;Hello&lt;/div&gt;
+
+&lt;button onClick={handleClick}&gt;Click&lt;/button&gt;
+
+return (
+  &lt;&gt;
+    &lt;h1&gt;Title&lt;/h1&gt;
+    &lt;p&gt;Text&lt;/p&gt;
+  &lt;/&gt;
+);</code></pre><p>Use <code>className</code>, not <code>class</code>. Use camelCase event names such as <code>onClick</code>. A component must return one JSX tree; a Fragment <code>&lt;&gt;...&lt;/&gt;</code> can group elements without adding a DOM element.</p></section>
+<section class="box"><h2>6. Function Component</h2><p>A function component is a JavaScript function that returns JSX.</p><pre><button class="copy" onclick="cp(this)">Copy</button><code>function Header() {
+  return (
+    &lt;header&gt;
+      &lt;h1&gt;🎬 MovieBoard&lt;/h1&gt;
+      &lt;p&gt;Your movie dashboard&lt;/p&gt;
+    &lt;/header&gt;
+  );
+}
+
+export default Header;</code></pre><p>Use it in App:</p><pre><button class="copy" onclick="cp(this)">Copy</button><code>import Header from "./Header.jsx";
+
+function App() {
+  return (
+    &lt;&gt;
+      &lt;Header /&gt;
+      &lt;p&gt;Welcome.&lt;/p&gt;
+    &lt;/&gt;
+  );
+}
+
+export default App;</code></pre><div class="why">Custom component names begin with an uppercase letter so React can distinguish them from HTML elements.</div></section>
+<section class="box"><h2>7. Build MovieCard</h2><pre><button class="copy" onclick="cp(this)">Copy</button><code>function MovieCard() {
+  return (
+    &lt;article&gt;
+      &lt;h2&gt;Inception&lt;/h2&gt;
+      &lt;p&gt;Science Fiction&lt;/p&gt;
+      &lt;p&gt;2010&lt;/p&gt;
+    &lt;/article&gt;
+  );
+}
+
+export default MovieCard;</code></pre><p>Using <code>&lt;MovieCard /&gt;</code> twice creates two instances, but both show the same hard-coded data. We need props.</p></section>
+<section class="box"><h2>8. Props</h2><p>Props are inputs supplied by a parent component.</p><pre><button class="copy" onclick="cp(this)">Copy</button><code>&lt;MovieCard
+  name="Inception"
+  year={2010}
+  genre="Science Fiction"
+/&gt;</code></pre><pre><button class="copy" onclick="cp(this)">Copy</button><code>function MovieCard(props) {
+  return (
+    &lt;article&gt;
+      &lt;h2&gt;{props.name}&lt;/h2&gt;
+      &lt;p&gt;Genre: {props.genre}&lt;/p&gt;
+      &lt;p&gt;Year: {props.year}&lt;/p&gt;
+    &lt;/article&gt;
+  );
+}</code></pre><p>Destructuring makes the code shorter:</p><pre><button class="copy" onclick="cp(this)">Copy</button><code>function MovieCard({ name, year, genre }) {
+  return (
+    &lt;article&gt;
+      &lt;h2&gt;{name}&lt;/h2&gt;
+      &lt;p&gt;{genre} — {year}&lt;/p&gt;
+    &lt;/article&gt;
+  );
+}</code></pre></section>
+<section class="box"><h2>9. Objects as Props + map()</h2><pre><button class="copy" onclick="cp(this)">Copy</button><code>const movies = [
+  { id: 1, name: "Inception", year: 2010, genre: "Science Fiction" },
+  { id: 2, name: "Dangal", year: 2016, genre: "Sports Drama" },
+  { id: 3, name: "Interstellar", year: 2014, genre: "Science Fiction" }
+];</code></pre><pre><button class="copy" onclick="cp(this)">Copy</button><code>{movies.map((movie) =&gt; (
+  &lt;MovieCard
+    key={movie.id}
+    movie={movie}
+  /&gt;
+))}</code></pre><p><code>map()</code> converts each array item into a React element. <code>key</code> gives each list item a stable identity so React can track it.</p><pre><button class="copy" onclick="cp(this)">Copy</button><code>function MovieCard({ movie }) {
+  return (
+    &lt;article&gt;
+      &lt;h2&gt;{movie.name}&lt;/h2&gt;
+      &lt;p&gt;{movie.genre}&lt;/p&gt;
+      &lt;p&gt;{movie.year}&lt;/p&gt;
+    &lt;/article&gt;
+  );
+}</code></pre></section>
+<section class="box"><h2>10. Component Composition</h2><p>A larger component can be assembled from smaller components.</p><div class="tree">App
+├── Header
+├── MovieList
+│   ├── MovieCard
+│   ├── MovieCard
+│   └── MovieCard
+└── Footer</div><pre><button class="copy" onclick="cp(this)">Copy</button><code>function App() {
+  return (
+    &lt;&gt;
+      &lt;Header /&gt;
+      &lt;MovieList /&gt;
+      &lt;Footer /&gt;
+    &lt;/&gt;
+  );
+}</code></pre></section>
+<section class="box"><h2>11. Class-Based Components</h2><p>Class components are an older but still important React component style, especially when reading existing applications.</p><pre><button class="copy" onclick="cp(this)">Copy</button><code>import { Component } from "react";
+
+class Welcome extends Component {
+  render() {
+    return (
+      &lt;h2&gt;Welcome to MovieBoard&lt;/h2&gt;
+    );
+  }
+}
+
+export default Welcome;</code></pre><table><tr><th>Code</th><th>Why?</th></tr><tr><td><code>Component</code></td><td>React's base class for class components.</td></tr><tr><td><code>extends Component</code></td><td>Inherits React component behavior.</td></tr><tr><td><code>render()</code></td><td>Returns the component's UI.</td></tr></table></section>
+<section class="box"><h2>12. Class Component Props</h2><pre><button class="copy" onclick="cp(this)">Copy</button><code>class MovieTitle extends Component {
+  render() {
+    return &lt;h2&gt;{this.props.name}&lt;/h2&gt;;
+  }
+}
+
+&lt;MovieTitle name="Inception" /&gt;</code></pre><p>Function components receive props through function parameters. Class components access them through <code>this.props</code>.</p></section>
+<section class="box"><h2>13. Class Component State</h2><pre><button class="copy" onclick="cp(this)">Copy</button><code>class MovieCounter extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { count: 0 };
+  }
+
+  render() {
+    return (
+      &lt;div&gt;
+        &lt;p&gt;Favorites: {this.state.count}&lt;/p&gt;
+        &lt;button onClick={() =&gt;
+          this.setState({
+            count: this.state.count + 1
+          })
+        }&gt;
+          Add Favorite
+        &lt;/button&gt;
+      &lt;/div&gt;
+    );
+  }
+}</code></pre><p><code>constructor()</code> initializes the class. <code>super(props)</code> calls the parent constructor. <code>this.state</code> stores class state. <code>setState()</code> requests an update and re-render. Do not directly assign <code>this.state.count = ...</code>.</p></section>
+<section class="box"><h2>14. React Component API</h2><p>For class components, the core component API includes:</p><div class="grid"><div class="card"><b>render()</b><br>Returns the UI.</div><div class="card"><b>this.props</b><br>Reads parent-provided data.</div><div class="card"><b>this.state</b><br>Stores internal class state.</div><div class="card"><b>setState()</b><br>Updates class state.</div><div class="card"><b>Lifecycle methods</b><br>Run at particular component stages.</div></div></section>
+<section class="box"><h2>15. Component Lifecycle</h2><div class="tree">Mount
+ ↓
+constructor()
+ ↓
+render()
+ ↓
+componentDidMount()
+ ↓
+Component active
+ ↓
+props/state change
+ ↓
+render()
+ ↓
+componentDidUpdate()
+ ↓
+Removal
+ ↓
+componentWillUnmount()</div><table><tr><th>Method</th><th>Purpose</th></tr><tr><td><code>constructor()</code></td><td>Initialize state and other setup.</td></tr><tr><td><code>render()</code></td><td>Describe UI.</td></tr><tr><td><code>componentDidMount()</code></td><td>Run work after mounting.</td></tr><tr><td><code>componentDidUpdate()</code></td><td>React to updates.</td></tr><tr><td><code>componentWillUnmount()</code></td><td>Clean up before removal.</td></tr></table></section>
+<section class="box"><h2>16. Observe Lifecycle</h2><pre><button class="copy" onclick="cp(this)">Copy</button><code>import { Component } from "react";
+
+class LifecycleDemo extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { count: 0 };
+    console.log("1. constructor");
+  }
+
+  componentDidMount() {
+    console.log("3. componentDidMount");
+  }
+
+  componentDidUpdate() {
+    console.log("4. componentDidUpdate");
+  }
+
+  componentWillUnmount() {
+    console.log("5. componentWillUnmount");
+  }
+
+  render() {
+    console.log("2. render");
+    return (
+      &lt;div&gt;
+        &lt;p&gt;Count: {this.state.count}&lt;/p&gt;
+        &lt;button onClick={() =&gt;
+          this.setState({ count: this.state.count + 1 })
+        }&gt;
+          Update
+        &lt;/button&gt;
+      &lt;/div&gt;
+    );
+  }
+}</code></pre><div class="warn">Development Strict Mode can make some development behavior appear more than once. Use the console to observe the lifecycle, but understand that development checks are not the same as production behavior.</div></section>
+<section class="box"><h2>17. Function Components and State: useState</h2><p>Modern function components use Hooks. <code>useState</code> adds state.</p><pre><button class="copy" onclick="cp(this)">Copy</button><code>import { useState } from "react";
+
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;div&gt;
+      &lt;p&gt;Count: {count}&lt;/p&gt;
+      &lt;button onClick={() =&gt;
+        setCount(count + 1)
+      }&gt;
+        Increase
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default Counter;</code></pre><table><tr><th>Part</th><th>Meaning</th></tr><tr><td><code>useState(0)</code></td><td>Creates state with initial value 0.</td></tr><tr><td><code>count</code></td><td>Current value.</td></tr><tr><td><code>setCount</code></td><td>State setter.</td></tr></table></section>
+<section class="box"><h2>18. State Is Different from a Normal Variable</h2><p>A normal variable changing does not tell React to update the UI.</p><pre><button class="copy" onclick="cp(this)">Copy</button><code>let count = 0;
+count = count + 1;</code></pre><p>Use state when the value affects rendered UI:</p><pre><button class="copy" onclick="cp(this)">Copy</button><code>const [count, setCount] = useState(0);
+setCount(count + 1);</code></pre><p>Never mutate state directly. For arrays, create a new array:</p><pre><button class="copy" onclick="cp(this)">Copy</button><code>setFavorites([
+  ...favorites,
+  movie
+]);</code></pre></section>
+<section class="box"><h2>19. Build FavoriteMovie</h2><pre><button class="copy" onclick="cp(this)">Copy</button><code>import { useState } from "react";
+
+function FavoriteMovie({ movie }) {
+  const [favorite, setFavorite] = useState(false);
+
+  function handleFavorite() {
+    setFavorite((previousFavorite) =&gt;
+      !previousFavorite
+    );
+  }
+
+  return (
+    &lt;article&gt;
+      &lt;h3&gt;{movie.name}&lt;/h3&gt;
+      &lt;p&gt;
+        {favorite ? "❤️ Favorite" : "🤍 Not Favorite"}
+      &lt;/p&gt;
+      &lt;button onClick={handleFavorite}&gt;
+        {favorite ? "Remove Favorite" : "Add Favorite"}
+      &lt;/button&gt;
+    &lt;/article&gt;
+  );
+}
+
+export default FavoriteMovie;</code></pre><p><code>movie</code> is a prop. <code>favorite</code> is state. Clicking the button updates state, which causes React to render the new UI.</p></section>
+<section class="box"><h2>20. State vs Props</h2><table><tr><th>State</th><th>Props</th></tr><tr><td>Owned by the component.</td><td>Supplied by a parent.</td></tr><tr><td>Changes through a state setter or <code>setState()</code>.</td><td>Read-only from the receiving component's perspective.</td></tr><tr><td>Used for changing internal UI data.</td><td>Used to configure or provide data to a child.</td></tr><tr><td>Function component: <code>useState</code>.</td><td>Function component: function parameter.</td></tr><tr><td>Class component: <code>this.state</code>.</td><td>Class component: <code>this.props</code>.</td></tr></table><div class="tree">PROPS
+Parent ─────────→ Child
+        data
+
+STATE
+Component
+   │
+   └── own changing data</div></section>
+<section class="box"><h2>21. Parent State → Child Props</h2><p>When the parent owns the changing value, it can pass the value and a callback down.</p><pre><button class="copy" onclick="cp(this)">Copy</button><code>function App() {
+  const [favorite, setFavorite] = useState(false);
+
+  const movie = {
+    name: "Inception",
+    year: 2010
+  };
+
+  return (
+    &lt;MovieCard
+      movie={movie}
+      favorite={favorite}
+      setFavorite={setFavorite}
+    /&gt;
+  );
+}</code></pre><pre><button class="copy" onclick="cp(this)">Copy</button><code>function MovieCard({ movie, favorite, setFavorite }) {
+  return (
+    &lt;article&gt;
+      &lt;h2&gt;{movie.name}&lt;/h2&gt;
+      &lt;p&gt;{favorite ? "Selected" : "Not selected"}&lt;/p&gt;
+      &lt;button onClick={() =&gt; setFavorite(!favorite)}&gt;
+        Toggle
+      &lt;/button&gt;
+    &lt;/article&gt;
+  );
+}</code></pre><div class="why">This demonstrates one-way data flow: the parent owns state, data flows down as props, and the child can call a callback supplied by the parent.</div></section>
+<section class="box"><h2>22. Props Should Not Be Mutated</h2><p>If a child receives <code>movie</code>, it should not replace the prop directly.</p><pre><button class="copy" onclick="cp(this)">Copy</button><code>function MovieCard({ movie }) {
+  // Treat movie as read-only input.
+}</code></pre><p>If the movie must change, the component that owns the state should update it and pass the new value down.</p><div class="tree">State Owner
+   ↓
+Parent
+   ↓ props
+Child</div></section>
+<section class="box"><h2>23. Controlled Search Input</h2><pre><button class="copy" onclick="cp(this)">Copy</button><code>function MovieList({ movies }) {
+  const [search, setSearch] = useState("");
+
+  const filteredMovies = movies.filter((movie) =&gt;
+    movie.name.toLowerCase().includes(
+      search.toLowerCase()
+    )
+  );
+
+  return (
+    &lt;&gt;
+      &lt;input
+        value={search}
+        onChange={(event) =&gt;
+          setSearch(event.target.value)
+        }
+        placeholder="Search movies..."
+      /&gt;
+
+      {filteredMovies.map((movie) =&gt; (
+        &lt;MovieCard key={movie.id} movie={movie} /&gt;
+      ))}
+    &lt;/&gt;
+  );
+}</code></pre><p><code>value</code> is controlled by state. <code>onChange</code> updates that state. <code>filter()</code> creates the visible list.</p></section>
+<section class="box"><h2>24. Function Component Lifecycle with useEffect</h2><p>Function components do not have <code>componentDidMount()</code> or <code>componentWillUnmount()</code>. Side effects are handled with Hooks such as <code>useEffect</code>.</p><pre><button class="copy" onclick="cp(this)">Copy</button><code>import { useEffect } from "react";
+
+useEffect(() =&gt; {
+  console.log("Effect ran after rendering");
+
+  return () =&gt; {
+    console.log("Cleanup before effect is removed/replaced");
+  };
+}, []);</code></pre><p>The empty dependency array is commonly used when an effect is intended to run after the initial mount and clean up when the component unmounts. <code>useEffect</code> is not a literal one-to-one replacement for every lifecycle method; it is a mechanism for synchronizing with side effects.</p></section>
+<section class="box"><h2>25. Lifecycle Comparison</h2><table><tr><th>Class</th><th>Function / Hook pattern</th></tr><tr><td><code>this.state</code></td><td><code>useState</code></td></tr><tr><td><code>this.setState()</code></td><td>State setter such as <code>setCount()</code></td></tr><tr><td><code>this.props</code></td><td>Function parameter such as <code>{ movie }</code></td></tr><tr><td><code>componentDidMount()</code></td><td>Often modeled with <code>useEffect(..., [])</code></td></tr><tr><td><code>componentDidUpdate()</code></td><td>Often modeled with <code>useEffect</code> dependencies</td></tr><tr><td><code>componentWillUnmount()</code></td><td>Effect cleanup function</td></tr></table></section>
+<section class="box"><h2>26. Complete Mini MovieBoard</h2><h3>App.jsx</h3><pre><button class="copy" onclick="cp(this)">Copy</button><code>import Header from "./components/Header";
+import MovieList from "./components/MovieList";
+
+function App() {
+  const movies = [
+    { id: 1, name: "Inception", year: 2010, genre: "Science Fiction" },
+    { id: 2, name: "Dangal", year: 2016, genre: "Sports Drama" },
+    { id: 3, name: "Interstellar", year: 2014, genre: "Science Fiction" }
+  ];
+
+  return (
+    &lt;div&gt;
+      &lt;Header /&gt;
+      &lt;MovieList movies={movies} /&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default App;</code></pre><h3>Header.jsx</h3><pre><button class="copy" onclick="cp(this)">Copy</button><code>function Header() {
+  return (
+    &lt;header&gt;
+      &lt;h1&gt;🎬 MovieBoard&lt;/h1&gt;
+      &lt;p&gt;Explore movies and learn React.&lt;/p&gt;
+    &lt;/header&gt;
+  );
+}
+
+export default Header;</code></pre><h3>MovieList.jsx</h3><pre><button class="copy" onclick="cp(this)">Copy</button><code>import { useState } from "react";
+import MovieCard from "./MovieCard";
+
+function MovieList({ movies }) {
+  const [search, setSearch] = useState("");
+
+  const filteredMovies = movies.filter((movie) =&gt;
+    movie.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    &lt;main&gt;
+      &lt;input
+        value={search}
+        onChange={(event) =&gt; setSearch(event.target.value)}
+        placeholder="Search..."
+      /&gt;
+      {filteredMovies.map((movie) =&gt; (
+        &lt;MovieCard key={movie.id} movie={movie} /&gt;
+      ))}
+    &lt;/main&gt;
+  );
+}
+
+export default MovieList;</code></pre><h3>MovieCard.jsx</h3><pre><button class="copy" onclick="cp(this)">Copy</button><code>import { useState } from "react";
+
+function MovieCard({ movie }) {
+  const [favorite, setFavorite] = useState(false);
+
+  return (
+    &lt;article&gt;
+      &lt;h2&gt;{movie.name}&lt;/h2&gt;
+      &lt;p&gt;Genre: {movie.genre}&lt;/p&gt;
+      &lt;p&gt;Year: {movie.year}&lt;/p&gt;
+      &lt;button onClick={() =&gt;
+        setFavorite((previous) =&gt; !previous)
+      }&gt;
+        {favorite ? "❤️ Favorite" : "🤍 Add Favorite"}
+      &lt;/button&gt;
+    &lt;/article&gt;
+  );
+}
+
+export default MovieCard;</code></pre></section>
+<section class="box"><h2>27. Understand Every Important Helper Used</h2><table><tr><th>JavaScript / React feature</th><th>Why it appears</th></tr><tr><td><code>import / export</code></td><td>Share components and functions between files.</td></tr><tr><td>Arrow functions</td><td>Compact functions, often used in callbacks.</td></tr><tr><td>Destructuring</td><td>Extract props or object properties cleanly.</td></tr><tr><td><code>map()</code></td><td>Convert an array into UI elements.</td></tr><tr><td><code>filter()</code></td><td>Create a subset such as search results.</td></tr><tr><td><code>toLowerCase()</code></td><td>Make a simple case-insensitive search.</td></tr><tr><td>Spread <code>...</code></td><td>Create a new array/object from existing data without directly mutating it.</td></tr><tr><td><code>useState()</code></td><td>Store changing data in a function component.</td></tr><tr><td><code>useEffect()</code></td><td>Synchronize with side effects.</td></tr><tr><td><code>Component</code></td><td>Base class used by class components.</td></tr></table></section>
+<section class="box"><h2>28. Common Errors and Fixes</h2><table><tr><th>Error</th><th>Reason / Fix</th></tr><tr><td><code>&lt;moviecard /&gt;</code></td><td>Custom component names should be uppercase: <code>&lt;MovieCard /&gt;</code>.</td></tr><tr><td><code>class="card"</code></td><td>Use <code>className</code> in JSX.</td></tr><tr><td><code>onClick={handleClick()}</code></td><td>This calls the function while rendering. Usually use <code>onClick={handleClick}</code>.</td></tr><tr><td>Directly changing state</td><td>Use the state setter instead.</td></tr><tr><td>Missing key in <code>map()</code></td><td>Add a stable unique key such as <code>key={movie.id}</code>.</td></tr><tr><td>“useState is not defined”</td><td>Import it: <code>import { useState } from "react";</code></td></tr><tr><td>Props changed inside child</td><td>Props should be treated as read-only. Change state in the owner.</td></tr></table></section>
+<section class="box"><h2>29. Final Project Structure</h2><pre><button class="copy" onclick="cp(this)">Copy</button><code>movieboard/
+├── src/
+│   ├── components/
+│   │   ├── Header.jsx
+│   │   ├── MovieCard.jsx
+│   │   ├── MovieList.jsx
+│   │   ├── LifecycleDemo.jsx
+│   │   └── ClassWelcome.jsx
+│   ├── App.jsx
+│   ├── App.css
+│   ├── index.css
+│   └── main.jsx
+├── index.html
+├── package.json
+└── vite.config.js</code></pre></section>
+<section class="box"><h2>30. Final Concept Map</h2><div class="tree">React
+│
+├── JSX → UI syntax
+│
+├── Components
+│   ├── Function Component
+│   └── Class Component
+│
+├── Props → parent-to-child input
+│
+├── State → changing component-owned data
+│
+├── Events → user interaction
+│
+├── Re-render → UI reflects state/prop changes
+│
+└── Lifecycle
+    ├── Mount
+    ├── Update
+    └── Unmount
+
+Class API
+├── render()
+├── this.props
+├── this.state
+├── setState()
+└── lifecycle methods
+
+Function Component Hooks
+├── useState()
+└── useEffect()</div></section>
+<section class="box"><h2>31. Final Understanding Check</h2><p>☐ JSX can be read as a JavaScript-based description of UI.</p><p>☐ A component is a reusable unit of UI.</p><p>☐ A function component returns JSX.</p><p>☐ A class component extends React's <code>Component</code> and uses <code>render()</code>.</p><p>☐ Class components can use <code>this.props</code>, <code>this.state</code> and <code>setState()</code>.</p><p>☐ Lifecycle methods describe important stages of a class component.</p><p>☐ Function components use Hooks such as <code>useState</code> and <code>useEffect</code>.</p><p>☐ Props come from a parent and should be treated as read-only.</p><p>☐ State is changing data managed by a component.</p><p>☐ State changes cause React to update the rendered UI.</p><p>☐ A parent can pass both values and callback functions as props.</p><p>☐ State can be lifted to a common parent when multiple components need the same changing value.</p></section>
+<section class="box"><h2>32. The Mental Model to Keep</h2><div class="tree">Parent
+  │
+  │ props
+  ↓
+Child
+  │
+  │ user event
+  ↓
+State update
+  │
+  ↓
+React renders again
+  │
+  ↓
+Updated UI</div><div class="note"><b>JSX</b> describes the UI. <b>Components</b> organize the UI. <b>Props</b> carry information into components. <b>State</b> stores changing information owned by components. <b>Lifecycle</b> explains what happens as components mount, update and unmount.</div></section>
+</main></body></html>
