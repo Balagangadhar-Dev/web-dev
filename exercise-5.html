@@ -1,0 +1,709 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MongoDB MovieHub - Complete Practical Exercise</title>
+<style>
+body{margin:0;background:#f4f7fb;color:#172033;font-family:Arial,Segoe UI,sans-serif;line-height:1.7}
+.wrap{max-width:1100px;margin:auto;padding:25px}.hero{background:linear-gradient(135deg,#172554,#2563eb);color:white;padding:40px;border-radius:20px}
+.card{background:white;border:1px solid #dbe3ef;border-radius:16px;padding:28px;margin:20px 0;box-shadow:0 6px 20px #0000000b}
+h2{color:#1e3a8a;border-bottom:2px solid #e8eef8;padding-bottom:8px}h3{color:#1e40af}
+pre{background:#111827;color:#e5e7eb;padding:18px;border-radius:10px;overflow:auto}
+code{font-family:Consolas,monospace} :not(pre)>code{background:#eef2f7;padding:2px 5px;border-radius:4px}
+.note,.why,.warn,.step,.mental{padding:15px 18px;border-radius:10px;margin:15px 0}
+.note{background:#eff6ff;border-left:5px solid #2563eb}.why{background:#ecfdf5;border-left:5px solid #059669}
+.warn{background:#fff7ed;border-left:5px solid #ea580c}.step{background:#f5f3ff;border-left:5px solid #7c3aed}
+.mental{background:#f8fafc;border-left:5px solid #64748b}
+.flow{background:#0f172a;color:#bfdbfe;padding:18px;border-radius:10px;white-space:pre;overflow:auto}
+table{width:100%;border-collapse:collapse;margin:15px 0}th,td{border:1px solid #dbe3ef;padding:10px;text-align:left;vertical-align:top}th{background:#eff6ff}
+li{margin:7px 0}.small{color:#64748b}
+</style></head>
+<body><div class="wrap">
+
+<div class="hero">
+<h1>🍿 MongoDB MovieHub</h1>
+<p><strong>A complete practical exercise: Documents, Collections, Databases, mongosh, CRUD, Projection and Aggregation</strong></p>
+<p>This exercise is deliberately written for understanding. For every major command, first understand what problem it solves, then run it, then change it and observe what happens.</p>
+</div>
+
+<div class="card">
+<h2>🎯 What You Will Learn</h2>
+<p>We will build one small <strong>MovieHub</strong> database from beginning to end. This avoids learning MongoDB as a list of disconnected commands.</p>
+<div class="flow">Database
+  ↓
+Collection
+  ↓
+Documents
+  ↓
+CREATE → READ → UPDATE → DELETE
+  ↓
+Projection
+  ↓
+Aggregation Pipeline
+  ↓
+Reports / Insights</div>
+<p><strong>Core idea:</strong> CRUD works mainly with storing, retrieving, changing and removing documents. Projection controls which fields are returned. Aggregation processes documents to produce calculated or grouped results.</p>
+</div>
+
+<div class="card">
+<h2>📚 Roadmap</h2>
+<ol>
+<li>Why MongoDB and the document model</li>
+<li>Database, collection, document and field</li>
+<li>MongoDB Shell (mongosh)</li>
+<li>Create/select a database</li>
+<li>Documents, BSON and <code>_id</code></li>
+<li>CREATE: insertOne / insertMany</li>
+<li>READ: find / findOne</li>
+<li>Filtering and operators</li>
+<li>UPDATE: updateOne / updateMany</li>
+<li>DELETE: deleteOne / deleteMany</li>
+<li>Projection</li>
+<li>Aggregation and pipelines</li>
+<li>$match, $group, $project, $sort, $limit</li>
+<li>MovieHub reports</li>
+<li>Debugging and final mental model</li>
+</ol>
+</div>
+
+<div class="card">
+<h2>1. 🧠 Why MongoDB?</h2>
+<p>A relational database commonly organizes data into tables, rows and columns. MongoDB is a document database. It stores records as documents and groups related documents into collections.</p>
+<table><tr><th>Relational idea</th><th>MongoDB idea</th></tr>
+<tr><td>Database</td><td>Database</td></tr><tr><td>Table</td><td>Collection</td></tr>
+<tr><td>Row</td><td>Document</td></tr><tr><td>Column</td><td>Field</td></tr></table>
+<div class="note"><strong>This is a mental comparison, not a claim that the two systems behave identically.</strong> MongoDB has its own document-oriented design.</div>
+<p>A movie is a natural document because its related information can stay together:</p>
+<pre><code>{
+  name: "Inception",
+  genre: "Sci-Fi",
+  releaseYear: 2010,
+  rating: 8.8,
+  duration: 148,
+  director: "Christopher Nolan"
+}</code></pre>
+<div class="why"><strong>Think of a document as one record about one thing.</strong> Here, the thing is a movie.</div>
+</div>
+
+<div class="card">
+<h2>2. 🧱 Database → Collection → Document → Field</h2>
+<div class="flow">moviehub                 ← database
+   │
+   └── movies             ← collection
+        │
+        ├── document     ← one movie
+        │     ├── name   ← field
+        │     ├── genre  ← field
+        │     └── rating ← field
+        │
+        └── document     ← another movie</div>
+<h3>Database</h3><p>A logical container for related application data. We use <code>moviehub</code>.</p>
+<h3>Collection</h3><p>A group of related documents. We use <code>movies</code>.</p>
+<h3>Document</h3><p>One stored record, such as the Inception movie.</p>
+<h3>Field</h3><p>A named value inside a document, such as <code>name</code> or <code>rating</code>.</p>
+<div class="mental"><strong>Memory trick:</strong> database = application container; collection = group; document = one record; field = one property.</div>
+</div>
+
+<div class="card">
+<h2>3. 💻 MongoDB and mongosh</h2>
+<p><code>mongosh</code> is the modern MongoDB Shell. It is a command-line client used to send commands to MongoDB.</p>
+<pre><code>mongosh</code></pre>
+<div class="note"><strong>Do not confuse them:</strong> MongoDB is the database system/server; mongosh is the shell/client through which you interact with it.</div>
+<h3>Check the current database</h3>
+<pre><code>db</code></pre>
+<p>The shell variable <code>db</code> represents the database currently selected in your session.</p>
+<h3>See available databases</h3>
+<pre><code>show dbs</code></pre>
+</div>
+
+<div class="card">
+<h2>4. 🗄️ Select the MovieHub Database</h2>
+<pre><code>use moviehub</code></pre>
+<p>Read this as: <strong>“For subsequent commands, work with the moviehub database.”</strong></p>
+<pre><code>db</code></pre>
+<p>It should now show <code>moviehub</code>.</p>
+<div class="warn"><strong>Important:</strong> selecting a database does not necessarily mean an empty database has already been permanently created. MongoDB commonly creates the database/collection when data is first written.</div>
+<h3>After inserting data, check again</h3>
+<pre><code>show dbs
+show collections</code></pre>
+</div>
+
+<div class="card">
+<h2>5. 📄 Documents, BSON and Data Types</h2>
+<p>MongoDB stores documents using <strong>BSON</strong>, a binary representation of JSON-like documents. In <code>mongosh</code>, the syntax looks familiar because it is JavaScript-like.</p>
+<pre><code>{
+  name: "Inception",
+  genre: "Sci-Fi",
+  releaseYear: 2010,
+  rating: 8.8,
+  duration: 148,
+  director: "Christopher Nolan",
+  cast: ["Leonardo DiCaprio", "Joseph Gordon-Levitt"]
+}</code></pre>
+<table><tr><th>Field</th><th>Type</th><th>Meaning</th></tr>
+<tr><td>name</td><td>String</td><td>Movie title</td></tr>
+<tr><td>genre</td><td>String</td><td>Category</td></tr>
+<tr><td>releaseYear</td><td>Number</td><td>Year</td></tr>
+<tr><td>rating</td><td>Number</td><td>Numeric rating</td></tr>
+<tr><td>duration</td><td>Number</td><td>Minutes</td></tr>
+<tr><td>cast</td><td>Array</td><td>Multiple actors</td></tr></table>
+<div class="why"><strong>Data type matters.</strong> Store <code>rating: 8.8</code> as a number when you want numeric comparison and aggregation. A string such as <code>"8.8"</code> is different.</div>
+<h3>The automatic _id</h3>
+<p>MongoDB automatically assigns an <code>_id</code> to a document when you do not supply one.</p>
+<pre><code>{
+  _id: ObjectId("..."),
+  name: "Inception",
+  ...
+}</code></pre>
+<p>The <code>_id</code> identifies the document and is especially useful when updating or deleting a specific record.</p>
+</div>
+
+<div class="card">
+<h2>6. ➕ CREATE — Insert Documents</h2>
+<h3>6.1 Insert one document</h3>
+<pre><code>db.movies.insertOne({
+  name: "Inception",
+  genre: "Sci-Fi",
+  releaseYear: 2010,
+  rating: 8.8,
+  duration: 148,
+  director: "Christopher Nolan",
+  cast: ["Leonardo DiCaprio", "Joseph Gordon-Levitt"]
+})</code></pre>
+<table><tr><th>Code</th><th>Meaning</th></tr>
+<tr><td><code>db</code></td><td>Current database context.</td></tr>
+<tr><td><code>movies</code></td><td>Collection being accessed.</td></tr>
+<tr><td><code>insertOne()</code></td><td>Insert one document.</td></tr>
+<tr><td><code>{...}</code></td><td>The document to store.</td></tr></table>
+<p>MongoDB can create the collection when the first document is inserted.</p>
+
+<h3>6.2 Insert many</h3>
+<pre><code>db.movies.insertMany([
+  {
+    name: "Dangal",
+    genre: "Drama",
+    releaseYear: 2016,
+    rating: 8.3,
+    duration: 161,
+    director: "Nitesh Tiwari",
+    cast: ["Aamir Khan", "Fatima Sana Shaikh"]
+  },
+  {
+    name: "Interstellar",
+    genre: "Sci-Fi",
+    releaseYear: 2014,
+    rating: 8.7,
+    duration: 169,
+    director: "Christopher Nolan",
+    cast: ["Matthew McConaughey", "Anne Hathaway"]
+  },
+  {
+    name: "3 Idiots",
+    genre: "Comedy",
+    releaseYear: 2009,
+    rating: 8.4,
+    duration: 170,
+    director: "Rajkumar Hirani",
+    cast: ["Aamir Khan", "R. Madhavan", "Sharman Joshi"]
+  },
+  {
+    name: "The Dark Knight",
+    genre: "Action",
+    releaseYear: 2008,
+    rating: 9.0,
+    duration: 152,
+    director: "Christopher Nolan",
+    cast: ["Christian Bale", "Heath Ledger"]
+  }
+])</code></pre>
+<div class="step"><strong>Understand the array:</strong> <code>[ ... ]</code> contains multiple objects. Each object becomes one document.</div>
+<pre><code>show collections</code></pre>
+<p>You should now see <code>movies</code>.</p>
+</div>
+
+<div class="card">
+<h2>7. 🔎 READ — Find Documents</h2>
+<h3>Read everything</h3>
+<pre><code>db.movies.find()</code></pre>
+<p>This means: <strong>“Return documents from movies without a filtering condition.”</strong></p>
+<h3>Pretty output</h3>
+<pre><code>db.movies.find().pretty()</code></pre>
+<p>This changes how the result is displayed, not how it is stored.</p>
+<h3>Find one</h3>
+<pre><code>db.movies.findOne({ name: "Inception" })</code></pre>
+<p>The object <code>{ name: "Inception" }</code> is the filter.</p>
+<div class="mental"><strong>find vs findOne:</strong> <code>find()</code> returns a cursor over matching documents; <code>findOne()</code> returns one matching document or no result.</div>
+</div>
+
+<div class="card">
+<h2>8. 🎯 Filtering and Query Operators</h2>
+<h3>Exact match</h3>
+<pre><code>db.movies.find({ genre: "Sci-Fi" })</code></pre>
+<div class="flow">Find movies
+WHERE genre equals "Sci-Fi"</div>
+<h3>Comparison operators</h3>
+<pre><code>db.movies.find({ rating: { $gt: 8.5 } })   // greater than
+db.movies.find({ rating: { $gte: 8.5 } })  // greater/equal
+db.movies.find({ rating: { $lt: 8.5 } })   // less than
+db.movies.find({ rating: { $lte: 8.5 } })  // less/equal</code></pre>
+<p>The pattern is:</p>
+<pre><code>{ field: { operator: value } }</code></pre>
+<h3>AND-style filtering</h3>
+<pre><code>db.movies.find({
+  genre: "Sci-Fi",
+  rating: { $gte: 8.5 }
+})</code></pre>
+<p>Both conditions must match.</p>
+<h3>OR</h3>
+<pre><code>db.movies.find({
+  $or: [
+    { genre: "Comedy" },
+    { genre: "Drama" }
+  ]
+})</code></pre>
+<h3>Search an array</h3>
+<pre><code>db.movies.find({
+  cast: "Aamir Khan"
+})</code></pre>
+<p>MongoDB can match an array field when one of its elements matches the query value.</p>
+</div>
+
+<div class="card">
+<h2>9. ✏️ UPDATE — Modify Existing Documents</h2>
+<h3>Update one</h3>
+<pre><code>db.movies.updateOne(
+  { name: "Inception" },
+  { $set: { rating: 9.0 } }
+)</code></pre>
+<p>Always read this as two separate ideas:</p>
+<div class="flow">updateOne(
+    WHICH document? → { name: "Inception" }
+    WHAT change?     → { $set: { rating: 9.0 } }
+)</div>
+<p><code>$set</code> means set the specified field to the specified value.</p>
+<h3>Update many</h3>
+<pre><code>db.movies.updateMany(
+  { genre: "Sci-Fi" },
+  { $set: { featured: true } }
+)</code></pre>
+<p>Every matching document gets the <code>featured</code> field/value.</p>
+<div class="warn"><strong>Be careful:</strong> a broad filter with <code>updateMany()</code> can change many documents. Practice the filter with <code>find()</code> first.</div>
+<h3>Increment a number</h3>
+<pre><code>db.movies.updateOne(
+  { name: "Dangal" },
+  { $inc: { rating: 0.1 } }
+)</code></pre>
+<p><code>$inc</code> means increment a numeric field.</p>
+</div>
+
+<div class="card">
+<h2>10. 🗑️ DELETE — Remove Documents</h2>
+<h3>Delete one</h3>
+<pre><code>db.movies.deleteOne({ name: "3 Idiots" })</code></pre>
+<h3>Delete many</h3>
+<pre><code>db.movies.deleteMany({ genre: "Comedy" })</code></pre>
+<div class="step"><strong>Safe practice:</strong> first run <code>find(filter)</code> to see exactly what matches. Then perform the delete.</div>
+<pre><code>db.movies.find({ genre: "Comedy" })</code></pre>
+<p>Only after checking the result should you use <code>deleteMany()</code>.</p>
+</div>
+
+<div class="card">
+<h2>11. 🔁 CRUD — The Complete Picture</h2>
+<table><tr><th>CRUD</th><th>MongoDB</th><th>Question</th></tr>
+<tr><td>Create</td><td>insertOne / insertMany</td><td>How do I store new documents?</td></tr>
+<tr><td>Read</td><td>find / findOne</td><td>How do I retrieve documents?</td></tr>
+<tr><td>Update</td><td>updateOne / updateMany</td><td>How do I change documents?</td></tr>
+<tr><td>Delete</td><td>deleteOne / deleteMany</td><td>How do I remove documents?</td></tr></table>
+<div class="flow">CREATE → data enters
+READ   → data comes out
+UPDATE → data changes
+DELETE → data disappears</div>
+</div>
+
+<div class="card">
+<h2>12. 🎯 PROJECTION — Decide Which Fields Are Returned</h2>
+<p>Projection does <strong>not</strong> delete fields. It controls which fields are included in the query result.</p>
+<h3>Include fields</h3>
+<pre><code>db.movies.find(
+  {},
+  {
+    name: 1,
+    genre: 1,
+    rating: 1
+  }
+)</code></pre>
+<p>The first object is the filter; the second is the projection.</p>
+<div class="flow">find(
+   FILTER,
+   PROJECTION
+)</div>
+<h3>Exclude fields</h3>
+<pre><code>db.movies.find(
+  {},
+  {
+    cast: 0,
+    duration: 0
+  }
+)</code></pre>
+<p><code>1</code> means include and <code>0</code> means exclude.</p>
+<h3>Exclude _id</h3>
+<pre><code>db.movies.find(
+  {},
+  {
+    _id: 0,
+    name: 1,
+    genre: 1,
+    rating: 1
+  }
+)</code></pre>
+<div class="warn"><strong>Important rule:</strong> generally do not mix inclusion and exclusion in one projection. The notable exception is excluding <code>_id</code> while including other fields.</div>
+<h3>Why projection?</h3>
+<p>A real document may contain a lot of information. A screen that only needs movie name and rating does not need every field. Projection lets a query return the fields needed for that operation.</p>
+</div>
+
+<div class="card">
+<h2>13. 🧮 AGGREGATION — Think in Pipelines</h2>
+<p>Suppose the requirement is “How many movies are there in each genre?” A simple <code>find()</code> retrieves documents, but this requirement asks MongoDB to <strong>group and calculate</strong>.</p>
+<div class="why"><strong>Aggregation is used for calculations, grouping, summaries and reports.</strong></div>
+<div class="flow">Collection
+   ↓
+Stage 1
+   ↓
+Stage 2
+   ↓
+Stage 3
+   ↓
+Final report</div>
+<p>The stages form a pipeline. The output of one stage becomes the input to the next.</p>
+<h3>Start an aggregation</h3>
+<pre><code>db.movies.aggregate([
+  {
+    $group: {
+      _id: "$genre",
+      movieCount: { $sum: 1 }
+    }
+  }
+])</code></pre>
+<p>Read it slowly:</p>
+<ol>
+<li><code>aggregate()</code> starts the pipeline.</li>
+<li><code>$group</code> groups documents.</li>
+<li><code>_id: "$genre"</code> says the group key is the value of the <code>genre</code> field.</li>
+<li><code>$sum: 1</code> adds one for every document, creating a count.</li>
+</ol>
+</div>
+
+<div class="card">
+<h2>14. 🔬 Essential Aggregation Stages</h2>
+<h3>$match — filter documents entering the pipeline</h3>
+<pre><code>db.movies.aggregate([
+  { $match: { rating: { $gte: 8.5 } } }
+])</code></pre>
+<p>Think: <strong>“Which documents should continue?”</strong></p>
+
+<h3>$group — group and calculate</h3>
+<pre><code>db.movies.aggregate([
+  {
+    $group: {
+      _id: "$genre",
+      movieCount: { $sum: 1 },
+      averageRating: { $avg: "$rating" }
+    }
+  }
+])</code></pre>
+<p>Think: <strong>“For each group, what calculations do I need?”</strong></p>
+
+<h3>$project — shape the pipeline output</h3>
+<pre><code>db.movies.aggregate([
+  {
+    $project: {
+      _id: 0,
+      name: 1,
+      rating: 1
+    }
+  }
+])</code></pre>
+
+<h3>$sort — order results</h3>
+<pre><code>db.movies.aggregate([
+  { $sort: { rating: -1 } }
+])</code></pre>
+<p><code>1</code> = ascending; <code>-1</code> = descending.</p>
+
+<h3>$limit — keep only N results</h3>
+<pre><code>db.movies.aggregate([
+  { $sort: { rating: -1 } },
+  { $limit: 3 }
+])</code></pre>
+<div class="mental"><strong>Remember:</strong> $match filters → $group calculates → $project shapes → $sort orders → $limit reduces the number of results.</div>
+</div>
+
+<div class="card">
+<h2>15. 📊 Build Real MovieHub Reports</h2>
+<h3>Report A — Count movies by genre</h3>
+<pre><code>db.movies.aggregate([
+  {
+    $group: {
+      _id: "$genre",
+      count: { $sum: 1 }
+    }
+  }
+])</code></pre>
+
+<h3>Report B — Average rating by genre</h3>
+<pre><code>db.movies.aggregate([
+  {
+    $group: {
+      _id: "$genre",
+      averageRating: { $avg: "$rating" },
+      movieCount: { $sum: 1 }
+    }
+  },
+  {
+    $sort: { averageRating: -1 }
+  }
+])</code></pre>
+
+<h3>Report C — Top five movies</h3>
+<pre><code>db.movies.aggregate([
+  { $sort: { rating: -1 } },
+  { $limit: 5 },
+  {
+    $project: {
+      _id: 0,
+      name: 1,
+      genre: 1,
+      rating: 1
+    }
+  }
+])</code></pre>
+<p>Read the pipeline as: <strong>sort → take five → choose displayed fields.</strong></p>
+
+<h3>Report D — Sci-Fi movies rated 8.5 or above</h3>
+<pre><code>db.movies.aggregate([
+  {
+    $match: {
+      genre: "Sci-Fi",
+      rating: { $gte: 8.5 }
+    }
+  },
+  {
+    $project: {
+      _id: 0,
+      name: 1,
+      rating: 1,
+      director: 1
+    }
+  }
+])</code></pre>
+
+<h3>Report E — Total movie duration by genre</h3>
+<pre><code>db.movies.aggregate([
+  {
+    $group: {
+      _id: "$genre",
+      totalMinutes: { $sum: "$duration" }
+    }
+  },
+  {
+    $sort: { totalMinutes: -1 }
+  }
+])</code></pre>
+
+<h3>Report F — Minimum and maximum rating by genre</h3>
+<pre><code>db.movies.aggregate([
+  {
+    $group: {
+      _id: "$genre",
+      highestRating: { $max: "$rating" },
+      lowestRating: { $min: "$rating" }
+    }
+  }
+])</code></pre>
+</div>
+
+<div class="card">
+<h2>16. 🔗 Projection vs Aggregation $project</h2>
+<table><tr><th>find() projection</th><th>Aggregation $project</th></tr>
+<tr><td>Second argument to <code>find()</code></td><td>A pipeline stage</td></tr>
+<tr><td><code>find(filter, projection)</code></td><td><code>aggregate([{ $project: ... }])</code></td></tr>
+<tr><td>Controls returned fields</td><td>Shapes documents during pipeline processing</td></tr></table>
+<h3>Normal projection</h3>
+<pre><code>db.movies.find(
+  { genre: "Sci-Fi" },
+  { _id: 0, name: 1, rating: 1 }
+)</code></pre>
+<h3>Aggregation</h3>
+<pre><code>db.movies.aggregate([
+  { $match: { genre: "Sci-Fi" } },
+  { $project: { _id: 0, name: 1, rating: 1 } }
+])</code></pre>
+<div class="why"><strong>Same general idea—shaping fields—but different contexts.</strong></div>
+</div>
+
+<div class="card">
+<h2>17. 🧩 Nested Documents</h2>
+<p>MongoDB documents can contain nested objects.</p>
+<pre><code>db.movies.insertOne({
+  name: "Dune Part Two",
+  genre: "Sci-Fi",
+  releaseYear: 2024,
+  rating: 8.7,
+  director: {
+    name: "Denis Villeneuve",
+    country: "Canada"
+  }
+})</code></pre>
+<p>To query the nested field, use dot notation:</p>
+<pre><code>db.movies.find({
+  "director.name": "Denis Villeneuve"
+})</code></pre>
+<p><code>"director.name"</code> means “go inside the director object and inspect its name field.”</p>
+</div>
+
+<div class="card">
+<h2>18. 🧠 How to Decide Which MongoDB Feature to Use</h2>
+<table><tr><th>Requirement</th><th>Think</th></tr>
+<tr><td>Store a new movie</td><td>CREATE / insert</td></tr>
+<tr><td>Find movies</td><td>READ / find</td></tr>
+<tr><td>Change a movie</td><td>UPDATE</td></tr>
+<tr><td>Remove a movie</td><td>DELETE</td></tr>
+<tr><td>Show only name and rating</td><td>Projection</td></tr>
+<tr><td>How many movies per genre?</td><td>Aggregation + $group</td></tr>
+<tr><td>Average rating?</td><td>Aggregation + $avg</td></tr>
+<tr><td>Top 5?</td><td>$sort + $limit</td></tr>
+<tr><td>Filter before calculating?</td><td>$match</td></tr></table>
+<div class="step"><strong>Golden habit:</strong> translate the requirement into plain English before writing MongoDB syntax.</div>
+</div>
+
+<div class="card">
+<h2>19. 🧪 Guided Practice</h2>
+<p>Now work on the same <code>moviehub.movies</code> collection.</p>
+<ol>
+<li>Insert two movies of your choice.</li>
+<li>Find all movies released after 2010.</li>
+<li>Find movies with rating at least 8.5.</li>
+<li>Find movies directed by Christopher Nolan.</li>
+<li>Find Drama or Action movies.</li>
+<li>Update the rating of one movie.</li>
+<li>Add a <code>language</code> field to several movies.</li>
+<li>Use projection to show only name, genre and language.</li>
+<li>Count movies by genre.</li>
+<li>Calculate average rating by genre.</li>
+<li>Find the three highest-rated movies.</li>
+<li>Calculate total duration by genre.</li>
+</ol>
+<div class="step"><strong>For every task:</strong> 1) say what the requirement means, 2) identify CRUD/projection/aggregation, 3) write the command, 4) run it, 5) inspect the result, 6) modify one part and run again.</div>
+</div>
+
+<div class="card">
+<h2>20. 🐛 Common Mistakes</h2>
+<h3>1. Rating stored as text</h3>
+<pre><code>{ rating: "8.8" }</code></pre>
+<p>is not the same type as:</p>
+<pre><code>{ rating: 8.8 }</code></pre>
+
+<h3>2. Wrong field name</h3>
+<p><code>releaseYear</code> and <code>releaseyear</code> are different field names.</p>
+
+<h3>3. Dangerous update/delete filter</h3>
+<p>Before an updateMany/deleteMany, run:</p>
+<pre><code>db.movies.find(YOUR_FILTER)</code></pre>
+<p>Inspect the matching documents first.</p>
+
+<h3>4. Thinking projection deletes fields</h3>
+<p>It does not. Projection changes what the query returns.</p>
+
+<h3>5. Not understanding aggregation order</h3>
+<p>These are not independent commands. Stage order matters:</p>
+<div class="flow">documents
+ ↓
+$match
+ ↓
+filtered documents
+ ↓
+$group
+ ↓
+grouped/calculated data
+ ↓
+$sort
+ ↓
+ordered result
+ ↓
+$limit
+ ↓
+final result</div>
+</div>
+
+<div class="card">
+<h2>21. 🧠 Final Mental Model</h2>
+<div class="flow">MONGODB
+  │
+  └── DATABASE
+       │
+       └── COLLECTION
+            │
+            └── DOCUMENT
+                 │
+                 └── FIELDS
+
+CRUD
+Create → insertOne / insertMany
+Read   → find / findOne
+Update → updateOne / updateMany
+Delete → deleteOne / deleteMany
+
+PROJECTION
+"Which fields should I return?"
+
+AGGREGATION
+"How can I process many documents
+to calculate/group/report something?"
+
+PIPELINE
+$match → $group → $project → $sort → $limit</div>
+<h3>Five questions to ask yourself</h3>
+<ol>
+<li>Where is my data? → database/collection.</li>
+<li>What is one record? → document.</li>
+<li>What information is inside it? → fields.</li>
+<li>Am I storing, reading, changing or deleting? → CRUD.</li>
+<li>Am I calculating, grouping or reporting? → aggregation.</li>
+</ol>
+<div class="why"><strong>If you can explain these five questions, you are understanding MongoDB rather than memorizing commands.</strong></div>
+</div>
+
+<div class="card">
+<h2>22. ✅ Final Checklist</h2>
+<ul>
+<li>☐ Connect using mongosh</li><li>☐ Select moviehub</li><li>☐ Explain database/collection/document/field</li>
+<li>☐ Insert one and many documents</li><li>☐ Read with find/findOne</li><li>☐ Filter with comparison operators</li>
+<li>☐ Use $or</li><li>☐ Update one and many</li><li>☐ Delete one and many</li>
+<li>☐ Explain _id</li><li>☐ Use projection</li><li>☐ Explain aggregation pipeline</li>
+<li>☐ Use $match</li><li>☐ Use $group</li><li>☐ Use $sum/$avg/$min/$max</li>
+<li>☐ Use $project</li><li>☐ Use $sort and $limit</li><li>☐ Build a multi-stage report</li>
+</ul>
+</div>
+
+<div class="card">
+<h2>🚀 Where This Leads Next</h2>
+<p>This exercise establishes the database layer for a real application. The same <code>movies</code> collection can later be connected to a backend such as Node.js/Express, Python/Flask, Django or another application framework.</p>
+<div class="flow">Frontend
+   ↓
+Backend API
+   ↓
+MongoDB
+   ↓
+movies collection
+   ↓
+CRUD / queries / aggregation
+   ↓
+Backend response
+   ↓
+Frontend UI</div>
+<p>The goal is to understand MongoDB well enough that the application framework later becomes a way of <strong>calling the database operations you already understand</strong>.</p>
+</div>
+
+<p class="small">MongoDB MovieHub Practical Exercise · Documents · Collections · mongosh · CRUD · Projection · Aggregation</p>
+</div></body></html>
