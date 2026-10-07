@@ -1,0 +1,287 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Django + Local MongoDB — SQLite to MongoDB Migration</title><style>:root{--bg:#f5f7fb;--card:#fff;--ink:#182235;--muted:#64748b;--line:#dfe5ee;--p:#4338ca;--soft:#eef2ff;--code:#111827;--good:#047857}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}.wrap{max-width:1120px;margin:auto;padding:0 20px}.hero{background:linear-gradient(135deg,#111827,#064e3b);color:white;padding:55px 0}.hero h1{font-size:40px;line-height:1.1;margin:0 0 15px}.hero p{font-size:18px;color:#e5e7eb}.badge{display:inline-block;padding:5px 10px;border:1px solid #ffffff44;border-radius:20px;margin:3px;background:#ffffff15;font-size:13px}nav{position:sticky;top:0;background:white;border-bottom:1px solid var(--line);z-index:4}.nav{display:flex;gap:6px;overflow:auto;padding:9px 20px}.nav a{white-space:nowrap;text-decoration:none;color:#334155;padding:5px 8px;font-size:13px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:25px;margin:22px 0;box-shadow:0 4px 18px #00000008}h2{font-size:28px;border-bottom:1px solid var(--line);padding-bottom:9px}h3{margin-top:28px}pre{position:relative;background:var(--code);color:#e5e7eb;padding:18px;border-radius:10px;overflow:auto;font:13px/1.55 SFMono-Regular,Consolas,monospace}.copy{position:absolute;right:8px;top:8px;background:#374151;color:white;border:1px solid #64748b;border-radius:6px;padding:5px 9px;cursor:pointer}code{background:#eef2f7;padding:2px 5px;border-radius:4px}pre code{background:none;padding:0}.call{padding:15px 17px;border-left:5px solid var(--p);background:var(--soft);border-radius:8px;margin:16px 0}.good{border-color:var(--good);background:#ecfdf5}.warn{border-color:#d97706;background:#fffbeb}.danger{border-color:#dc2626;background:#fef2f2}table{width:100%;border-collapse:collapse;margin:15px 0}th,td{border:1px solid var(--line);padding:9px;text-align:left;vertical-align:top}th{background:#f8fafc}.flow{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin:15px 0}.flow span{border:1px solid var(--line);padding:8px 11px;border-radius:8px;background:white}.arrow{color:var(--p);font-weight:bold}details{background:white;border:1px solid var(--line);padding:10px 13px;border-radius:8px;margin:9px 0}summary{font-weight:700;cursor:pointer}.check{list-style:none;padding:0}.check li:before{content:'☐';color:var(--p);font-weight:bold;margin-right:8px}footer{background:#111827;color:#cbd5e1;padding:30px 0}@media(max-width:700px){.hero h1{font-size:30px}.card{padding:18px}}</style></head><body>
+<header class="hero"><div class="wrap"><h1>Django + Local MongoDB</h1><p><strong>Connect an existing Django Movie application to a locally running MongoDB database and migrate the existing SQLite data.</strong> This practical explains the connection, commands, model mapping, Movie migration, Django User migration, password hashes, and verification from A–Z.</p><span class="badge">Django</span><span class="badge">MongoDB</span><span class="badge">PyMongo</span><span class="badge">Django MongoDB Backend</span><span class="badge">SQLite → MongoDB</span><span class="badge">Authentication</span></div></header>
+<nav><div class="wrap nav"><a href="#goal">Goal</a><a href="#basics">Basics</a><a href="#setup">Setup</a><a href="#connect">Connect</a><a href="#export">Export</a><a href="#import">Import</a><a href="#users">Users</a><a href="#verify">Verify</a><a href="#trouble">Troubleshoot</a><a href="#check">Checklist</a></div></nav>
+<main class="wrap">
+<section id="goal"><div class="card"><h2>1. What You Will Build</h2><p>Current application:</p><div class="flow"><span>Django</span><b class="arrow">→</b><span>SQLite</span></div><p>Target application:</p><div class="flow"><span>Django</span><b class="arrow">→</b><span>Django MongoDB Backend</span><b class="arrow">→</b><span>Local MongoDB</span></div><p>Data migration:</p><div class="flow"><span>SQLite</span><b class="arrow">→</b><span>Python export</span><b class="arrow">→</b><span>JSON</span><b class="arrow">→</b><span>Python import</span><b class="arrow">→</b><span>MongoDB</span></div><ul><li>Connect Django to MongoDB running on your computer.</li><li>Understand database, collection, document and field.</li><li>Move the existing Movie records.</li><li>Move existing Django users.</li><li>Preserve existing password hashes so old passwords still work.</li><li>Test old login, new signup and Movie CRUD.</li></ul><div class="call warn"><strong>Important current limitation:</strong> the official Django MongoDB Backend currently lists <code>dumpdata</code> and <code>loaddata</code> as unsupported. Therefore this exercise does <strong>not</strong> pretend that a normal Django fixture can simply be loaded into MongoDB. We export the SQLite records ourselves and import them with a custom command. citeturn0search0</div></div></section>
+<section id="basics"><div class="card"><h2>2. MongoDB Basics</h2><h3>2.1 Relational vs MongoDB terminology</h3><table><tr><th>Relational database</th><th>MongoDB</th></tr><tr><td>Database</td><td>Database</td></tr><tr><td>Table</td><td>Collection</td></tr><tr><td>Row</td><td>Document</td></tr><tr><td>Column</td><td>Field</td></tr><tr><td>Primary key</td><td>Usually <code>_id</code></td></tr></table><h3>2.2 Example Movie document</h3><pre><code>{
+  "_id": 1,
+  "name": "Dangal",
+  "genre": "Sports",
+  "releaseYear": 2016,
+  "rating": "8.3/10",
+  "duration": "161 min",
+  "director": "Nitesh Tiwari",
+  "cast": "Aamir Khan, Fatima Sana Shaikh",
+  "description": "A former wrestler trains his daughters...",
+  "bannerUrl": "https://example.com/dangal.jpg",
+  "trailer": "https://youtube.com/..."
+}</code></pre><p>MongoDB stores BSON documents, which are JSON-like but support additional BSON types.</p><h3>2.3 MongoDB server, shell and Django backend</h3><table><tr><th>Component</th><th>Purpose</th></tr><tr><td><code>mongod</code></td><td>MongoDB database server.</td></tr><tr><td><code>mongosh</code></td><td>Command-line client for MongoDB.</td></tr><tr><td>Django MongoDB Backend</td><td>Django database backend.</td></tr><tr><td>PyMongo</td><td>Python driver used by the backend.</td></tr></table><p>The official backend uses PyMongo underneath. citeturn0search3turn0search5</p><h3>2.4 Check MongoDB</h3><pre><code>mongosh
+show dbs
+exit</code></pre><p><code>mongosh</code> is only the client; the MongoDB server must already be running.</p></div></section>
+<section id="setup"><div class="card"><h2>3. Check Versions and Install the Backend</h2><p>The backend version should match the Django major/minor version. For example, Django 5.2 should use the 5.2 backend. Check the current compatibility matrix before installing. citeturn0search10</p><pre><code>python --version
+python -m django --version
+pip install django-mongodb-backend
+pip freeze &gt; requirements.txt</code></pre><p>The official package installs the required PyMongo dependency. citeturn0search3</p><div class="call danger"><strong>Do not use Djongo for this exercise.</strong> MongoDB's current documentation identifies Django MongoDB Backend as the officially supported integration for newer Django versions. citeturn0search2</div></div></section>
+<section id="connect"><div class="card"><h2>4. Connect Django to Local MongoDB</h2><h3>4.1 Connection URI</h3><pre><code>mongodb://127.0.0.1:27017/</code></pre><table><tr><th>Part</th><th>Meaning</th></tr><tr><td><code>mongodb://</code></td><td>MongoDB connection protocol.</td></tr><tr><td><code>127.0.0.1</code></td><td>Your computer.</td></tr><tr><td><code>27017</code></td><td>Default MongoDB port.</td></tr></table><h3>4.2 settings.py</h3><p>Replace SQLite:</p><pre><code>DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
+}</code></pre><p>with:</p><pre><code>DATABASES = {
+    "default": {
+        "ENGINE": "django_mongodb_backend",
+        "HOST": "mongodb://127.0.0.1:27017/",
+        "NAME": "moviehub",
+    }
+}</code></pre><p>The official connection guide uses <code>django_mongodb_backend</code> for <code>ENGINE</code> and accepts the MongoDB URI in <code>HOST</code>. citeturn0search1</p><h3>4.3 Understand the configuration</h3><ul><li><code>ENGINE</code> tells Django which database backend to use.</li><li><code>HOST</code> tells the backend where MongoDB is running.</li><li><code>NAME</code> is the MongoDB database name.</li></ul><h3>4.4 Test</h3><pre><code>python manage.py check
+python manage.py shell</code></pre><pre><code>from django.db import connection
+print(connection.vendor)
+print(connection.settings_dict["NAME"])
+exit()</code></pre><p>Then:</p><pre><code>python manage.py runserver</code></pre><div class="call good"><strong>Connection complete:</strong> Django now points at local MongoDB. The next task is moving the existing SQLite records.</div></div></section>
+<section id="model"><div class="card"><h2>5. Your Movie Model</h2><pre><code>from django.db import models
+
+class Movie(models.Model):
+    name = models.CharField(max_length=200)
+    genre = models.CharField(max_length=100)
+    releaseYear = models.IntegerField()
+    rating = models.CharField(max_length=20)
+    duration = models.CharField(max_length=20)
+    director = models.CharField(max_length=100)
+    cast = models.TextField()
+    description = models.TextField()
+    bannerUrl = models.URLField()
+    trailer = models.URLField()</code></pre><p>With the MongoDB backend, a Django model represents data stored in a MongoDB collection. The official documentation shows models being mapped to collections and migrations being used to create them. citeturn0search8</p><h3>5.1 Important primary-key difference</h3><p>SQLite projects commonly use integer IDs. MongoDB commonly uses ObjectIds. Do not assume an old SQLite integer ID should simply become a MongoDB ObjectId. The migration below creates MongoDB-backed records and preserves the old ID only as information if you need it.</p><p>For supported ORM operations, your code remains familiar:</p><pre><code>Movie.objects.all()
+Movie.objects.filter(genre="Drama")
+Movie.objects.create(...)</code></pre><p>The official backend provides Django ORM interaction with MongoDB. citeturn0search11</p></div></section>
+<section id="export"><div class="card"><h2>6. Export the Existing SQLite Data</h2><div class="call danger"><strong>Do this BEFORE changing settings.py to MongoDB.</strong> Otherwise your export command may read from MongoDB instead of SQLite.</div><h3>6.1 Back up SQLite</h3><p>Keep a copy of <code>db.sqlite3</code> before migration.</p><h3>6.2 Record counts</h3><pre><code>python manage.py shell</code></pre><pre><code>from movies.models import Movie
+from django.contrib.auth.models import User
+print("Movies:", Movie.objects.count())
+print("Users:", User.objects.count())
+exit()</code></pre><h3>6.3 Create Movie export command</h3><pre><code>movies/
+  management/
+    __init__.py
+    commands/
+      __init__.py
+      export_sqlite_data.py</code></pre><pre><code>import json
+from django.core.management.base import BaseCommand
+from movies.models import Movie
+
+class Command(BaseCommand):
+    help = "Export Movie data from SQLite to JSON"
+
+    def handle(self, *args, **options):
+        movies = Movie.objects.all()
+        data = []
+
+        for movie in movies:
+            data.append({
+                "old_id": movie.id,
+                "name": movie.name,
+                "genre": movie.genre,
+                "releaseYear": movie.releaseYear,
+                "rating": movie.rating,
+                "duration": movie.duration,
+                "director": movie.director,
+                "cast": movie.cast,
+                "description": movie.description,
+                "bannerUrl": movie.bannerUrl,
+                "trailer": movie.trailer,
+            })
+
+        with open("movies_migration.json", "w", encoding="utf-8") as file:
+            json.dump(data, file, indent=2)
+
+        self.stdout.write(
+            self.style.SUCCESS(f"Exported {len(data)} movies")
+        )</code></pre><p><strong>Why each part?</strong> <code>BaseCommand</code> creates a custom <code>manage.py</code> command; <code>Movie.objects.all()</code> reads SQLite records; the Python dictionary converts each model object into portable JSON data; <code>json.dump()</code> writes the file.</p><pre><code>python manage.py export_sqlite_data</code></pre><h3>6.4 Export users</h3><pre><code>movies/management/commands/export_users.py</code></pre><pre><code>import json
+from django.contrib.auth.models import User
+from django.core.management.base import BaseCommand
+
+class Command(BaseCommand):
+    help = "Export Django users from SQLite to JSON"
+
+    def handle(self, *args, **options):
+        users = User.objects.all()
+        data = []
+
+        for user in users:
+            data.append({
+                "old_id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "password": user.password,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "is_staff": user.is_staff,
+                "is_active": user.is_active,
+                "is_superuser": user.is_superuser,
+                "date_joined": user.date_joined.isoformat(),
+                "last_login": user.last_login.isoformat() if user.last_login else None,
+            })
+
+        with open("users_migration.json", "w", encoding="utf-8") as file:
+            json.dump(data, file, indent=2)
+
+        self.stdout.write(
+            self.style.SUCCESS(f"Exported {len(data)} users")
+        )</code></pre><pre><code>python manage.py export_users</code></pre><div class="call good"><strong>Password explanation:</strong> <code>user.password</code> is a Django password hash, not the original password. Preserving that hash lets the same password continue to authenticate after migration.</div><div class="call danger"><strong>Security:</strong> the user JSON contains personal information and password hashes. Never publish it or commit it to Git.</div></div></section>
+<section id="switch"><div class="card"><h2>7. Switch Django to MongoDB</h2><p>Now change <code>settings.py</code> to:</p><pre><code>DATABASES = {
+    "default": {
+        "ENGINE": "django_mongodb_backend",
+        "HOST": "mongodb://127.0.0.1:27017/",
+        "NAME": "moviehub",
+    }
+}</code></pre><p>Test:</p><pre><code>python manage.py check
+python manage.py shell</code></pre><pre><code>from django.db import connection
+print(connection.vendor)
+print(connection.settings_dict["NAME"])
+exit()</code></pre><p>Conceptually, the same ORM code now points somewhere different:</p><div class="flow"><span>Movie.objects</span><b class="arrow">→</b><span>MongoDB</span></div></div></section>
+<section id="schema"><div class="card"><h2>8. Create MongoDB-Side Structures</h2><p>The official backend supports Django migrations with limitations. Run:</p><pre><code>python manage.py makemigrations
+python manage.py migrate</code></pre><p>MongoDB's documentation explains that migrations can be used to create collections for models. citeturn0search8</p><p>Now inspect MongoDB:</p><pre><code>mongosh
+use moviehub
+show collections</code></pre><p>Do not guess collection names; inspect them. The exact mapping depends on your project/backend configuration.</p><div class="call warn"><strong>Important:</strong> MongoDB is schema-flexible, but Django still has model/migration concepts when using the Django MongoDB Backend. The backend's migration support has documented limitations. citeturn0search0</div></div></section>
+<section id="import"><div class="card"><h2>9. Import Movie Data Into MongoDB</h2><p>Because <code>loaddata</code> is unsupported by the current backend, write a custom import command. citeturn0search0</p><pre><code>movies/management/commands/import_movies_to_mongodb.py</code></pre><pre><code>import json
+from django.core.management.base import BaseCommand
+from movies.models import Movie
+
+class Command(BaseCommand):
+    help = "Import Movie data into MongoDB"
+
+    def handle(self, *args, **options):
+        with open("movies_migration.json", "r", encoding="utf-8") as file:
+            data = json.load(file)
+
+        imported = 0
+
+        for item in data:
+            Movie.objects.create(
+                name=item["name"],
+                genre=item["genre"],
+                releaseYear=item["releaseYear"],
+                rating=item["rating"],
+                duration=item["duration"],
+                director=item["director"],
+                cast=item["cast"],
+                description=item["description"],
+                bannerUrl=item["bannerUrl"],
+                trailer=item["trailer"],
+            )
+            imported += 1
+
+        self.stdout.write(
+            self.style.SUCCESS(f"Imported {imported} movies into MongoDB")
+        )</code></pre><p><strong>How it works:</strong> <code>json.load()</code> converts the file into Python data; the loop reads one Movie at a time; <code>Movie.objects.create()</code> creates a MongoDB-backed document through Django.</p><pre><code>python manage.py import_movies_to_mongodb</code></pre><h3>9.1 Verify</h3><pre><code>python manage.py shell</code></pre><pre><code>from movies.models import Movie
+print("Movies:", Movie.objects.count())
+for movie in Movie.objects.all()[:5]:
+    print(movie.name)
+exit()</code></pre><p>Then:</p><pre><code>mongosh
+use moviehub
+show collections</code></pre><p>Inspect the actual Movie collection shown by <code>show collections</code>.</p></div></section>
+<section id="users"><div class="card"><h2>10. Migrate Existing Django Users</h2><h3>10.1 What must be preserved?</h3><ul><li>username</li><li>email</li><li>first/last name</li><li>active/staff/superuser flags</li><li>date joined and last login</li><li><strong>password hash</strong></li></ul><h3>10.2 Why the password still works</h3><p>If the user originally typed:</p><pre><code>MySecretPassword123</code></pre><p>Django stores a hash, such as:</p><pre><code>pbkdf2_sha256$...</code></pre><p>We migrate the hash, not the plain-text password. Django can then compare the password entered at login against the stored hash.</p><h3>10.3 Import command</h3><pre><code>movies/management/commands/import_users_to_mongodb.py</code></pre><pre><code>import json
+from datetime import datetime
+from django.contrib.auth import get_user_model
+from django.core.management.base import BaseCommand
+
+class Command(BaseCommand):
+    help = "Import existing Django users into MongoDB"
+
+    def handle(self, *args, **options):
+        User = get_user_model()
+
+        with open("users_migration.json", "r", encoding="utf-8") as file:
+            data = json.load(file)
+
+        imported = 0
+
+        for item in data:
+            user = User(
+                username=item["username"],
+                email=item["email"],
+                password=item["password"],
+                first_name=item["first_name"],
+                last_name=item["last_name"],
+                is_staff=item["is_staff"],
+                is_active=item["is_active"],
+                is_superuser=item["is_superuser"],
+            )
+
+            user.date_joined = datetime.fromisoformat(item["date_joined"])
+
+            if item["last_login"]:
+                user.last_login = datetime.fromisoformat(item["last_login"])
+
+            user.save()
+            imported += 1
+
+        self.stdout.write(
+            self.style.SUCCESS(f"Imported {imported} users into MongoDB")
+        )</code></pre><h3>10.4 Why <code>get_user_model()</code>?</h3><p>It asks Django for the User model configured by the project instead of hard-coding a model class.</p><h3>10.5 Very important: do NOT hash the hash again</h3><p>This is correct for an already-hashed password:</p><pre><code>user.password = item["password"]
+user.save()</code></pre><p>Do <strong>not</strong> do this:</p><pre><code>user.set_password(item["password"])</code></pre><p><code>set_password()</code> is for a plain-text password. Calling it on an existing hash would hash the hash and break the old password.</p><pre><code>python manage.py import_users_to_mongodb</code></pre><h3>10.6 Verify</h3><pre><code>python manage.py shell</code></pre><pre><code>from django.contrib.auth import get_user_model
+User = get_user_model()
+print("Users:", User.objects.count())
+exit()</code></pre><div class="call good"><strong>Goal:</strong> existing usernames and password hashes are now represented in the MongoDB-backed User model.</div></div></section>
+<section id="auth"><div class="card"><h2>11. Your Existing Login/Signup Code</h2><p>Your authentication code remains conceptually the same.</p><h3>Login</h3><pre><code>from django.contrib.auth import authenticate, login
+
+def loginPage(request):
+    if request.method == "POST":
+        username = request.POST["username"]
+        password = request.POST["password"]
+
+        user = authenticate(
+            request,
+            username=username,
+            password=password
+        )
+
+        if user is not None:
+            login(request, user)
+            return redirect("home")
+
+        return render(request, "login.html", {
+            "error": "Invalid Username or Password"
+        })
+
+    return render(request, "login.html")</code></pre><div class="flow"><span>username + password</span><b class="arrow">→</b><span>authenticate()</span><b class="arrow">→</b><span>User model</span><b class="arrow">→</b><span>MongoDB</span></div><h3>Signup</h3><pre><code>user = User.objects.create_user(
+    username=username,
+    email=email,
+    password=password
+)
+login(request, user)</code></pre><p><code>create_user()</code> receives the plain password and hashes it before saving. This is different from the migration script, where we already have the old hash.</p><h3>Logout</h3><pre><code>from django.contrib.auth import logout
+
+def logoutPage(request):
+    logout(request)
+    return redirect("login")</code></pre><h3>Existing sessions</h3><p>A user account and a browser login session are different. This exercise preserves accounts and password hashes. It does not attempt to preserve every old browser session. Users may need to log in again after the migration.</p></div></section>
+<section id="verify"><div class="card"><h2>12. Full Verification</h2><h3>12.1 Compare counts</h3><p>If SQLite had:</p><pre><code>Movies: 30
+Users: 8</code></pre><p>MongoDB should report the same counts:</p><pre><code>python manage.py shell</code></pre><pre><code>from movies.models import Movie
+from django.contrib.auth import get_user_model
+User = get_user_model()
+print("Movies:", Movie.objects.count())
+print("Users:", User.objects.count())
+exit()</code></pre><h3>12.2 Verify a Movie</h3><pre><code>movie = Movie.objects.first()
+print(movie.name)
+print(movie.genre)
+print(movie.releaseYear)
+print(movie.rating)</code></pre><h3>12.3 Verify an existing user</h3><pre><code>user = User.objects.first()
+print(user.username)
+print(user.email)
+print(user.is_active)</code></pre><h3>12.4 Test old login</h3><ol><li>Run <code>python manage.py runserver</code>.</li><li>Open the login page.</li><li>Use an existing username.</li><li>Use the same old password.</li><li>Confirm successful login.</li></ol><h3>12.5 Test new signup</h3><p>Create a new user through the normal signup page, then:</p><pre><code>from django.contrib.auth import get_user_model
+User = get_user_model()
+print(User.objects.filter(username="new_username").exists())</code></pre><p>Expected: <code>True</code>.</p><h3>12.6 Test Movie CRUD</h3><pre><code># Create
+movie = Movie.objects.create(...)
+
+# Read
+Movie.objects.all()
+
+# Update
+movie.rating = "9.0/10"
+movie.save()
+
+# Delete
+movie.delete()</code></pre><p>The official backend documents Django ORM CRUD interaction with MongoDB. citeturn0search11</p><h3>12.7 Inspect MongoDB directly</h3><pre><code>mongosh
+use moviehub
+show collections</code></pre><p>Then inspect the Movie/User collections using the exact names shown by <code>show collections</code>.</p></div></section>
+<section id="trouble"><div class="card"><h2>13. Troubleshooting</h2><details><summary>Connection refused on 127.0.0.1:27017</summary><p>MongoDB server is not running or is not listening on the expected port. Confirm that <code>mongosh</code> connects.</p></details><details><summary>ModuleNotFoundError: django_mongodb_backend</summary><pre><code>pip install django-mongodb-backend</code></pre><p>Also verify that the backend version matches Django. citeturn0search10</p></details><details><summary>dumpdata/loaddata fails</summary><p>The current official backend lists these commands as unsupported. Use the custom export/import commands in this exercise. citeturn0search0</p></details><details><summary>Old password no longer works</summary><ul><li>Confirm the original <code>user.password</code> hash was exported.</li><li>Do not call <code>set_password()</code> on the already-hashed value.</li><li>Make sure the user was imported only once.</li><li>Test through the normal login page.</li></ul></details><details><summary>Movie count is wrong</summary><ul><li>Compare with the SQLite count recorded before migration.</li><li>Check whether the import command ran twice.</li><li>Use a fresh target database for a clean practice run.</li></ul></details><details><summary>Authentication/admin behaves differently</summary><p>The backend has documented compatibility limitations. Django contrib apps can require MongoDB-specific configuration depending on your Django/backend version. Follow the official migration guidance for your exact version. citeturn0search2</p></details><details><summary>Project has many foreign keys</summary><p>A relational project with many foreign keys, many-to-many relations and through models needs a more carefully designed migration. This exercise focuses on the supplied Movie model and Django User data.</p></details></div></section>
+<section id="check"><div class="card"><h2>14. Complete A–Z Checklist</h2><h3>Before migration</h3><ul class="check"><li>MongoDB server running.</li><li><code>mongosh</code> connects.</li><li>Django/Python versions checked.</li><li>Compatible backend installed.</li><li>SQLite backed up.</li><li>Movie count recorded.</li><li>User count recorded.</li><li>Existing login tested.</li></ul><h3>Export</h3><ul class="check"><li><code>movies_migration.json</code> created.</li><li><code>users_migration.json</code> created.</li><li>Password hashes preserved.</li><li>JSON files kept private.</li></ul><h3>MongoDB</h3><ul class="check"><li><code>DATABASES</code> changed to <code>django_mongodb_backend</code>.</li><li>MongoDB URI configured.</li><li><code>moviehub</code> database configured.</li><li><code>python manage.py check</code> passes.</li><li>Django shell connects to MongoDB.</li><li>Supported migrations applied.</li></ul><h3>Import</h3><ul class="check"><li>Movie import completed.</li><li>User import completed.</li><li>Movie count matches.</li><li>User count matches.</li></ul><h3>Application</h3><ul class="check"><li>Existing user logs in with old password.</li><li>New signup works.</li><li>New login works.</li><li>Movies display.</li><li>Movie create works.</li><li>Movie update works.</li><li>Movie delete works.</li></ul><div class="call good"><strong>Final rule:</strong> keep the SQLite backup until the MongoDB migration has been completely verified.</div></div></section>
+<section><div class="card"><h2>15. Final Mental Model</h2><div class="flow"><span>Old Django</span><b class="arrow">→</b><span>SQLite</span><b class="arrow">→</b><span>Export Python data</span><b class="arrow">→</b><span>JSON</span><b class="arrow">→</b><span>Import</span><b class="arrow">→</b><span>MongoDB</span></div><p><strong>You are not copying the SQLite database file into MongoDB.</strong> You are reading old records, transforming them into MongoDB-backed Django objects, and creating new documents.</p><div class="flow"><span>Browser</span><b class="arrow">→</b><span>Django Views</span><b class="arrow">→</b><span>Django ORM</span><b class="arrow">→</b><span>Django MongoDB Backend</span><b class="arrow">→</b><span>PyMongo</span><b class="arrow">→</b><span>MongoDB</span></div><div class="call good"><strong>Most important lesson:</strong> the database technology changes underneath the Django application, but the application still works through Django models, QuerySets and authentication APIs wherever the MongoDB backend supports those features.</div></div></section>
+<section><div class="card"><h2>16. Official References</h2><ul><li>MongoDB — Django MongoDB Backend</li><li>MongoDB — Connect to MongoDB</li><li>MongoDB — Get Started</li><li>MongoDB — Model Your Data</li><li>MongoDB — Feature Compatibility / Limitations</li><li>MongoDB — Interact With Data</li></ul><p>Use the current MongoDB documentation for the exact Django/backend version because compatibility and supported features evolve.</p></div></section>
+</main><footer><div class="wrap"><strong>Django + Local MongoDB Migration Lab</strong><br>SQLite → MongoDB • Movie data • Django Users • Password hashes • CRUD • Verification</div></footer><script>document.querySelectorAll('pre').forEach(p=>{let b=document.createElement('button');b.className='copy';b.textContent='Copy';b.onclick=async()=>{try{await navigator.clipboard.writeText(p.querySelector('code').innerText);b.textContent='Copied!';setTimeout(()=>b.textContent='Copy',1200)}catch(e){b.textContent='Select & Copy'}};p.appendChild(b)})</script></body></html>

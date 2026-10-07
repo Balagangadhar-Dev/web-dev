@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Django Deployment Masterclass — PythonAnywhere & Heroku</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--ink:#182235;--muted:#617084;--line:#dfe5ee;--p:#4f46e5;--soft:#eef2ff;--code:#111827}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif}
+.container{max-width:1150px;margin:auto;padding:0 22px}.hero{background:linear-gradient(135deg,#111827,#312e81,#4f46e5);color:#fff;padding:55px 0}.hero h1{font-size:42px;line-height:1.1;margin:0 0 15px}.hero p{max-width:900px;color:#e5e7eb;font-size:18px}
+.badges{display:flex;gap:8px;flex-wrap:wrap}.badge{padding:6px 11px;border:1px solid #ffffff44;border-radius:99px;background:#ffffff18;font-size:13px}
+nav{position:sticky;top:0;z-index:5;background:white;border-bottom:1px solid var(--line)}.nav{display:flex;gap:7px;overflow:auto;padding:9px 22px}.nav a{padding:6px 9px;border-radius:7px;text-decoration:none;color:#334155;font-size:13px;white-space:nowrap}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:25px;margin:22px 0;box-shadow:0 5px 18px #0f172a08}h2{font-size:28px;margin-top:0;border-bottom:1px solid var(--line);padding-bottom:9px}h3{font-size:21px;margin-top:28px}h4{margin-bottom:6px}
+.callout{padding:15px 17px;border-left:5px solid var(--p);background:var(--soft);border-radius:9px;margin:16px 0}.warn{border-left-color:#d97706;background:#fffbeb}.good{border-left-color:#087f5b;background:#ecfdf5}.danger{border-left-color:#dc2626;background:#fef2f2}
+pre{position:relative;background:var(--code);color:#e5e7eb;border-radius:10px;padding:17px;overflow:auto;font:13px/1.55 "SFMono-Regular",Consolas,monospace}code.inline{background:#eef2f7;padding:2px 5px;border-radius:5px}
+.copy{position:absolute;right:8px;top:8px;background:#1f2937;color:#fff;border:1px solid #475569;border-radius:6px;padding:5px 9px;cursor:pointer;font-size:11px}
+table{border-collapse:collapse;width:100%;margin:15px 0}th,td{border:1px solid var(--line);padding:10px;text-align:left;vertical-align:top}th{background:#f8fafc}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:16px 0}.flow span{background:white;border:1px solid var(--line);border-radius:8px;padding:9px 12px}.arrow{color:var(--p);font-weight:800}
+.file{font:13px monospace;background:#f8fafc;border:1px solid var(--line);padding:3px 7px;border-radius:6px}.muted{color:var(--muted)}li{margin:6px 0}
+details{background:white;border:1px solid var(--line);border-radius:9px;padding:10px 13px;margin:10px 0}summary{font-weight:700;cursor:pointer}
+.check{list-style:none;padding-left:0}.check li:before{content:"☐";color:var(--p);font-weight:bold;margin-right:8px}
+footer{background:#111827;color:#cbd5e1;padding:35px 0;margin-top:40px}a{color:#4338ca}
+@media(max-width:700px){.hero h1{font-size:31px}.card{padding:18px}}
+</style>
+</head>
+<body>
+<header class="hero"><div class="container">
+<h1>Django Deployment Masterclass</h1>
+<p><strong>One Django application. Two real deployments.</strong> Build a small Django project locally, prepare it for production, deploy it to <strong>PythonAnywhere</strong>, and deploy the same project to <strong>Heroku</strong>.</p>
+<div class="badges"><span class="badge">Django</span><span class="badge">Git</span><span class="badge">WSGI</span><span class="badge">Gunicorn</span><span class="badge">Static Files</span><span class="badge">Environment Variables</span><span class="badge">PythonAnywhere</span><span class="badge">Heroku</span></div>
+</div></header>
+<nav><div class="container nav">
+<a href="#goal">Goal</a><a href="#build">Build</a><a href="#prepare">Prepare</a><a href="#pa">PythonAnywhere</a><a href="#heroku">Heroku</a><a href="#compare">Compare</a><a href="#debug">Troubleshoot</a><a href="#check">Checklist</a>
+</div></nav>
+<main class="container">
+
+<section id="goal"><div class="card">
+<h2>1. What You Will Learn</h2>
+<p>This is a single progressive deployment practical. The application is intentionally small so the focus stays on understanding deployment rather than business logic.</p>
+<div class="flow"><span>Local Django</span><b class="arrow">→</b><span>Git</span><b class="arrow">→</b><span>Production settings</span><b class="arrow">→</b><span>PythonAnywhere</span><b>+</b><span>Heroku</span></div>
+<h3>Important idea</h3>
+<p>Deployment is not simply “uploading a folder”. A host needs to know the Python runtime, dependencies, Django settings, entry point, static-file strategy, environment variables, database, and how to start/reload the web process.</p>
+<h3>Local vs production</h3>
+<table><tr><th>Local</th><th>Production</th></tr>
+<tr><td><code class="inline">python manage.py runserver</code></td><td>Production web server/platform process</td></tr>
+<tr><td>Usually DEBUG=True</td><td>Normally DEBUG=False</td></tr>
+<tr><td>localhost</td><td>Public domain</td></tr>
+<tr><td>Local virtual environment</td><td>Hosted environment / virtualenv</td></tr>
+<tr><td>Django can serve static files during development</td><td>Static files need a production strategy</td></tr>
+<tr><td>Local configuration</td><td>Environment variables/config vars</td></tr></table>
+<h3>Core vocabulary</h3>
+<ul>
+<li><strong>WSGI:</strong> interface connecting a Python web server to a traditional Django application.</li>
+<li><strong>Gunicorn:</strong> production WSGI server commonly used to run Django.</li>
+<li><strong>requirements.txt:</strong> list of Python dependencies to install.</li>
+<li><strong>collectstatic:</strong> collects static assets into one deployment directory.</li>
+<li><strong>environment variable:</strong> configuration supplied outside the source code.</li>
+<li><strong>Procfile:</strong> Heroku process declaration telling the platform how to start the web process.</li>
+</ul>
+</div></section>
+
+<section id="build"><div class="card">
+<h2>2. Build the DeployMe Django Project</h2>
+<h3>2.1 Create the environment</h3>
+<pre><code>mkdir django-deployme
+cd django-deployme
+python -m venv venv</code></pre>
+<p>Activate it:</p>
+<h4>macOS/Linux</h4><pre><code>source venv/bin/activate</code></pre>
+<h4>Windows PowerShell</h4><pre><code>venv\Scripts\Activate.ps1</code></pre>
+<h4>Windows cmd</h4><pre><code>venv\Scripts\activate</code></pre>
+<pre><code>pip install django gunicorn whitenoise</code></pre>
+<h3>2.2 Create project and app</h3>
+<pre><code>django-admin startproject deployme .
+python manage.py startapp core</code></pre>
+<h3>2.3 Understand the structure</h3>
+<pre><code>django-deployme/
+├── manage.py
+├── deployme/
+│   ├── settings.py
+│   ├── urls.py
+│   ├── wsgi.py
+│   └── asgi.py
+├── core/
+│   ├── views.py
+│   └── ...
+└── venv/</code></pre>
+<h3>2.4 Add the app</h3>
+<p>In <span class="file">deployme/settings.py</span>:</p>
+<pre><code>INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "core",
+]</code></pre>
+<h3>2.5 Create a view</h3>
+<p>In <span class="file">core/views.py</span>:</p>
+<pre><code>from django.http import HttpResponse
+
+def home(request):
+    return HttpResponse(
+        "&lt;h1&gt;DeployMe&lt;/h1&gt;"
+        "&lt;p&gt;Django deployment is working!&lt;/p&gt;"
+    )</code></pre>
+<p><strong>Understand:</strong> the browser sends a request → Django resolves a URL → Django calls <code class="inline">home()</code> → the view returns an HTTP response.</p>
+<h3>2.6 Connect the URL</h3>
+<p>In <span class="file">deployme/urls.py</span>:</p>
+<pre><code>from django.contrib import admin
+from django.urls import path
+from core.views import home
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("", home, name="home"),
+]</code></pre>
+<h3>2.7 Test locally</h3>
+<pre><code>python manage.py migrate
+python manage.py runserver</code></pre>
+<p>Open <code class="inline">http://127.0.0.1:8000/</code>.</p>
+<div class="callout good"><strong>Checkpoint:</strong> Do not continue until the application works locally. Hosting cannot repair a broken Django project.</div>
+</div></section>
+
+<section id="prepare"><div class="card">
+<h2>3. Prepare Django for Production</h2>
+<h3>3.1 Record dependencies</h3>
+<pre><code>pip freeze &gt; requirements.txt</code></pre>
+<p>Verify that Django, gunicorn, and whitenoise are present.</p>
+
+<h3>3.2 Static files</h3>
+<p>Add to <span class="file">settings.py</span>:</p>
+<pre><code>STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"</code></pre>
+<p>Run:</p>
+<pre><code>python manage.py collectstatic --noinput</code></pre>
+<p><strong>Why?</strong> Django may find static files in multiple apps during development. <code class="inline">collectstatic</code> gathers them into the single directory specified by <code class="inline">STATIC_ROOT</code> for deployment.</p>
+
+<h3>3.3 WhiteNoise</h3>
+<p>In <span class="file">MIDDLEWARE</span>, immediately after Django's security middleware:</p>
+<pre><code>MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+]</code></pre>
+<p>WhiteNoise is a common way to integrate static-file serving into a Django deployment on Heroku. Heroku's official documentation recommends it for this purpose. citeturn1search0</p>
+
+<h3>3.4 Environment-aware settings</h3>
+<p>At the top of <span class="file">settings.py</span>:</p>
+<pre><code>import os</code></pre>
+<p>Use:</p>
+<pre><code>SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET_KEY",
+    "dev-only-secret-key-change-this"
+)
+
+DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
+
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",")
+    if host.strip()
+]</code></pre>
+<p><strong>Why?</strong> The same Git repository can run in different environments without editing secrets or production hostnames directly into the source.</p>
+
+<h3>3.5 Generate a secret</h3>
+<pre><code>python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"</code></pre>
+<div class="callout danger"><strong>Never commit your production secret key to Git.</strong></div>
+
+<h3>3.6 .gitignore</h3>
+<pre><code>venv/
+__pycache__/
+*.py[cod]
+db.sqlite3
+.env
+staticfiles/
+.DS_Store</code></pre>
+
+<h3>3.7 Git</h3>
+<pre><code>git init
+git add .
+git commit -m "Prepare Django app for deployment"</code></pre>
+<p>Optional but recommended: push the repository to GitHub. GitHub is useful as your source repository; Heroku Git is a deployment remote, not a substitute for proper source control. Heroku explicitly recommends a source-control system such as GitHub/GitLab/Bitbucket for the canonical repository. citeturn1search5turn1search7</p>
+
+<h3>3.8 Production-ready structure</h3>
+<pre><code>django-deployme/
+├── manage.py
+├── requirements.txt
+├── .gitignore
+├── deployme/
+│   ├── settings.py
+│   ├── urls.py
+│   ├── wsgi.py
+│   └── asgi.py
+└── core/</code></pre>
+</div></section>
+
+<section id="pa"><div class="card">
+<h2>4. Deployment 1 — PythonAnywhere</h2>
+<p>PythonAnywhere's documented workflow for an existing Django project is: get the code onto PythonAnywhere, create a virtualenv and install requirements, create a Web app using manual configuration, configure its WSGI file, run migrations, configure static files, and reload. citeturn0search0turn0search1</p>
+
+<h3>4.1 Account and dashboard</h3>
+<p>Sign in to PythonAnywhere. The important areas are <strong>Files</strong>, <strong>Consoles</strong>, and <strong>Web</strong>.</p>
+<p>For an existing Django project, use the <strong>Manual configuration</strong> route in the Web tab. The PythonAnywhere documentation specifically distinguishes this from the quickstart intended for new projects. citeturn0search0</p>
+
+<h3>4.2 Put the code on PythonAnywhere</h3>
+<p>If the project is on GitHub:</p>
+<pre><code>git clone https://github.com/YOUR_USERNAME/django-deployme.git
+cd django-deployme</code></pre>
+<p>You can also upload files using the Files interface, but Git makes later updates easier.</p>
+
+<h3>4.3 Identify the important paths</h3>
+<pre><code>Project directory:
+ /home/YOUR_PA_USERNAME/django-deployme
+
+Django settings module:
+ deployme.settings
+
+Virtual environment:
+ /home/YOUR_PA_USERNAME/.virtualenvs/deployme-venv</code></pre>
+<p>The project directory is the folder containing <span class="file">manage.py</span>. The settings module is the Python package containing <span class="file">settings.py</span>.</p>
+
+<h3>4.4 Create a virtual environment</h3>
+<p>Use a Python executable/version currently available in your PythonAnywhere account:</p>
+<pre><code>mkvirtualenv --python=/usr/bin/python3.12 deployme-venv</code></pre>
+<p>If Python 3.12 is not available in your environment, choose an available supported version instead.</p>
+<pre><code>cd ~/django-deployme
+pip install -r requirements.txt
+
+python --version
+pip show django
+pip show gunicorn
+pip show whitenoise</code></pre>
+<p>PythonAnywhere documents virtual environments as the way to use your own package versions rather than relying on the system environment. citeturn0search12</p>
+
+<h3>4.5 Database migrations</h3>
+<pre><code>cd ~/django-deployme
+python manage.py migrate</code></pre>
+<p>Optional admin account:</p>
+<pre><code>python manage.py createsuperuser</code></pre>
+
+<h3>4.6 Create the Web app</h3>
+<ol>
+<li>Open <strong>Web</strong>.</li>
+<li>Choose <strong>Add a new web app</strong>.</li>
+<li>Select your domain.</li>
+<li>Choose <strong>Manual configuration</strong>.</li>
+<li>Select the appropriate Python version.</li>
+</ol>
+<p>The official existing-Django guide uses this manual configuration flow. citeturn0search0</p>
+
+<h3>4.7 Configure the virtualenv</h3>
+<p>Set the virtual environment path to something like:</p>
+<pre><code>/home/YOUR_PA_USERNAME/.virtualenvs/deployme-venv</code></pre>
+<p>The Web tab can also accept the short virtualenv name in its appropriate field. citeturn0search0</p>
+
+<h3>4.8 Configure source code / working directory</h3>
+<p>Use:</p>
+<pre><code>/home/YOUR_PA_USERNAME/django-deployme</code></pre>
+
+<h3>4.9 Configure the PythonAnywhere WSGI file</h3>
+<p>PythonAnywhere provides a WSGI file linked from the Web tab. This is the file you configure for the hosted web application. citeturn0search0</p>
+<p>Use:</p>
+<pre><code>import os
+import sys
+
+path = "/home/YOUR_PA_USERNAME/django-deployme"
+
+if path not in sys.path:
+    sys.path.insert(0, path)
+
+os.environ["DJANGO_SETTINGS_MODULE"] = "deployme.settings"
+
+from django.core.wsgi import get_wsgi_application
+
+application = get_wsgi_application()</code></pre>
+<p>Replace <code class="inline">YOUR_PA_USERNAME</code>.</p>
+<table><tr><th>Line</th><th>Meaning</th></tr>
+<tr><td><code class="inline">path = ...</code></td><td>Location of the folder containing manage.py.</td></tr>
+<tr><td><code class="inline">sys.path.insert(0,path)</code></td><td>Makes the project importable.</td></tr>
+<tr><td><code class="inline">DJANGO_SETTINGS_MODULE</code></td><td>Tells Django which settings to load.</td></tr>
+<tr><td><code class="inline">get_wsgi_application()</code></td><td>Creates the WSGI application used by the web server.</td></tr></table>
+
+<h3>4.10 Environment variables</h3>
+<p>Set the variables through the current PythonAnywhere web-app environment configuration mechanism:</p>
+<pre><code>DJANGO_SECRET_KEY = your-generated-secret
+DJANGO_DEBUG = False
+DJANGO_ALLOWED_HOSTS = YOUR_PA_USERNAME.pythonanywhere.com</code></pre>
+<p>Do not put the production secret into the repository. PythonAnywhere's existing-project guide points to its environment-variable configuration documentation for production settings. citeturn0search0</p>
+
+<h3>4.11 Static files</h3>
+<p>PythonAnywhere documents three main steps: set <code class="inline">STATIC_ROOT</code>, run <code class="inline">collectstatic</code>, then add a Static Files mapping in the Web tab. citeturn0search1</p>
+<pre><code>cd ~/django-deployme
+python manage.py collectstatic --noinput</code></pre>
+<p>With our settings, the directory is:</p>
+<pre><code>/home/YOUR_PA_USERNAME/django-deployme/staticfiles</code></pre>
+<p>In the Web tab, under <strong>Static Files</strong>:</p>
+<table><tr><th>URL</th><th>Path</th></tr>
+<tr><td><code class="inline">/static/</code></td><td><code class="inline">/home/YOUR_PA_USERNAME/django-deployme/staticfiles</code></td></tr></table>
+
+<h3>4.12 Reload</h3>
+<p>Click <strong>Reload</strong> in the Web tab. PythonAnywhere's documentation notes that a reload is required to publish changes to the live web application. citeturn0search2</p>
+
+<h3>4.13 Verify</h3>
+<pre><code>https://YOUR_PA_USERNAME.pythonanywhere.com/</code></pre>
+<p>Test the home page, static assets, and <code class="inline">/admin/</code> if configured.</p>
+<div class="callout good"><strong>PythonAnywhere mental model:</strong> code + virtualenv + Web app + WSGI + migrations + static mapping + reload.</div>
+</div></section>
+
+<section id="heroku"><div class="card">
+<h2>5. Deployment 2 — Heroku</h2>
+<p>Heroku's current Python workflow is Git-centered: prepare the codebase, specify dependencies/runtime, provide a process declaration, configure environment variables, then push the Git branch to the Heroku remote. citeturn1search5turn1search7</p>
+
+<div class="callout warn"><strong>Usage note:</strong> Heroku's current getting-started material notes that dynos/databases count toward usage and describes an Eco plan for its tutorial. Check current pricing and account requirements before creating resources. citeturn1search4</div>
+
+<h3>5.1 Install Git and Heroku CLI</h3>
+<pre><code>git --version
+heroku --version</code></pre>
+<p>On macOS with Homebrew:</p>
+<pre><code>brew install heroku/brew/heroku</code></pre>
+<p>The current Heroku CLI documentation identifies Git as a prerequisite. citeturn1search3</p>
+
+<h3>5.2 Login</h3>
+<pre><code>heroku login</code></pre>
+<p>This opens the browser-based authentication flow. citeturn1search3</p>
+
+<h3>5.3 Specify Python version</h3>
+<p>Create <span class="file">.python-version</span> at the repository root. Heroku currently recommends this file and says <span class="file">runtime.txt</span> is deprecated.</p>
+<pre><code>3.14</code></pre>
+<p>Use a supported version compatible with the project you tested. Heroku's current Python runtime documentation recommends specifying the major version so security updates can be received automatically. citeturn1search1</p>
+
+<h3>5.4 Install and record Gunicorn</h3>
+<pre><code>pip install gunicorn
+pip freeze &gt; requirements.txt</code></pre>
+<p>Heroku's Django configuration documentation requires a Procfile and recommends Gunicorn for Django web applications. citeturn0search9turn0search10</p>
+
+<h3>5.5 Create the Procfile</h3>
+<p>Create exactly <span class="file">Procfile</span> in the project root — no <code class="inline">.txt</code> extension.</p>
+<pre><code>web: gunicorn deployme.wsgi</code></pre>
+<p>Understand it:</p>
+<ul><li><code class="inline">web:</code> = web process.</li><li><code class="inline">gunicorn</code> = production WSGI server.</li><li><code class="inline">deployme.wsgi</code> = Django WSGI module.</li></ul>
+<p>Heroku's official Django guide shows the same pattern with a project-specific WSGI module. citeturn0search9</p>
+
+<h3>5.6 Check root structure</h3>
+<pre><code>django-deployme/
+├── .gitignore
+├── .python-version
+├── Procfile
+├── requirements.txt
+├── manage.py
+├── deployme/
+└── core/</code></pre>
+
+<h3>5.7 Commit</h3>
+<pre><code>git add .
+git commit -m "Add Heroku deployment configuration"</code></pre>
+
+<h3>5.8 Create the Heroku app</h3>
+<pre><code>heroku create</code></pre>
+<p>Heroku creates the app and normally adds a Git remote named <code class="inline">heroku</code>. citeturn0search11turn1search7</p>
+<p>Verify:</p>
+<pre><code>git remote -v</code></pre>
+
+<h3>5.9 Configure environment variables</h3>
+<pre><code>heroku config:set DJANGO_SECRET_KEY="PASTE_YOUR_GENERATED_SECRET"
+heroku config:set DJANGO_DEBUG=False</code></pre>
+<p>Find the hostname:</p>
+<pre><code>heroku info</code></pre>
+<p>Then set:</p>
+<pre><code>heroku config:set DJANGO_ALLOWED_HOSTS="your-app-hostname"</code></pre>
+<p>Use the actual hostname shown for your app; do not literally use <code class="inline">your-app-hostname</code>.</p>
+<p>Heroku's Django guidance recommends environment/config vars for sensitive configuration such as credentials. citeturn0search9</p>
+
+<h3>5.10 Deploy</h3>
+<p>If your branch is <code class="inline">main</code>:</p>
+<pre><code>git push heroku main</code></pre>
+<p>Heroku's Git documentation says pushing the main/master branch to the Heroku remote deploys the code. citeturn1search7</p>
+<p>If your local branch is named something else, you can explicitly push it to Heroku's main:</p>
+<pre><code>git push heroku YOUR_BRANCH:main</code></pre>
+
+<h3>5.11 Understand the build</h3>
+<div class="flow"><span>git push</span><b class="arrow">→</b><span>Python detected</span><b class="arrow">→</b><span>Python runtime</span><b class="arrow">→</b><span>pip install</span><b class="arrow">→</b><span>collectstatic</span><b class="arrow">→</b><span>release</span><b class="arrow">→</b><span>Gunicorn</span></div>
+<p>Heroku detects Python when appropriate dependency metadata such as <span class="file">requirements.txt</span> is present and installs the listed dependencies. citeturn1search2turn1search6</p>
+<p>Heroku also runs Django's <code class="inline">collectstatic</code> during a build unless that behavior is explicitly disabled. A failed collectstatic step can fail the build. citeturn1search0</p>
+
+<h3>5.12 Open and inspect the app</h3>
+<pre><code>heroku open</code></pre>
+<p>If it fails:</p>
+<pre><code>heroku logs --tail</code></pre>
+<p>Refresh the site while the logs are visible.</p>
+
+<h3>5.13 Run migrations</h3>
+<pre><code>heroku run python manage.py migrate</code></pre>
+<p>Create a superuser if needed:</p>
+<pre><code>heroku run python manage.py createsuperuser</code></pre>
+
+<h3>5.14 Database warning</h3>
+<div class="callout danger"><strong>Do not treat a Heroku dyno filesystem as permanent database storage.</strong> SQLite is fine for learning the deployment mechanics, but a production application should use a persistent database service. Heroku's deployment guidance explicitly recommends using a database or object storage rather than depending on local filesystem writes. citeturn1search5</div>
+
+<h3>5.15 Optional PostgreSQL configuration</h3>
+<p>Once the basic deployment works, you can use a database URL rather than hard-coding a database connection. A common Django pattern is <code class="inline">dj-database-url</code>.</p>
+<pre><code>pip install dj-database-url
+pip freeze &gt; requirements.txt</code></pre>
+<p>Then:</p>
+<pre><code>import dj_database_url
+
+DATABASES = {
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600,
+    )
+}</code></pre>
+<p>The exact PostgreSQL provisioning route depends on the current Heroku account, app generation, region, and available services. Follow the current Heroku database documentation when adding a persistent database.</p>
+
+<h3>5.16 Heroku mental model</h3>
+<div class="flow"><span>Code</span><b class="arrow">→</b><span>Git commit</span><b class="arrow">→</b><span>Heroku app</span><b class="arrow">→</b><span>Config vars</span><b class="arrow">→</b><span>git push</span><b class="arrow">→</b><span>Build</span><b class="arrow">→</b><span>Gunicorn</span></div>
+<div class="callout good"><strong>Heroku checkpoint:</strong> The app should build successfully, start the web process, and be accessible from its Heroku URL.</div>
+</div></section>
+
+<section id="compare"><div class="card">
+<h2>6. PythonAnywhere vs Heroku</h2>
+<table><tr><th>Topic</th><th>PythonAnywhere</th><th>Heroku</th></tr>
+<tr><td>Deployment style</td><td>Web-app configuration + virtualenv + WSGI</td><td>Git push + build + process declaration</td></tr>
+<tr><td>Python environment</td><td>Configure a virtualenv for the Web app</td><td>Platform selects runtime and installs dependencies</td></tr>
+<tr><td>Entry point</td><td>PythonAnywhere WSGI configuration</td><td>Procfile → Gunicorn → Django WSGI</td></tr>
+<tr><td>Static files</td><td>collectstatic + Web-tab Static Files mapping</td><td>collectstatic during build + WhiteNoise/common production strategy</td></tr>
+<tr><td>Environment settings</td><td>Web-app environment configuration</td><td>Heroku config vars</td></tr>
+<tr><td>Update</td><td>Pull/update files, run needed commands, reload</td><td>Commit + <code class="inline">git push heroku main</code></td></tr>
+<tr><td>Logs</td><td>Web-tab error/server logs</td><td><code class="inline">heroku logs --tail</code></td></tr>
+</table>
+<h3>The biggest conceptual difference</h3>
+<p><strong>PythonAnywhere exposes more web-server configuration.</strong> You explicitly connect code, virtualenv, WSGI, and static mapping.</p>
+<p><strong>Heroku abstracts more infrastructure.</strong> You give it a Git repository, runtime/dependencies, a process declaration, and configuration; the platform builds and starts the application.</p>
+</div></section>
+
+<section id="updates"><div class="card">
+<h2>7. Deploying Future Changes</h2>
+<h3>PythonAnywhere</h3>
+<pre><code>cd ~/django-deployme
+git pull
+source ~/.virtualenvs/deployme-venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py collectstatic --noinput</code></pre>
+<p>Then reload the Web app.</p>
+<h3>Heroku</h3>
+<pre><code>git add .
+git commit -m "Update application"
+git push heroku main</code></pre>
+<p>If needed:</p>
+<pre><code>heroku run python manage.py migrate</code></pre>
+<p>Deployment means repeated release cycles, not just the first successful launch.</p>
+</div></section>
+
+<section id="debug"><div class="card">
+<h2>8. Troubleshooting</h2>
+<details><summary>ModuleNotFoundError: No module named 'django'</summary><p>Check the PythonAnywhere virtualenv or confirm Django is in <span class="file">requirements.txt</span> on Heroku. Install dependencies into the correct environment.</p></details>
+<details><summary>ModuleNotFoundError: No module named 'deployme'</summary><p>Check the project path, WSGI module, and Procfile. The folder containing <span class="file">manage.py</span> must be importable.</p></details>
+<details><summary>DisallowedHost</summary><p>Your deployed hostname is missing from <code class="inline">DJANGO_ALLOWED_HOSTS</code>. Do not include <code class="inline">https://</code>; use the hostname.</p></details>
+<details><summary>CSS/static files are missing</summary><p>Check <code class="inline">django.contrib.staticfiles</code>, <code class="inline">STATIC_ROOT</code>, <code class="inline">collectstatic</code>, and the host's static serving strategy. PythonAnywhere requires a Static Files mapping for the documented setup; Heroku's Django guidance recommends WhiteNoise. citeturn0search1turn1search0</p></details>
+<details><summary>Heroku build failed at collectstatic</summary><p>Run locally: <code class="inline">python manage.py collectstatic --noinput</code>. Fix the actual error before pushing again. Heroku documents collectstatic as part of the build process. citeturn1search0</p></details>
+<details><summary>Heroku says Application Error</summary><p>Run <code class="inline">heroku logs --tail</code>, refresh the site, and inspect import, settings, database, or Gunicorn startup errors.</p></details>
+<details><summary>PythonAnywhere says there was an error reloading</summary><p>Check the Web-tab error log first. Common causes are incorrect WSGI path, missing dependency, incorrect settings module, or syntax/import errors.</p></details>
+<details><summary>It works with runserver but not Gunicorn</summary><p>Run locally: <code class="inline">gunicorn deployme.wsgi</code>. If this fails, the problem is probably in dependencies, WSGI import path, settings, or application startup.</p></details>
+<h3>Debugging order</h3>
+<ol><li>Make it work locally.</li><li>Run <code class="inline">python manage.py check</code>.</li><li>Verify dependencies.</li><li>Verify environment variables.</li><li>Verify WSGI/Procfile.</li><li>Verify static files.</li><li>Read host logs.</li><li>Then change hosting configuration.</li></ol>
+</div></section>
+
+<section id="check"><div class="card">
+<h2>9. Complete Deployment Checklist</h2>
+<h3>Local</h3><ul class="check"><li>Project works with runserver.</li><li>Migrations work.</li><li>requirements.txt exists.</li><li>collectstatic succeeds.</li><li>.gitignore exists.</li><li>Production secret is not committed.</li><li>Git commit exists.</li></ul>
+<h3>PythonAnywhere</h3><ul class="check"><li>Code cloned/uploaded.</li><li>Correct virtualenv created.</li><li>requirements installed.</li><li>Web app created.</li><li>Virtualenv path configured.</li><li>Source/working directory configured.</li><li>WSGI file configured.</li><li>Environment variables configured.</li><li>migrate executed.</li><li>collectstatic executed.</li><li>/static/ mapping configured.</li><li>Web app reloaded.</li><li>Live URL tested.</li><li>Error logs understood.</li></ul>
+<h3>Heroku</h3><ul class="check"><li>Git repo committed.</li><li>Heroku CLI installed.</li><li>heroku login works.</li><li>.python-version exists.</li><li>requirements.txt exists.</li><li>Procfile exists at root.</li><li>Gunicorn is installed/recorded.</li><li>WhiteNoise is configured.</li><li>Heroku app created.</li><li>Config vars set.</li><li>git push heroku main succeeds.</li><li>Build succeeds.</li><li>Gunicorn starts.</li><li>heroku open works.</li><li>heroku logs --tail is understood.</li><li>Database strategy is appropriate.</li></ul>
+
+<h3>10. Final Deployment Practice</h3>
+<p>Change the home page from:</p>
+<pre><code>Django deployment is working!</code></pre>
+<p>to:</p>
+<pre><code>Django Deployment Masterclass — Version 2</code></pre>
+<p>Deploy the change to both platforms.</p>
+<p>Notice the different release workflow:</p>
+<ul><li><strong>PythonAnywhere:</strong> update code → install changes if necessary → migrate/collectstatic if necessary → reload.</li>
+<li><strong>Heroku:</strong> change code → git add/commit → git push heroku main.</li></ul>
+<div class="callout good"><strong>Final mental model:</strong> local Django → dependencies → production settings → static files → Git → host configuration → WSGI/process → environment variables → deployment → logs → live application → future releases.</div>
+</div></section>
+
+<section><div class="card">
+<h2>11. Official References</h2>
+<ul>
+<li>PythonAnywhere — existing Django deployment: https://help.pythonanywhere.com/pages/DeployExistingDjangoProject/</li>
+<li>PythonAnywhere — Django static files: https://help.pythonanywhere.com/pages/DjangoStaticFiles</li>
+<li>PythonAnywhere — web app basics: https://help.pythonanywhere.com/pages/WebAppBasics/</li>
+<li>Heroku — Django configuration: https://devcenter.heroku.com/articles/django-app-configuration</li>
+<li>Heroku — Django static assets: https://devcenter.heroku.com/articles/django-assets</li>
+<li>Heroku — Python runtimes: https://devcenter.heroku.com/articles/python-runtimes</li>
+<li>Heroku — preparing a codebase: https://devcenter.heroku.com/articles/preparing-a-codebase-for-heroku-deployment</li>
+<li>Heroku — Git deployment: https://devcenter.heroku.com/articles/git</li>
+<li>Heroku — CLI: https://devcenter.heroku.com/articles/heroku-cli</li>
+</ul>
+<p class="muted">Hosting interfaces, supported runtimes, pricing, and available database services can change. When a screen or command differs, use the current official documentation and keep the deployment concepts unchanged.</p>
+</div></section>
+</main>
+<footer><div class="container"><strong>Django Deployment Masterclass</strong><br>PythonAnywhere + Heroku • Local → Production • WSGI • Gunicorn • Static Files • Environment Variables • Git</div></footer>
+<script>
+document.querySelectorAll("pre").forEach(pre=>{let b=document.createElement("button");b.className="copy";b.textContent="Copy";b.onclick=async()=>{try{await navigator.clipboard.writeText(pre.querySelector("code").innerText);b.textContent="Copied!";setTimeout(()=>b.textContent="Copy",1200)}catch(e){b.textContent="Select & Copy";setTimeout(()=>b.textContent="Copy",1200)}};pre.appendChild(b)});
+</script>
+</body></html>
