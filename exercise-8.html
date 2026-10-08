@@ -1,0 +1,681 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MovieHub — React + Express + MongoDB Beginner Exercise</title><style>
+:root{--bg:#07111f;--surface:#0f1c2e;--surface2:#13243a;--text:#eaf2ff;--muted:#a9bad0;--line:#263b55;--accent:#ff3b5c;--accent2:#ff7a59;--cyan:#48d8ff;--green:#42d392;--yellow:#ffd166;--shadow:0 18px 50px rgba(0,0,0,.22)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f4f7fb;color:#1b2938;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.72}.wrap{width:min(1120px,calc(100% - 32px));margin:auto}.hero{position:relative;overflow:hidden;background:radial-gradient(circle at 85% 20%,rgba(255,59,92,.28),transparent 30%),radial-gradient(circle at 15% 80%,rgba(72,216,255,.18),transparent 30%),linear-gradient(135deg,#050b15,#0c1930 60%,#11182a);color:white;padding:78px 0 66px;border-bottom:1px solid #20334c}.hero:after{content:"";position:absolute;inset:auto 0 0;height:90px;background:linear-gradient(transparent,rgba(244,247,251,.08));pointer-events:none}.hero h1{font-size:clamp(2.3rem,6vw,4.5rem);line-height:1.02;max-width:900px;margin:18px 0 18px;letter-spacing:-.045em}.hero p{max-width:850px;color:#c8d6e8;font-size:1.08rem}.badge{display:inline-block;margin:0 8px 8px 0;padding:7px 12px;border:1px solid rgba(255,255,255,.18);border-radius:999px;background:rgba(255,255,255,.08);font-size:.74rem;font-weight:800;letter-spacing:.08em}.nav{position:sticky;top:0;z-index:20;background:rgba(7,17,31,.94);backdrop-filter:blur(14px);border-bottom:1px solid #1d3047;box-shadow:0 5px 25px rgba(0,0,0,.12)}.nav .wrap{display:flex;gap:6px;overflow:auto;padding:9px 0}.nav a{color:#c9d8ea;text-decoration:none;padding:8px 12px;border-radius:9px;white-space:nowrap;font-size:.84rem;font-weight:700}.nav a:hover{background:#1b3048;color:white}.section{margin:30px 0;padding:36px;background:white;border:1px solid #dfe7f0;border-radius:22px;box-shadow:0 8px 35px rgba(24,45,75,.07);scroll-margin-top:72px}.section h2{font-size:1.9rem;margin:0 0 18px;color:#10243b;letter-spacing:-.025em}.section h3{font-size:1.15rem;color:#193552;margin-top:30px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.grid .card{height:100%}.card{background:#fff;border:1px solid #dce5ef;border-radius:16px;padding:20px;box-shadow:0 5px 18px rgba(24,45,75,.05)}.card h3{margin-top:0}.card.dark{background:#091525;color:#e8f2ff;border-color:#1c334d;box-shadow:var(--shadow)}.card.dark h3{color:white}.flow{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:22px 0;padding:20px;border-radius:16px;background:#eef5fb;border:1px solid #d7e5f1}.flow span{background:#10253d;color:white;padding:11px 16px;border-radius:12px;font-weight:800;box-shadow:0 7px 18px rgba(16,37,61,.13)}.flow span:nth-of-type(2){background:#1b6f8c}.flow span:nth-of-type(3){background:#b52e4a}.flow span:nth-of-type(4){background:#273d55}.arrow{color:#7c91a9;font-size:1.3rem}.callout,.explain{margin:18px 0;padding:17px 19px;border-left:5px solid #3b82f6;background:#eef6ff;border-radius:10px;color:#29445e}.callout.good{border-color:var(--green);background:#ecfbf4}.callout.warn{border-color:#f59e0b;background:#fff8e7}.callout.danger{border-color:#ef4444;background:#fff0f1}.pill{display:inline-block;background:#eaf0f6;color:#18344e;border:1px solid #d6e0ea;padding:1px 7px;border-radius:6px;font:600 .88em ui-monospace,SFMono-Regular,Menlo,monospace}.code{position:relative;background:#081322;border:1px solid #1d334d;border-radius:14px;overflow:auto;margin:15px 0;box-shadow:0 10px 28px rgba(6,18,32,.14)}pre{margin:0;padding:20px;overflow:auto}code{font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;font-size:.9rem;line-height:1.65}.code code{color:#d9e8fa}.copy{position:absolute;right:10px;top:10px;border:1px solid #38516d;background:#15283e;color:#dcecff;border-radius:8px;padding:6px 10px;font-weight:700;cursor:pointer}.copy:hover{background:#203a58}.table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border:1px solid #dbe4ed;border-radius:13px;margin:18px 0;font-size:.94rem}.table th{background:#10253d;color:#fff;text-align:left;padding:12px}.table td{padding:12px;border-top:1px solid #e4eaf1;vertical-align:top}.table tr:nth-child(even) td{background:#f8fafc}.check{padding-left:0;list-style:none;display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.check li{background:#f5f9fc;border:1px solid #e0e8f0;padding:10px 12px;border-radius:10px}.check li:before{content:"✓";color:#149c62;font-weight:900;margin-right:9px}.steps{counter-reset:step;list-style:none;padding:0}.steps li{counter-increment:step;position:relative;padding:16px 18px 16px 62px;background:#f7fafd;border:1px solid #e0e8f0;border-radius:13px;margin:10px 0}.steps li:before{content:counter(step);position:absolute;left:16px;top:15px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#10253d;color:#fff;font-weight:800}.small{font-size:.88rem;color:#6e8196}.footer{margin-top:50px;background:#07111f;color:#aebfd3;padding:45px 0}.footer h3{color:white}.footer .small{color:#8295aa}.toc{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0}.toc a{text-decoration:none;color:#183d61;background:#eef5fb;border:1px solid #d8e5ef;border-radius:11px;padding:12px;font-weight:700}.toc a:hover{background:#e2eff9}.terminal{background:#050b12;border-radius:14px;padding:18px;color:#d7e7f7;font-family:monospace;border:1px solid #1c2d40}.terminal .prompt{color:#65e6a2}.note-title{font-weight:900;display:block;margin-bottom:4px}.chapter{display:inline-block;color:#d44a63;font-size:.78rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px}@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.toc{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.wrap{width:min(100% - 20px,1120px)}.hero{padding:55px 0}.section{padding:22px 17px;border-radius:16px}.grid,.check,.toc{grid-template-columns:1fr}.flow{justify-content:flex-start}.flow .arrow{transform:rotate(90deg)}}
+</style></head><body>
+<div class="hero"><div class="wrap"><span class="badge">BEGINNER FRIENDLY</span><span class="badge">FULL STACK</span><h1>Build MovieHub from Scratch</h1><p>A complete hands-on exercise to understand <b>React + Express.js + MongoDB</b> by building one Netflix-like movie application from an empty folder.</p><p>We will create the database, insert the supplied movie data, build an Express API, connect MongoDB, build the React interface, and finally connect the complete application.</p></div></div>
+<div class="nav"><div class="wrap"><a href="#goal">Goal</a><a href="#architecture">Architecture</a><a href="#mongo">MongoDB</a><a href="#express">Express</a><a href="#api">API</a><a href="#react">React</a><a href="#connect">Connect</a><a href="#crud">CRUD</a><a href="#debug">Debug</a><a href="#final">Final</a></div></div>
+<div class="wrap">
+<section class="section" id="goal"><span class="chapter">Start here</span><h2>1. What are we building?</h2>
+<div class="card"><p>MovieHub will look like a small Netflix-style application. Movies are <b>not stored inside React</b>. They live in MongoDB. Express provides URLs that React can call to get, create, update and delete movies.</p><div class="flow"><span>MongoDB</span><b class="arrow">→</b><span>Express API</span><b class="arrow">→</b><span>React</span><b class="arrow">→</b><span>Browser</span></div></div>
+<div class="grid"><div class="card"><h3>MongoDB</h3><p>Stores the movie documents permanently.</p></div><div class="card"><h3>Express.js</h3><p>Creates the backend server and API endpoints.</p></div><div class="card"><h3>React</h3><p>Creates the interactive user interface.</p></div><div class="card"><h3>Mongoose</h3><p>Helps the Express application work with MongoDB using schemas and models.</p></div></div>
+<div class="callout good"><b>Important idea:</b> Do not think of this as three separate applications. Think of it as one application with three layers that communicate with each other.</div>
+<h3>What you will understand by the end</h3><ul class="check"><li>What MongoDB, database, collection and document mean.</li><li>How to create a MongoDB database and insert data.</li><li>How Node.js and Express create a backend server.</li><li>What an API endpoint is and how HTTP methods work.</li><li>How Mongoose connects Express to MongoDB.</li><li>How React fetches data from an Express API.</li><li>How JSON travels from MongoDB → Express → React.</li><li>How to implement Create, Read, Update and Delete.</li></ul>
+<div class="toc"><a href="#setup">🧰 Tools & Setup</a><a href="#mongo">🍃 MongoDB</a><a href="#express">⚙️ Express.js</a><a href="#api">🔌 REST API</a><a href="#react">⚛️ React</a><a href="#connect">🔗 Connect Everything</a><a href="#crud">🧩 CRUD</a><a href="#debug">🛠 Debugging</a><a href="#final">🚀 Final Project</a></div></section>
+
+<section class="section" id="architecture"><span class="chapter">Part 2</span><h2>2. Understand the architecture before coding</h2>
+<div class="card dark"><pre style="white-space:pre-wrap">Browser
+  ↓
+React application (localhost:5173)
+  ↓  HTTP request: GET /api/movies
+Express server (localhost:5000)
+  ↓
+Mongoose
+  ↓
+MongoDB (localhost:27017)
+  ↓
+movies collection
+  ↓
+JSON response
+  ↓
+React displays MovieCard components</pre></div>
+<table class="table"><tr><th>Technology</th><th>Job</th><th>Simple analogy</th></tr><tr><td>React</td><td>Builds what the user sees and interacts with.</td><td>Restaurant dining area</td></tr><tr><td>Express</td><td>Receives requests and decides what the backend should do.</td><td>Waiter</td></tr><tr><td>MongoDB</td><td>Stores the actual movie information.</td><td>Kitchen/storage</td></tr><tr><td>Mongoose</td><td>Helps Node/Express work with MongoDB in a structured way.</td><td>Translator/organizer</td></tr></table>
+<div class="callout"><b>Never put database credentials or database operations directly in React.</b> React should call your Express API. Express talks to MongoDB.</div></section>
+
+<section class="section" id="setup"><span class="chapter">Part 3</span><h2>3. Install the tools</h2>
+<p>You need Node.js, MongoDB Community Server, and optionally MongoDB Compass. Vite will create the React application.</p>
+<div class="card"><h3>Check Node.js</h3><div class="code"><button class="copy" onclick="copyCode('c577501')">Copy</button><pre id="c577501"><code>node --version
+npm --version</code></pre></div></div>
+<div class="card"><h3>Check MongoDB</h3><p>Make sure your local MongoDB server is running. On many installations the server process is called <span class="pill">mongod</span>. Then open the MongoDB shell:</p><div class="code"><button class="copy" onclick="copyCode('c150338')">Copy</button><pre id="c150338"><code>mongosh</code></pre></div></div>
+<div class="callout warn"><b>If <span class="pill">mongosh</span> is not found:</b> install MongoDB Shell or use MongoDB Compass. The exact installation steps depend on your operating system. The exercise assumes MongoDB is available locally on <span class="pill">mongodb://127.0.0.1:27017</span>.</div>
+</section>
+
+<section class="section" id="mongo"><span class="chapter">Part 4</span><h2>4. Part A — MongoDB from zero</h2>
+<h3>4.1 Database, collection and document</h3><div class="card"><p>MongoDB has a document-oriented structure:</p><div class="flow"><span>Database</span><b>→</b><span>Collection</span><b>→</b><span>Document</span><b>→</b><span>Fields</span></div><p>For this application:</p><ul><li>Database: <b>moviehub</b></li><li>Collection: <b>movies</b></li><li>One movie = one document</li><li>Fields: name, genre, releaseYear, rating, etc.</li></ul></div>
+<h3>4.2 Create/select the MovieHub database</h3><div class="code"><button class="copy" onclick="copyCode('c612219')">Copy</button><pre id="c612219"><code>mongosh
+show dbs
+use moviehub
+db
+show collections</code></pre></div>
+<div class="explain"><b>Why does <span class="pill">use moviehub</span> create the database?</b><br>It selects the database. MongoDB actually creates/persists the database when data is stored in it. Therefore, do not worry if <span class="pill">show dbs</span> does not immediately display an empty database.</div>
+<h3>4.3 Insert one document manually</h3><div class="code"><button class="copy" onclick="copyCode('generated1')">Copy</button><pre id="generated1"><code>db.movies.insertOne({
+  name: &quot;Inception&quot;,
+  genre: &quot;Science Fiction Thriller&quot;,
+  releaseYear: 2010,
+  rating: &quot;8.8/10&quot;,
+  duration: &quot;2h 28m&quot;,
+  director: &quot;Christopher Nolan&quot;,
+  cast: &quot;Leonardo DiCaprio, Joseph Gordon-Levitt, Elliot Page&quot;,
+  description: &quot;A thief who steals corporate secrets through dream-sharing technology.&quot;,
+  bannerUrl: &quot;https://example.com/inception.jpg&quot;,
+  trailer: &quot;https://www.youtube.com/embed/YoHD9XEInc0&quot;
+})</code></pre></div>
+<div class="explain"><b>What happened?</b><br><span class="pill">db</span> refers to the selected database. <span class="pill">movies</span> is the collection. <span class="pill">insertOne()</span> inserts one document. MongoDB automatically creates an <span class="pill">_id</span> field.</div>
+<h3>4.4 Read the data</h3><div class="code"><button class="copy" onclick="copyCode('c786544')">Copy</button><pre id="c786544"><code>db.movies.find()
+db.movies.find().pretty()
+db.movies.findOne({ name: &quot;Inception&quot; })
+db.movies.countDocuments()</code></pre></div>
+<h3>4.5 The supplied dataset</h3><p>The supplied file contains <b>30 movie records</b> with fields such as name, genre, release year, rating, duration, director, cast, description, banner URL and trailer URL. For example, the first record is Dangal and the dataset also contains Inception and Dune: Part Two. fileciteturn3file0L1-L13 fileciteturn3file0L302-L313 fileciteturn3file0L380-L390</p>
+<div class="callout good"><b>Download the prepared dataset file:</b> <a href="sandbox:/mnt/data/moviehub_movies_data.js">moviehub_movies_data.js</a>. It is the supplied dataset converted into a separate project data file.</div>
+<h3>4.6 Insert all 30 records using a seed script</h3><p>Typing 30 documents manually is not practical. We will let Node.js read the data file and insert all records with Mongoose.</p><div class="code"><button class="copy" onclick="copyCode('generated2')">Copy</button><pre id="generated2"><code>import mongoose from &quot;mongoose&quot;;
+import Movie from &quot;./models/Movie.js&quot;;
+import movies_data from &quot;./moviehub_movies_data.js&quot;;
+
+const MONGO_URI = &quot;mongodb://127.0.0.1:27017/moviehub&quot;;
+
+async function seedMovies() {
+  try {
+    await mongoose.connect(MONGO_URI);
+    console.log(&quot;MongoDB connected&quot;);
+
+    await Movie.deleteMany({});
+    const movies = movies_data.map(({ id, ...movie }) =&gt; movie);
+    await Movie.insertMany(movies);
+
+    console.log(`${movies.length} movies inserted successfully`);
+  } catch (error) {
+    console.error(&quot;Seed failed:&quot;, error.message);
+  } finally {
+    await mongoose.disconnect();
+  }
+}
+
+seedMovies();</code></pre></div>
+<div class="explain"><b>Why remove <span class="pill">id</span>?</b><br>The supplied data has a numeric <span class="pill">id</span>. Mongoose/MongoDB will create its own unique <span class="pill">_id</span>. We keep the original movie information but let MongoDB manage its database identifier.</div>
+</section>
+
+<section class="section" id="express"><span class="chapter">Part 5</span><h2>5. Part B — Build the Express backend</h2>
+<h3>5.1 What is Node.js?</h3><p>Node.js lets us execute JavaScript outside the browser. React runs JavaScript in the browser. Express runs JavaScript on the server.</p>
+<h3>5.2 What is Express?</h3><p>Express is a Node.js web framework. It makes it easier to create a server, define routes, receive requests, send responses and build APIs.</p>
+<h3>5.3 Create the project folders</h3><div class="code"><button class="copy" onclick="copyCode('c125820')">Copy</button><pre id="c125820"><code>mkdir moviehub-fullstack
+cd moviehub-fullstack
+mkdir server
+cd server
+npm init -y
+npm install express mongoose cors
+npm install --save-dev nodemon</code></pre></div>
+<div class="explain"><b>What did each command do?</b><br><span class="pill">npm init -y</span> creates package.json. <span class="pill">express</span> creates the server. <span class="pill">mongoose</span> connects Node to MongoDB using models. <span class="pill">cors</span> allows the React development server to communicate with Express during local development. <span class="pill">nodemon</span> restarts the server when files change.</div>
+<h3>5.4 Configure package.json</h3><div class="code"><button class="copy" onclick="copyCode('c476224')">Copy</button><pre id="c476224"><code>&quot;type&quot;: &quot;module&quot;,
+&quot;scripts&quot;: {
+  &quot;start&quot;: &quot;node server.js&quot;,
+  &quot;dev&quot;: &quot;nodemon server.js&quot;,
+  &quot;seed&quot;: &quot;node seed.js&quot;
+}</code></pre></div>
+<div class="callout warn">Add these properties inside the existing <span class="pill">package.json</span>; do not create a second package.json.</div>
+<h3>5.5 Backend structure</h3><div class="code"><button class="copy" onclick="copyCode('c504359')">Copy</button><pre id="c504359"><code>server/
+├── models/
+│   └── Movie.js
+├── routes/
+│   └── movieRoutes.js
+├── moviehub_movies_data.js
+├── seed.js
+├── server.js
+└── package.json</code></pre></div>
+<h3>5.6 Create the Movie model</h3><div class="code"><button class="copy" onclick="copyCode('c451213')">Copy</button><pre id="c451213"><code>import mongoose from &quot;mongoose&quot;;
+
+const movieSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  genre: { type: String, required: true },
+  releaseYear: { type: Number, required: true },
+  rating: { type: String, required: true },
+  duration: { type: String, required: true },
+  director: { type: String, required: true },
+  cast: { type: String, required: true },
+  description: { type: String, required: true },
+  bannerUrl: { type: String, required: true },
+  trailer: { type: String, required: true }
+});
+
+const Movie = mongoose.model(&quot;Movie&quot;, movieSchema);
+
+export default Movie;</code></pre></div>
+<div class="explain"><b>Line by line:</b><br><span class="pill">new mongoose.Schema({...})</span> describes the shape of a movie. <span class="pill">type: String</span> means the field should contain text. <span class="pill">type: Number</span> means a number. <span class="pill">required: true</span> says the field must be supplied. <span class="pill">mongoose.model("Movie", movieSchema)</span> creates a model that Mongoose uses to work with the MongoDB collection.</div>
+<h3>5.7 Build the Express server</h3><div class="code"><button class="copy" onclick="copyCode('c685751')">Copy</button><pre id="c685751"><code>import express from &quot;express&quot;;
+import cors from &quot;cors&quot;;
+import mongoose from &quot;mongoose&quot;;
+import movieRoutes from &quot;./routes/movieRoutes.js&quot;;
+
+const app = express();
+const PORT = 5000;
+const MONGO_URI = &quot;mongodb://127.0.0.1:27017/moviehub&quot;;
+
+app.use(cors());
+app.use(express.json());
+
+app.get(&quot;/&quot;, (req, res) =&gt; {
+  res.json({ message: &quot;MovieHub API is running&quot; });
+});
+
+app.use(&quot;/api/movies&quot;, movieRoutes);
+
+mongoose
+  .connect(MONGO_URI)
+  .then(() =&gt; {
+    console.log(&quot;MongoDB connected&quot;);
+    app.listen(PORT, () =&gt; {
+      console.log(`Server running at http://localhost:${PORT}`);
+    });
+  })
+  .catch((error) =&gt; {
+    console.error(&quot;MongoDB connection failed:&quot;, error.message);
+  });</code></pre></div>
+<div class="explain"><b>Important lines:</b><br><span class="pill">express()</span> creates the application. <span class="pill">app.use(cors())</span> enables cross-origin requests. <span class="pill">app.use(express.json())</span> tells Express to understand JSON request bodies. <span class="pill">mongoose.connect()</span> connects to MongoDB. <span class="pill">app.listen()</span> starts the web server.</div>
+</section>
+
+<section class="section" id="api"><span class="chapter">Part 6</span><h2>6. Part C — Build the REST API</h2>
+<p>An API is a set of URLs that another program can call. We will use HTTP methods to express the action.</p>
+<table class="table"><tr><th>Method</th><th>URL</th><th>Purpose</th></tr><tr><td>GET</td><td>/api/movies</td><td>Read all movies</td></tr><tr><td>GET</td><td>/api/movies/:id</td><td>Read one movie</td></tr><tr><td>POST</td><td>/api/movies</td><td>Create a movie</td></tr><tr><td>PUT</td><td>/api/movies/:id</td><td>Update a movie</td></tr><tr><td>DELETE</td><td>/api/movies/:id</td><td>Delete a movie</td></tr></table>
+<h3>6.1 Create the routes</h3><div class="code"><button class="copy" onclick="copyCode('c863458')">Copy</button><pre id="c863458"><code>import express from &quot;express&quot;;
+import Movie from &quot;../models/Movie.js&quot;;
+
+const router = express.Router();
+
+// GET /api/movies
+router.get(&quot;/&quot;, async (req, res) =&gt; {
+  try {
+    const movies = await Movie.find().sort({ releaseYear: -1 });
+    res.json(movies);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// GET /api/movies/:id
+router.get(&quot;/:id&quot;, async (req, res) =&gt; {
+  try {
+    const movie = await Movie.findById(req.params.id);
+    if (!movie) return res.status(404).json({ message: &quot;Movie not found&quot; });
+    res.json(movie);
+  } catch (error) {
+    res.status(400).json({ message: &quot;Invalid movie id&quot; });
+  }
+});
+
+// POST /api/movies
+router.post(&quot;/&quot;, async (req, res) =&gt; {
+  try {
+    const movie = await Movie.create(req.body);
+    res.status(201).json(movie);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// PUT /api/movies/:id
+router.put(&quot;/:id&quot;, async (req, res) =&gt; {
+  try {
+    const movie = await Movie.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+    if (!movie) return res.status(404).json({ message: &quot;Movie not found&quot; });
+    res.json(movie);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// DELETE /api/movies/:id
+router.delete(&quot;/:id&quot;, async (req, res) =&gt; {
+  try {
+    const movie = await Movie.findByIdAndDelete(req.params.id);
+    if (!movie) return res.status(404).json({ message: &quot;Movie not found&quot; });
+    res.json({ message: &quot;Movie deleted successfully&quot; });
+  } catch (error) {
+    res.status(400).json({ message: &quot;Invalid movie id&quot; });
+  }
+});
+
+export default router;</code></pre></div>
+<div class="explain"><b>Understand <span class="pill">req</span> and <span class="pill">res</span>:</b> <span class="pill">req</span> contains information sent by the client, such as URL parameters and JSON body. <span class="pill">res</span> is how the server sends a response back. <span class="pill">async/await</span> is used because database operations take time.</div>
+<h3>6.2 Start the backend</h3><div class="code"><button class="copy" onclick="copyCode('c300229')">Copy</button><pre id="c300229"><code>cd server
+npm run dev</code></pre></div>
+<p>Open <a href="http://localhost:5000" target="_blank">http://localhost:5000</a>. You should receive:</p><div class="code"><button class="copy" onclick="copyCode('c880679')">Copy</button><pre id="c880679"><code>{
+  &quot;message&quot;: &quot;MovieHub API is running&quot;
+}</code></pre></div>
+<div class="callout good"><b>Test the API before building React.</b> Open <span class="pill">http://localhost:5000/api/movies</span>. If you see JSON movie records, the backend and database connection are working.</div>
+</section>
+
+<section class="section" id="seed"><span class="chapter">Part 7</span><h2>7. Part D — Insert the supplied 30 movies</h2>
+<p>Place the supplied <span class="pill">moviehub_movies_data.js</span> file in the server folder. Then create <span class="pill">seed.js</span>:</p><div class="code"><button class="copy" onclick="copyCode('c483023')">Copy</button><pre id="c483023"><code>import mongoose from &quot;mongoose&quot;;
+import Movie from &quot;./models/Movie.js&quot;;
+import movies_data from &quot;./moviehub_movies_data.js&quot;;
+
+const MONGO_URI = &quot;mongodb://127.0.0.1:27017/moviehub&quot;;
+
+async function seedMovies() {
+  try {
+    await mongoose.connect(MONGO_URI);
+    console.log(&quot;MongoDB connected&quot;);
+
+    await Movie.deleteMany({});
+    console.log(&quot;Old movie records removed&quot;);
+
+    // The source data has a numeric id. MongoDB/Mongoose will create its own _id.
+    const movies = movies_data.map(({ id, ...movie }) =&gt; movie);
+
+    await Movie.insertMany(movies);
+    console.log(`${movies.length} movies inserted successfully`);
+  } catch (error) {
+    console.error(&quot;Seed failed:&quot;, error.message);
+  } finally {
+    await mongoose.disconnect();
+  }
+}
+
+seedMovies();</code></pre></div>
+<h3>Run the seed</h3><div class="code"><button class="copy" onclick="copyCode('c345432')">Copy</button><pre id="c345432"><code>cd server
+npm run seed</code></pre></div>
+<p>Expected result:</p><div class="code"><button class="copy" onclick="copyCode('c183650')">Copy</button><pre id="c183650"><code>MongoDB connected
+Old movie records removed
+30 movies inserted successfully</code></pre></div>
+<h3>Verify in mongosh</h3><div class="code"><button class="copy" onclick="copyCode('c59246')">Copy</button><pre id="c59246"><code>mongosh
+use moviehub
+show collections
+db.movies.countDocuments()
+db.movies.findOne({ name: &quot;Dangal&quot; })</code></pre></div>
+<div class="callout warn"><b>Important:</b> <span class="pill">deleteMany({})</span> removes all existing movies before re-inserting the dataset. This is convenient for a learning project but should not be used casually against production data.</div>
+</section>
+
+<section class="section" id="react"><span class="chapter">Part 8</span><h2>8. Part E — Build the React frontend</h2>
+<h3>8.1 Create the Vite React application</h3><div class="code"><button class="copy" onclick="copyCode('c63217')">Copy</button><pre id="c63217"><code>cd ..
+npm create vite@latest client -- --template react
+cd client
+npm install
+npm run dev</code></pre></div>
+<p>Vite normally gives the React app a development URL such as <span class="pill">http://localhost:5173</span>.</p>
+<h3>8.2 Understand React before coding</h3><div class="grid"><div class="card"><h3>Component</h3><p>A reusable piece of UI. Example: MovieCard.</p></div><div class="card"><h3>State</h3><p>Data that can change while the application is running. Example: search text.</p></div><div class="card"><h3>Props</h3><p>Data passed from a parent component to a child component.</p></div><div class="card"><h3>useEffect</h3><p>Runs side effects. Here it loads movie data when the app starts.</p></div></div>
+<h3>8.3 Create the frontend structure</h3><div class="code"><button class="copy" onclick="copyCode('c289152')">Copy</button><pre id="c289152"><code>client/src/
+├── components/
+│   ├── MovieCard.jsx
+│   └── MovieForm.jsx
+├── App.jsx
+├── App.css
+├── index.css
+└── main.jsx</code></pre></div>
+<h3>8.4 App.jsx — connect React to Express</h3><div class="code"><button class="copy" onclick="copyCode('c88470')">Copy</button><pre id="c88470"><code>import { useEffect, useState } from &quot;react&quot;;
+import MovieCard from &quot;./components/MovieCard&quot;;
+import MovieForm from &quot;./components/MovieForm&quot;;
+import &quot;./App.css&quot;;
+
+const API_URL = &quot;http://localhost:5000/api/movies&quot;;
+
+function App() {
+  const [movies, setMovies] = useState([]);
+  const [search, setSearch] = useState(&quot;&quot;);
+  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+  const [editingMovie, setEditingMovie] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(&quot;&quot;);
+
+  async function loadMovies() {
+    try {
+      setLoading(true);
+      const response = await fetch(API_URL);
+      if (!response.ok) throw new Error(&quot;Could not load movies&quot;);
+      const data = await response.json();
+      setMovies(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() =&gt; {
+    loadMovies();
+  }, []);
+
+  const filteredMovies = movies.filter((movie) =&gt;
+    movie.name.toLowerCase().includes(search.toLowerCase()) ||
+    movie.genre.toLowerCase().includes(search.toLowerCase()) ||
+    movie.director.toLowerCase().includes(search.toLowerCase())
+  );
+
+  async function deleteMovie(id) {
+    const ok = window.confirm(&quot;Delete this movie?&quot;);
+    if (!ok) return;
+
+    const response = await fetch(`${API_URL}/${id}`, { method: &quot;DELETE&quot; });
+    if (response.ok) {
+      setSelectedMovie(null);
+      loadMovies();
+    }
+  }
+
+  function startEdit(movie) {
+    setEditingMovie(movie);
+    setShowForm(true);
+    setSelectedMovie(null);
+  }
+
+  return (
+    &lt;div className=&quot;app&quot;&gt;
+      &lt;header className=&quot;navbar&quot;&gt;
+        &lt;h1&gt;MovieHub&lt;/h1&gt;
+        &lt;div className=&quot;nav-actions&quot;&gt;
+          &lt;input
+            value={search}
+            onChange={(e) =&gt; setSearch(e.target.value)}
+            placeholder=&quot;Search movies...&quot;
+          /&gt;
+          &lt;button onClick={() =&gt; { setEditingMovie(null); setShowForm(true); }}&gt;
+            + Add Movie
+          &lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/header&gt;
+
+      &lt;main&gt;
+        &lt;section className=&quot;hero&quot;&gt;
+          &lt;div&gt;
+            &lt;p className=&quot;eyebrow&quot;&gt;REACT + EXPRESS + MONGODB&lt;/p&gt;
+            &lt;h2&gt;Unlimited movies, built from scratch.&lt;/h2&gt;
+            &lt;p&gt;MovieHub reads movie data from MongoDB through an Express API.&lt;/p&gt;
+          &lt;/div&gt;
+        &lt;/section&gt;
+
+        {error &amp;&amp; &lt;p className=&quot;error&quot;&gt;{error}&lt;/p&gt;}
+        {loading ? &lt;p className=&quot;status&quot;&gt;Loading movies...&lt;/p&gt; : null}
+
+        &lt;section className=&quot;movie-grid&quot;&gt;
+          {filteredMovies.map((movie) =&gt; (
+            &lt;MovieCard
+              key={movie._id}
+              movie={movie}
+              onClick={() =&gt; setSelectedMovie(movie)}
+            /&gt;
+          ))}
+        &lt;/section&gt;
+      &lt;/main&gt;
+
+      {selectedMovie &amp;&amp; (
+        &lt;div className=&quot;modal-backdrop&quot; onClick={() =&gt; setSelectedMovie(null)}&gt;
+          &lt;div className=&quot;modal&quot; onClick={(e) =&gt; e.stopPropagation()}&gt;
+            &lt;img src={selectedMovie.bannerUrl} alt={selectedMovie.name} /&gt;
+            &lt;h2&gt;{selectedMovie.name}&lt;/h2&gt;
+            &lt;p&gt;{selectedMovie.description}&lt;/p&gt;
+            &lt;p&gt;&lt;b&gt;Genre:&lt;/b&gt; {selectedMovie.genre}&lt;/p&gt;
+            &lt;p&gt;&lt;b&gt;Director:&lt;/b&gt; {selectedMovie.director}&lt;/p&gt;
+            &lt;p&gt;&lt;b&gt;Cast:&lt;/b&gt; {selectedMovie.cast}&lt;/p&gt;
+            &lt;div className=&quot;modal-actions&quot;&gt;
+              &lt;button onClick={() =&gt; startEdit(selectedMovie)}&gt;Edit&lt;/button&gt;
+              &lt;button className=&quot;danger&quot; onClick={() =&gt; deleteMovie(selectedMovie._id)}&gt;Delete&lt;/button&gt;
+              &lt;button onClick={() =&gt; setSelectedMovie(null)}&gt;Close&lt;/button&gt;
+            &lt;/div&gt;
+            &lt;iframe
+              title={`${selectedMovie.name} trailer`}
+              src={selectedMovie.trailer}
+              allowFullScreen
+            /&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      )}
+
+      {showForm &amp;&amp; (
+        &lt;MovieForm
+          movie={editingMovie}
+          onClose={() =&gt; setShowForm(false)}
+          onSaved={() =&gt; { setShowForm(false); loadMovies(); }}
+        /&gt;
+      )}
+    &lt;/div&gt;
+  );
+}
+
+export default App;</code></pre></div>
+<div class="explain"><b>Understand the most important part:</b><br><span class="pill">fetch(API_URL)</span> sends an HTTP request to Express. <span class="pill">response.json()</span> converts the JSON response into JavaScript data. <span class="pill">setMovies(data)</span> puts that data into React state. React then re-renders the movie cards.</div>
+<h3>8.5 MovieCard component</h3><div class="code"><button class="copy" onclick="copyCode('c477266')">Copy</button><pre id="c477266"><code>function MovieCard({ movie, onClick }) {
+  return (
+    &lt;article className=&quot;movie-card&quot; onClick={onClick}&gt;
+      &lt;img src={movie.bannerUrl} alt={movie.name} /&gt;
+      &lt;div className=&quot;movie-info&quot;&gt;
+        &lt;h3&gt;{movie.name}&lt;/h3&gt;
+        &lt;p&gt;{movie.releaseYear} • {movie.rating} • {movie.duration}&lt;/p&gt;
+        &lt;p&gt;{movie.genre}&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/article&gt;
+  );
+}
+
+export default MovieCard;</code></pre></div>
+<div class="explain"><b>Why use props?</b><br>App has the complete movies array. Each MovieCard receives one movie through <span class="pill">movie</span>. This keeps the card reusable.</div>
+<h3>8.6 Add the CRUD form</h3><div class="code"><button class="copy" onclick="copyCode('c720269')">Copy</button><pre id="c720269"><code>import { useEffect, useState } from &quot;react&quot;;
+
+const API_URL = &quot;http://localhost:5000/api/movies&quot;;
+
+const emptyMovie = {
+  name: &quot;&quot;,
+  genre: &quot;&quot;,
+  releaseYear: &quot;&quot;,
+  rating: &quot;&quot;,
+  duration: &quot;&quot;,
+  director: &quot;&quot;,
+  cast: &quot;&quot;,
+  description: &quot;&quot;,
+  bannerUrl: &quot;&quot;,
+  trailer: &quot;&quot;
+};
+
+function MovieForm({ movie, onClose, onSaved }) {
+  const [form, setForm] = useState(emptyMovie);
+
+  useEffect(() =&gt; {
+    if (movie) {
+      setForm({ ...movie });
+    } else {
+      setForm(emptyMovie);
+    }
+  }, [movie]);
+
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setForm((oldForm) =&gt; ({ ...oldForm, [name]: value }));
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+
+    const isEditing = Boolean(movie);
+    const url = isEditing ? `${API_URL}/${movie._id}` : API_URL;
+    const method = isEditing ? &quot;PUT&quot; : &quot;POST&quot;;
+
+    const response = await fetch(url, {
+      method,
+      headers: { &quot;Content-Type&quot;: &quot;application/json&quot; },
+      body: JSON.stringify({
+        ...form,
+        releaseYear: Number(form.releaseYear)
+      })
+    });
+
+    if (response.ok) {
+      onSaved();
+    } else {
+      const data = await response.json();
+      alert(data.message || &quot;Could not save movie&quot;);
+    }
+  }
+
+  return (
+    &lt;div className=&quot;modal-backdrop&quot;&gt;
+      &lt;form className=&quot;form-modal&quot; onSubmit={handleSubmit}&gt;
+        &lt;h2&gt;{movie ? &quot;Edit Movie&quot; : &quot;Add Movie&quot;}&lt;/h2&gt;
+
+        {Object.keys(emptyMovie).map((field) =&gt; (
+          &lt;input
+            key={field}
+            name={field}
+            value={form[field]}
+            onChange={handleChange}
+            placeholder={field}
+            required
+          /&gt;
+        ))}
+
+        &lt;textarea
+          name=&quot;description&quot;
+          value={form.description}
+          onChange={handleChange}
+          placeholder=&quot;description&quot;
+          required
+        /&gt;
+
+        &lt;div className=&quot;modal-actions&quot;&gt;
+          &lt;button type=&quot;submit&quot;&gt;Save&lt;/button&gt;
+          &lt;button type=&quot;button&quot; onClick={onClose}&gt;Cancel&lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/form&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default MovieForm;</code></pre></div>
+<h3>8.7 Add styling</h3><div class="code"><button class="copy" onclick="copyCode('c33139')">Copy</button><pre id="c33139"><code>* { box-sizing: border-box; }
+body { margin: 0; font-family: Arial, sans-serif; background: #080808; color: white; }
+button, input, textarea { font: inherit; }
+.app { min-height: 100vh; }
+.navbar { position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; gap: 20px; align-items: center; padding: 16px 5%; background: rgba(8,8,8,.96); }
+.navbar h1 { color: #e50914; margin: 0; }
+.nav-actions { display: flex; gap: 10px; }
+.nav-actions input { width: 260px; padding: 10px; border-radius: 6px; border: 1px solid #444; background: #181818; color: white; }
+button { border: 0; border-radius: 6px; padding: 10px 15px; cursor: pointer; background: #e50914; color: white; }
+.hero { padding: 90px 6%; min-height: 360px; display: flex; align-items: end; background: linear-gradient(90deg, #080808 0%, #080808cc 40%, transparent), linear-gradient(0deg, #080808, transparent), url(&quot;https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcQovCe0H45fWwAtV31ajOdXRPTxSsMQgPIQ3lcZX_mAW0jXV3kH&quot;) center/cover; }
+.hero h2 { font-size: clamp(34px, 5vw, 64px); max-width: 700px; margin: 5px 0; }
+.eyebrow { color: #e50914; font-weight: 800; letter-spacing: 2px; }
+.movie-grid { padding: 30px 5%; display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 20px; }
+.movie-card { background: #151515; border-radius: 10px; overflow: hidden; cursor: pointer; transition: transform .2s; }
+.movie-card:hover { transform: scale(1.03); }
+.movie-card img { width: 100%; height: 270px; object-fit: cover; display: block; }
+.movie-info { padding: 12px; }
+.movie-info h3 { margin: 0 0 6px; }
+.movie-info p { color: #b9b9b9; font-size: 13px; }
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.78); display: grid; place-items: center; padding: 20px; z-index: 30; }
+.modal, .form-modal { background: #171717; max-width: 760px; width: 100%; max-height: 90vh; overflow: auto; padding: 24px; border-radius: 14px; }
+.modal img { width: 100%; max-height: 300px; object-fit: cover; border-radius: 10px; }
+.modal iframe { width: 100%; height: 360px; border: 0; margin-top: 15px; }
+.form-modal { max-width: 650px; display: grid; gap: 12px; }
+.form-modal input, .form-modal textarea { width: 100%; padding: 11px; border-radius: 6px; border: 1px solid #444; background: #252525; color: white; }
+.form-modal textarea { min-height: 100px; }
+.modal-actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+.danger { background: #9d1119; }
+.error { margin: 20px 5%; background: #3a1111; padding: 12px; border-radius: 8px; }
+.status { padding: 20px 5%; color: #bbb; }
+@media(max-width:700px){.navbar{flex-direction:column;align-items:stretch}.nav-actions{flex-direction:column}.nav-actions input{width:100%}.movie-grid{grid-template-columns:repeat(2,1fr);padding:20px}.movie-card img{height:240px}}</code></pre></div>
+<h3>8.8 main.jsx</h3><div class="code"><button class="copy" onclick="copyCode('c192768')">Copy</button><pre id="c192768"><code>import React from &quot;react&quot;;
+import ReactDOM from &quot;react-dom/client&quot;;
+import App from &quot;./App.jsx&quot;;
+import &quot;./index.css&quot;;
+
+ReactDOM.createRoot(document.getElementById(&quot;root&quot;)).render(
+  &lt;React.StrictMode&gt;
+    &lt;App /&gt;
+  &lt;/React.StrictMode&gt;
+);</code></pre></div>
+<h3>8.9 index.css</h3><div class="code"><button class="copy" onclick="copyCode('c340362')">Copy</button><pre id="c340362"><code>body { margin: 0; }
+* { box-sizing: border-box; }</code></pre></div>
+</section>
+
+<section class="section" id="connect"><span class="chapter">Part 9</span><h2>9. Part F — Understand the complete data flow</h2>
+<div class="card dark"><pre style="white-space:pre-wrap">1. User opens React in browser.
+2. App.jsx runs.
+3. useEffect() calls loadMovies().
+4. fetch() sends GET http://localhost:5000/api/movies.
+5. Express receives the request.
+6. movieRoutes.js matches GET /.
+7. Movie.find() asks MongoDB for documents.
+8. MongoDB returns movie documents.
+9. Mongoose gives the result to Express.
+10. Express sends JSON to React.
+11. React stores JSON in movies state.
+12. movies.map() creates MovieCard components.
+13. Browser displays the Netflix-like grid.</pre></div>
+<div class="callout"><b>This is the most important mental model:</b> React does not directly talk to MongoDB. React talks to Express. Express talks to MongoDB.</div>
+</section>
+
+<section class="section" id="crud"><span class="chapter">Part 10</span><h2>10. Part G — Understand CRUD end-to-end</h2>
+<h3>Create</h3><p>Fill the Add Movie form. React sends a POST request. Express reads <span class="pill">req.body</span>. Mongoose creates a document. MongoDB stores it.</p><div class="code"><button class="copy" onclick="copyCode('c909927')">Copy</button><pre id="c909927"><code>fetch(&quot;http://localhost:5000/api/movies&quot;, {
+  method: &quot;POST&quot;,
+  headers: { &quot;Content-Type&quot;: &quot;application/json&quot; },
+  body: JSON.stringify(movie)
+})</code></pre></div>
+<h3>Read</h3><p>React sends GET and displays the returned documents.</p><div class="code"><button class="copy" onclick="copyCode('c640557')">Copy</button><pre id="c640557"><code>const response = await fetch(&quot;http://localhost:5000/api/movies&quot;);
+const data = await response.json();
+setMovies(data);</code></pre></div>
+<h3>Update</h3><p>React sends PUT to the selected movie's MongoDB <span class="pill">_id</span>.</p><div class="code"><button class="copy" onclick="copyCode('c502203')">Copy</button><pre id="c502203"><code>fetch(`http://localhost:5000/api/movies/${movie._id}`, {
+  method: &quot;PUT&quot;,
+  headers: { &quot;Content-Type&quot;: &quot;application/json&quot; },
+  body: JSON.stringify(updatedMovie)
+})</code></pre></div>
+<h3>Delete</h3><p>React sends DELETE. Express calls <span class="pill">findByIdAndDelete()</span>.</p><div class="code"><button class="copy" onclick="copyCode('c833171')">Copy</button><pre id="c833171"><code>fetch(`http://localhost:5000/api/movies/${movie._id}`, {
+  method: &quot;DELETE&quot;
+})</code></pre></div>
+<table class="table"><tr><th>CRUD</th><th>HTTP</th><th>Mongoose operation</th><th>Database effect</th></tr><tr><td>Create</td><td>POST</td><td>Movie.create()</td><td>Add document</td></tr><tr><td>Read</td><td>GET</td><td>Movie.find()</td><td>Read documents</td></tr><tr><td>Update</td><td>PUT</td><td>findByIdAndUpdate()</td><td>Change document</td></tr><tr><td>Delete</td><td>DELETE</td><td>findByIdAndDelete()</td><td>Remove document</td></tr></table>
+</section>
+
+<section class="section" id="practice"><span class="chapter">Part 11</span><h2>11. Part H — Improve the Netflix-like experience</h2>
+<div class="grid"><div class="card"><h3>Search</h3><p>Search by movie name, genre or director using React state and <span class="pill">filter()</span>.</p></div><div class="card"><h3>Details modal</h3><p>Click a card and display description, cast, director and trailer.</p></div><div class="card"><h3>Genre filter</h3><p>Add buttons such as All, Indian, Hollywood, Action and Drama.</p></div><div class="card"><h3>Sort</h3><p>Add newest, oldest and highest-rated sorting.</p></div></div>
+<h3>Why does search happen in React here?</h3><p>For a small dataset it is easy to load the movies once and filter them in the browser. Later, when the dataset becomes large, you can move search to Express and MongoDB using query parameters.</p>
+<div class="callout"><b>Next-level idea:</b> Build <span class="pill">GET /api/movies?search=inception</span> and let Express perform the search. Then React does not need to download every movie.</div>
+</section>
+
+<section class="section" id="debug"><span class="chapter">Part 12</span><h2>12. Debugging guide</h2>
+<table class="table"><tr><th>Problem</th><th>Likely reason</th><th>Check</th></tr><tr><td>ECONNREFUSED 27017</td><td>MongoDB server is not running.</td><td>Start mongod / MongoDB service.</td></tr><tr><td>Cannot GET /api/movies</td><td>Route not mounted or wrong URL.</td><td>Check <span class="pill">app.use("/api/movies", movieRoutes)</span>.</td></tr><tr><td>CORS error</td><td>Browser blocks cross-origin request.</td><td>Check <span class="pill">app.use(cors())</span>.</td></tr><tr><td>React shows empty list</td><td>API may be empty or request failed.</td><td>Open <span class="pill">http://localhost:5000/api/movies</span> directly.</td></tr><tr><td>MongoServerError</td><td>MongoDB connection/query problem.</td><td>Read the server terminal error carefully.</td></tr><tr><td>Image not visible</td><td>Remote image URL may be unavailable.</td><td>Test the banner URL in a browser.</td></tr><tr><td>POST gives 400</td><td>Required field missing or wrong data type.</td><td>Inspect request body and Mongoose validation message.</td></tr></table>
+<h3>Debug from the bottom upward</h3><ol><li>Is MongoDB running?</li><li>Does <span class="pill">db.movies.countDocuments()</span> return 30?</li><li>Does Express connect successfully?</li><li>Does <span class="pill">GET /api/movies</span> return JSON?</li><li>Does React reach the API?</li><li>Does React state contain the returned array?</li><li>Does <span class="pill">map()</span> render MovieCard?</li></ol>
+</section>
+
+<section class="section" id="commands"><span class="chapter">Part 13</span><h2>13. Commands you should understand</h2>
+<table class="table"><tr><th>Command</th><th>Meaning</th></tr><tr><td><span class="pill">npm init -y</span></td><td>Create a Node project.</td></tr><tr><td><span class="pill">npm install express</span></td><td>Install Express.</td></tr><tr><td><span class="pill">npm install mongoose</span></td><td>Install Mongoose.</td></tr><tr><td><span class="pill">npm run dev</span></td><td>Run backend with automatic restart.</td></tr><tr><td><span class="pill">npm run seed</span></td><td>Run the movie insertion script.</td></tr><tr><td><span class="pill">npm create vite@latest</span></td><td>Create the React project using Vite.</td></tr><tr><td><span class="pill">npm run dev</span></td><td>Run the React development server when inside client.</td></tr></table>
+</section>
+
+<section class="section" id="final"><span class="chapter">Part 14</span><h2>14. Final project structure</h2><div class="code"><button class="copy" onclick="copyCode('generated3')">Copy</button><pre id="generated3"><code>moviehub-fullstack/
+├── server/
+│   ├── models/
+│   │   └── Movie.js
+│   ├── routes/
+│   │   └── movieRoutes.js
+│   ├── moviehub_movies_data.js
+│   ├── seed.js
+│   ├── server.js
+│   └── package.json
+│
+└── client/
+    ├── src/
+    │   ├── components/
+    │   │   ├── MovieCard.jsx
+    │   │   └── MovieForm.jsx
+    │   ├── App.jsx
+    │   ├── App.css
+    │   ├── index.css
+    │   └── main.jsx
+    ├── package.json
+    └── vite.config.js</code></pre></div>
+<h3>Final checklist</h3><ul class="check"><li>MongoDB is running locally.</li><li><span class="pill">moviehub</span> database contains a <span class="pill">movies</span> collection.</li><li>The collection contains 30 supplied movies.</li><li>Express connects to MongoDB using Mongoose.</li><li><span class="pill">GET /api/movies</span> returns JSON.</li><li>React loads movies from Express rather than hardcoded data.</li><li>Movie cards display MongoDB data.</li><li>Search works.</li><li>Add movie works.</li><li>Edit movie works.</li><li>Delete movie works.</li><li>You can explain the complete request/response flow.</li></ul>
+<div class="card dark"><h3>The one diagram to remember</h3><pre style="white-space:pre-wrap">USER
+ ↓
+REACT
+ ↓ fetch()
+EXPRESS API
+ ↓ MONGOOSE
+MONGODB
+ ↓ document data
+EXPRESS
+ ↓ JSON
+REACT
+ ↓
+SCREEN</pre></div>
+<div class="callout good"><b>When this exercise is complete, you have built a real full-stack application:</b> React handles the interface, Express handles the API, Mongoose handles the MongoDB interaction, and MongoDB stores the application data.</div>
+</section>
+</div>
+<footer class="footer"><div class="wrap"><h3>MovieHub Full-Stack Practical</h3><p>React + Express.js + MongoDB • Built progressively from an empty folder • Beginner friendly</p><p class="small">The movie records and fields in this exercise are based on the supplied movie dataset.</p></div></footer>
+<script>function copyCode(id){const el=document.getElementById(id);navigator.clipboard.writeText(el.innerText).then(()=>{const b=el.parentElement.querySelector('.copy');const old=b.innerText;b.innerText='Copied!';setTimeout(()=>b.innerText=old,900)}).catch(()=>alert('Copy failed. Please copy manually.'))}</script></body></html>
