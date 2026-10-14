@@ -1382,7 +1382,7 @@ CSRF_COOKIE_SECURE = True</code></pre>
                 <h4 class="font-bold text-emerald-500"><i class="fa-solid fa-lock mr-1.5"></i>2. SQL Injection & XSS Protection</h4>
                 <p class="text-slate-600 dark:text-slate-300 mt-1">
                   • <strong>SQL Injection:</strong> Prevented automatically because Django's ORM parameterizes all queries.<br/>
-                  • <strong>XSS (Cross-Site Scripting):</strong> Django templates automatically escape HTML tags (`<script>` becomes harmless `&lt;script&gt;`).
+                  • <strong>XSS (Cross-Site Scripting):</strong> Django templates automatically escape HTML tags (<code class="font-mono">&lt;script&gt;</code> becomes harmless <code class="font-mono">&amp;lt;script&amp;gt;</code>).
                 </p>
               </div>
             </div>
@@ -1513,8 +1513,8 @@ CSRF_COOKIE_SECURE = True</code></pre>
       });
       localStorage.setItem('djangoStudyProgress', JSON.stringify(savedState));
       const pct = Math.round((completed / total) * 100);
-      document.getElementById('progressCountText').textContent = completed + '/' + total;
-      document.getElementById('progressBarFill').style.width = pct + '%';
+      document.getElementById('progressCountText').textContent = `${completed}/${total}`;
+      document.getElementById('progressBarFill').style.width = `${pct}%`;
     }
 
     function toggleTopicProgress() {
@@ -1975,13 +1975,37 @@ CSRF_COOKIE_SECURE = True</code></pre>
       document.getElementById('quizScoreBadge').textContent = `Score: ${score} / ${quizQuestions.length}`;
     }
 
+    // Explicitly expose all handlers on window so inline onclick attributes always resolve
+    Object.assign(window, {
+      toggleTheme,
+      toggleMobileSidebar,
+      openCheatSheetModal,
+      closeCheatSheetModal,
+      copyCode,
+      toggleTopicProgress,
+      resetProgress,
+      handleSearch,
+      clearSearch,
+      setPipelineStep,
+      stepPipeline,
+      autoPlayPipeline,
+      inspectFile,
+      runOrmAction,
+      resetOrmTable,
+      applyDtlFilter,
+      simSession,
+      sendPostmanRequest,
+      updatePostmanBodyVisibility,
+      answerQuiz
+    });
+
     // Initialize everything on load
-    window.onload = function () {
+    window.addEventListener('DOMContentLoaded', function () {
       loadProgress();
       renderOrmTable();
       sendPostmanRequest();
       renderQuiz();
-    };
+    });
   </script>
 </body>
 </html>
