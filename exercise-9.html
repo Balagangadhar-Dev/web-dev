@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TaskFlow — React State, REST & GraphQL Complete Practical</title>
+<style>
+:root{--bg:#0b1020;--panel:#121a2e;--panel2:#17233b;--ink:#eaf0ff;--muted:#aab8d2;--line:#2b3956;--cyan:#65e4df;--purple:#b8a4ff;--yellow:#ffd47a;--pink:#ff9fc5;--green:#9be7b0;--red:#ff9a9a;--code:#080d18;--shadow:0 16px 40px #0003}*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:90px}body{margin:0;background:radial-gradient(ellipse at 10% 0%,#202b51 0,transparent 38%),var(--bg);color:var(--ink);font:16px/1.72 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--cyan)}.top{position:sticky;top:0;z-index:20;background:#0b1020eF;backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}.topin{max-width:1180px;margin:auto;padding:12px 22px;display:flex;justify-content:space-between;align-items:center;gap:18px}.brand{font-weight:850;letter-spacing:.3px}.brand span{color:var(--cyan)}.top a{text-decoration:none;font-size:.88rem}.layout{max-width:1180px;margin:auto;padding:26px 22px 80px;display:grid;grid-template-columns:250px minmax(0,1fr);gap:26px}.side{align-self:start;position:sticky;top:76px;max-height:calc(100vh - 94px);overflow:auto;padding:18px;background:#11192bd9;border:1px solid var(--line);border-radius:18px}.side h3{font-size:.78rem;text-transform:uppercase;letter-spacing:1.4px;color:var(--muted);margin:0 0 12px}.side a{display:block;text-decoration:none;color:#c8d4eb;padding:6px 9px;border-radius:8px;font-size:.88rem}.side a:hover{background:#263452;color:white}.content{min-width:0}.hero{padding:38px;border:1px solid #35466a;border-radius:28px;background:linear-gradient(135deg,#192a4b,#221e43 58%,#102f3b);box-shadow:var(--shadow);position:relative;overflow:hidden}.hero:after{content:"TF";position:absolute;right:22px;bottom:-58px;font-size:210px;font-weight:900;color:#fff08;opacity:.06;pointer-events:none}.eyebrow{display:inline-flex;gap:8px;align-items:center;border:1px solid #55708f;border-radius:99px;padding:4px 11px;color:var(--cyan);font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:1px}.hero h1{font-size:clamp(2.2rem,5vw,3.6rem);line-height:1.07;letter-spacing:-1.5px;margin:18px 0}.hero p{max-width:780px;color:#d1dcf3;font-size:1.08rem}.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}.chip{background:#ffffff12;border:1px solid #ffffff26;border-radius:9px;padding:6px 10px;font-size:.82rem}.hero-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:28px}.hero-stat{background:#0810205e;border:1px solid #ffffff20;border-radius:14px;padding:14px}.hero-stat strong{display:block;font-size:1.15rem;color:var(--cyan)}.hero-stat small{color:#c1cee5}.section{margin-top:30px;background:linear-gradient(180deg,#121a2c,#101727);border:1px solid var(--line);border-radius:22px;padding:28px;box-shadow:var(--shadow)}.section-head{display:flex;gap:15px;align-items:flex-start;margin-bottom:22px}.num{flex:0 0 43px;height:43px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(135deg,#5be0d6,#9b8aff);color:#10172b;font-weight:900;font-size:1.1rem}.section h2{font-size:1.65rem;line-height:1.25;margin:0 0 5px;letter-spacing:-.4px}.section-head p{margin:0;color:var(--muted)}h3{margin:25px 0 8px;font-size:1.15rem;color:#dce7ff}h4{margin:17px 0 6px;color:var(--cyan)}p{margin:9px 0 13px}ul,ol{padding-left:24px}li{margin:5px 0}.muted{color:var(--muted)}.grid2,.grid3{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:16px 0}.grid3{grid-template-columns:repeat(3,minmax(0,1fr))}.card{padding:17px;border:1px solid var(--line);background:#18233a;border-radius:15px}.card h3,.card h4{margin-top:0}.card p:last-child{margin-bottom:0}.card .icon{font-size:1.5rem}.callout{padding:15px 17px;border-radius:13px;margin:17px 0;border-left:4px solid var(--cyan);background:#102b35}.callout.warn{border-color:var(--yellow);background:#342b19}.callout.danger{border-color:var(--pink);background:#351e2c}.callout.good{border-color:var(--green);background:#173126}.callout strong{display:block;margin-bottom:3px}.tablewrap{overflow:auto;margin:14px 0}table{width:100%;border-collapse:collapse;min-width:520px;font-size:.93rem}th,td{padding:11px 12px;border:1px solid var(--line);text-align:left;vertical-align:top}th{background:#202e49;color:var(--cyan)}tr:nth-child(even) td{background:#ffffff04}.flow{display:flex;align-items:stretch;gap:9px;flex-wrap:wrap;margin:20px 0}.flow .node{flex:1;min-width:120px;text-align:center;background:#1b2943;border:1px solid #405578;border-radius:13px;padding:13px}.flow .node strong{display:block;color:var(--cyan)}.flow .arrow{align-self:center;color:var(--purple);font-size:1.5rem;font-weight:900}.codebox{margin:15px 0;border:1px solid #33435e;border-radius:14px;overflow:hidden;background:var(--code)}.codehead{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 13px;background:#17233a;border-bottom:1px solid #2b3b55;color:#b9c9e6;font-size:.8rem}.codehead .lang{font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--cyan)}button.copy{border:1px solid #526683;background:#253653;color:#eaf0ff;border-radius:7px;padding:5px 10px;cursor:pointer;font-weight:700}button.copy:hover{background:#365074}pre{margin:0;padding:17px;overflow:auto;color:#e5edff;font:13.5px/1.65 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;tab-size:2}code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:#ffffff12;border-radius:5px;padding:1px 5px;font-size:.92em}.codebox code{background:none;padding:0}.explain{display:grid;grid-template-columns:150px 1fr;gap:12px;border-bottom:1px solid #29364e;padding:10px 0}.explain:last-child{border:0}.explain code{color:var(--yellow);overflow-wrap:anywhere;align-self:start}.badge{display:inline-block;padding:3px 8px;border-radius:99px;background:#263854;color:var(--cyan);font-size:.75rem;font-weight:800}.steps{counter-reset:step;list-style:none;padding:0}.steps li{counter-increment:step;position:relative;padding:0 0 18px 48px;margin:0}.steps li:before{content:counter(step);position:absolute;left:0;top:0;width:32px;height:32px;display:grid;place-items:center;background:#243956;border:1px solid #526d91;border-radius:10px;color:var(--cyan);font-weight:900}.checklist label{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line)}.checklist input{margin-top:7px;accent-color:#65e4df}.small{font-size:.9rem}.footer{text-align:center;color:var(--muted);padding:30px 10px}.pillrow{display:flex;gap:8px;flex-wrap:wrap}.pillrow span{border:1px solid var(--line);padding:4px 9px;border-radius:8px;color:#cbd7ed;font-size:.82rem}.mini-title{font-size:.78rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);font-weight:850}.progress{height:5px;background:#28334b}.progress div{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--purple));transition:width .2s}.end-banner{padding:24px;border-radius:18px;background:linear-gradient(120deg,#153c3e,#29224b);border:1px solid #42656f}.end-banner h3{margin-top:0;color:var(--cyan)}@media(max-width:900px){.layout{grid-template-columns:1fr}.side{position:relative;top:auto;max-height:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px}.side h3{grid-column:1/-1}.hero-grid{grid-template-columns:1fr}.grid3{grid-template-columns:1fr}}@media(max-width:600px){.layout{padding:14px 12px 45px}.topin{padding:10px 14px}.hero,.section{padding:20px;border-radius:18px}.section h2{font-size:1.4rem}.grid2{grid-template-columns:1fr}.side{grid-template-columns:1fr}.explain{grid-template-columns:1fr;gap:3px}.flow .arrow{transform:rotate(90deg);width:100%;text-align:center}.hero:after{font-size:120px}.top .toplink{display:none}}
+</style></head><body>
+<div class="top"><div class="topin"><div class="brand"><a href="#roadmap">Roadmap</a>　·　<a href="#checklist">Completion checklist</a></div></div><div class="progress"><div id="readProgress"></div></div></div>
+<div class="layout"><aside class="side"><h3>Exercise navigator</h3><a href="#start">Start here</a><a href="#setup">1 · Project setup</a><a href="#hierarchy">2 · Component hierarchy</a><a href="#state">3 · useState</a><a href="#events">4 · Event handling</a><a href="#props">5 · Props vs state</a><a href="#lift">6 · Lifting state up</a><a href="#effects">7 · useEffect</a><a href="#async">8 · Async initialization</a><a href="#express">9 · Express & REST</a><a href="#crud">10 · REST CRUD routes</a><a href="#graphql">11 · GraphQL concepts</a><a href="#schema">12 · Schema & fields</a><a href="#queries">13 · Queries & variables</a><a href="#mutations">14 · Mutations</a><a href="#validation">15 · Validation & errors</a><a href="#integration">16 · React integration</a><a href="#debug">17 · Debugging</a><a href="#checklist">Final checklist</a></aside>
+<main class="content">
+<header class="hero" id="start"><span class="eyebrow">Complete beginner practical · Full stack</span><h1>React State, REST APIs<br> & GraphQL</h1><p>Build <strong>TaskFlow</strong>, a task-management application, from an empty folder. Learn how React remembers data, how components communicate, how Express exposes REST endpoints, and how GraphQL lets a client request exactly the fields it needs.</p><div class="chips"><span class="chip">⚛️ React + Vite</span><span class="chip">🟩 Node.js + Express</span><span class="chip">🍃 MongoDB + Mongoose</span><span class="chip">◇ GraphQL</span><span class="chip">🧪 Testable steps</span></div><div class="hero-grid"><div class="hero-stat"><strong>Build one app</strong><small>Each section extends TaskFlow</small></div><div class="hero-stat"><strong>REST + GraphQL</strong><small>Compare two API styles</small></div><div class="hero-stat"><strong>Copy-ready code</strong><small>Code blocks include copy buttons</small></div></div></header>
+<section class="section" id="roadmap"><div class="section-head"><div class="num">↗</div><div><h2>Learning roadmap</h2><p>Follow the order. Do not skip straight to the final integration.</p></div></div><div class="flow"><div class="node"><strong>React</strong><small>UI + state</small></div><div class="arrow">↔</div><div class="node"><strong>Express</strong><small>HTTP endpoints</small></div><div class="arrow">↔</div><div class="node"><strong>Data layer</strong><small>Mongoose + MongoDB</small></div></div><div class="grid3"><div class="card"><div class="icon">⚛️</div><h3>Frontend</h3><p>Buttons, forms, lists and modals. React state controls what appears on screen.</p></div><div class="card"><div class="icon">🔌</div><h3>Backend</h3><p>Express receives HTTP requests, validates input and sends JSON responses.</p></div><div class="card"><div class="icon">🗃️</div><h3>Database</h3><p>MongoDB stores tasks. Mongoose gives JavaScript models for reading and changing them.</p></div></div><div class="callout"><strong>Important learning rule</strong>First make a feature work with local React state. Then connect it to the REST API. Finally, learn how the same data can be accessed through GraphQL. This separates the concepts and makes debugging easier.</div><h3>What you will build</h3><ul><li>Display a list of tasks with title, status and priority.</li><li>Add a task, mark it complete, edit it and delete it.</li><li>Filter tasks and display counts.</li><li>Load data asynchronously from a backend.</li><li>Create REST CRUD routes in Express.</li><li>Create a GraphQL schema with queries and mutations.</li><li>Validate user input and return understandable errors.</li></ul></section>
+<section class="section" id="setup"><div class="section-head"><div class="num">01</div><div><h2>Set up the project from scratch</h2><p>Understand the tools before writing application code.</p></div></div><h3>1.1 What are Node.js, npm, React, Express and MongoDB?</h3><div class="tablewrap"><table><thead><tr><th>Tool</th><th>Plain-English meaning</th><th>Why we need it</th></tr></thead><tbody><tr><td>Node.js</td><td>Runs JavaScript outside a browser.</td><td>Runs the Express backend.</td></tr><tr><td>npm</td><td>Installs and manages JavaScript packages.</td><td>Installs Express, Mongoose and GraphQL.</td></tr><tr><td>React</td><td>A library for building user interfaces from components.</td><td>Builds the TaskFlow screen.</td></tr><tr><td>Express.js</td><td>A small web framework for Node.js.</td><td>Defines HTTP routes and API behavior.</td></tr><tr><td>MongoDB</td><td>A document database that stores JSON-like documents.</td><td>Stores tasks persistently.</td></tr><tr><td>Mongoose</td><td>A library that models and validates MongoDB documents.</td><td>Makes database code easier to structure.</td></tr><tr><td>GraphQL</td><td>A query language and runtime for APIs.</td><td>Lets a client request specific fields and perform mutations.</td></tr></tbody></table></div><h3>1.2 Check the tools</h3><div class="codebox"><div class="codehead"><span class="lang">Terminal</span><button class="copy">Copy</button></div><pre><code>node --version
+npm --version</code></pre></div><p><strong>Explanation:</strong> <code>node --version</code> prints the installed Node.js version. <code>npm --version</code> checks that npm is available. Install a current supported Node.js LTS release if either command is not found. Install and start MongoDB locally, or use a MongoDB Atlas connection string.</p><h3>1.3 Create the backend</h3><div class="codebox"><div class="codehead"><span class="lang">Terminal</span><button class="copy">Copy</button></div><pre><code>mkdir taskflow
+cd taskflow
+mkdir server
+cd server
+npm init -y
+npm install express mongoose cors dotenv graphql graphql-http
+npm install --save-dev nodemon</code></pre></div><div class="explain"><code>mkdir taskflow</code><div>Creates the main project folder. A folder keeps related files together.</div></div><div class="explain"><code>npm init -y</code><div>Creates <code>package.json</code>, which records the project's name, scripts and package dependencies. The <code>-y</code> option accepts default answers.</div></div><div class="explain"><code>express</code><div>Creates the HTTP server and routes.</div></div><div class="explain"><code>mongoose</code><div>Connects the application to MongoDB and provides schemas/models.</div></div><div class="explain"><code>cors</code><div>Allows a browser frontend on a different origin/port to call the backend when configured appropriately.</div></div><div class="explain"><code>dotenv</code><div>Loads configuration values from a local <code>.env</code> file.</div></div><div class="explain"><code>graphql graphql-http</code><div>Provides GraphQL schema execution and an HTTP adapter for Express.</div></div><div class="explain"><code>nodemon</code><div>Development helper that restarts Node when a backend file changes.</div></div><h3>1.4 Create the React frontend</h3><p>Open a second terminal. Keep the backend terminal available for later.</p><div class="codebox"><div class="codehead"><span class="lang">Terminal · from taskflow/</span><button class="copy">Copy</button></div><pre><code>cd ..
+npm create vite@latest client -- --template react
+cd client
+npm install
+npm run dev</code></pre></div><p>Vite creates a starter React project. It prints a local address, often <code>http://localhost:5173</code>. This is the frontend development server. The backend will use another port, <code>4000</code>.</p><div class="callout warn"><strong>Keep the terminals separate</strong>Run the frontend with <code>npm run dev</code> in <code>client</code>, and the backend with its own script in <code>server</code>. If a command says a folder does not exist, check the current directory with <code>pwd</code> (macOS/Linux) or <code>cd</code> (Windows).</div></section>
+<section class="section" id="hierarchy"><div class="section-head"><div class="num">02</div><div><h2>Component hierarchy & stateless/stateful components</h2><p>Break the interface into small pieces with clear responsibilities.</p></div></div><h3>2.1 What is a component?</h3><p>A React component is a JavaScript function that returns JSX describing a part of the screen. JSX looks like HTML, but it is written inside JavaScript and lets us combine markup with JavaScript expressions.</p><div class="codebox"><div class="codehead"><span class="lang">client/src/App.jsx</span><button class="copy">Copy</button></div><pre><code>function Welcome() {
+  return &lt;h1&gt;Welcome to TaskFlow&lt;/h1&gt;;
+}
+
+export default function App() {
+  return (
+    &lt;main&gt;
+      &lt;Welcome /&gt;
+      &lt;p&gt;Organize one task at a time.&lt;/p&gt;
+    &lt;/main&gt;
+  );
+}</code></pre></div><div class="explain"><code>function Welcome()</code><div>Declares a function component. Component names begin with a capital letter so React can distinguish them from built-in HTML tags.</div></div><div class="explain"><code>return (...)</code><div>Returns the JSX that React should render. Parentheses make multi-line JSX easier to read.</div></div><div class="explain"><code>&lt;Welcome /&gt;</code><div>Uses one component inside another. This is component composition.</div></div><div class="explain"><code>export default</code><div>Makes <code>App</code> the default export so the entry file can import it.</div></div><h3>2.2 Plan the hierarchy</h3><div class="flow"><div class="node"><strong>App</strong><small>owns shared task data</small></div><div class="arrow">↓</div><div class="node"><strong>TaskForm</strong><small>collects a new task</small></div><div class="node"><strong>TaskFilters</strong><small>chooses visible tasks</small></div><div class="node"><strong>TaskList</strong><small>renders task rows</small></div></div><div class="flow"><div class="node"><strong>TaskList</strong></div><div class="arrow">↓</div><div class="node"><strong>TaskItem</strong><small>one task, repeated</small></div></div><p>This is a component hierarchy: a tree showing which components render other components. A parent can pass information to a child through props. A child can request a parent action by calling a callback function that the parent passed down.</p><h3>2.3 Stateless vs stateful</h3><div class="grid2"><div class="card"><span class="badge">Stateless / presentational</span><h3>Displays what it receives</h3><p>Does not own the changing task data. Usually receives props and renders them.</p><div class="codebox"><div class="codehead"><span class="lang">JSX</span><button class="copy">Copy</button></div><pre><code>function TaskTitle({ title }) {
+  return &lt;h3&gt;{title}&lt;/h3&gt;;
+}</code></pre></div></div><div class="card"><span class="badge">Stateful</span><h3>Owns changing information</h3><p>Uses state because its information changes over time.</p><div class="codebox"><div class="codehead"><span class="lang">JSX</span><button class="copy">Copy</button></div><pre><code>import { useState } from "react";
+
+function Counter() {
+  const [count, setCount] = useState(0);
+  return (
+    &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+      Clicked {count} times
+    &lt;/button&gt;
+  );
+}</code></pre></div></div></div><p>These are design descriptions, not rigid categories. A component can receive props and also have its own state. The useful question is: <em>which component should own this piece of changing data?</em></p></section>
+<section class="section" id="state"><div class="section-head"><div class="num">03</div><div><h2>React useState — remembering information</h2><p>Build the mental model before using state in the full task app.</p></div></div><h3>3.1 Why ordinary variables are not enough</h3><p>A normal variable can change inside JavaScript, but changing it does not tell React to redraw the screen. React state is information React remembers between renders. When you update state with its setter, React schedules a new render using the updated value.</p><h3>3.2 useState syntax</h3><div class="codebox"><div class="codehead"><span class="lang">React</span><button class="copy">Copy</button></div><pre><code>const [count, setCount] = useState(0);</code></pre></div><div class="explain"><code>useState(0)</code><div>Calls the Hook and sets the initial value to <code>0</code>. A Hook is a React function that gives a component a capability such as state or an effect.</div></div><div class="explain"><code>count</code><div>The current state value for this render.</div></div><div class="explain"><code>setCount</code><div>The setter used to request a state update. Do not assign directly to <code>count</code>.</div></div><div class="explain"><code>[count, setCount]</code><div>Array destructuring takes the first and second items returned by <code>useState</code> and gives them useful names.</div></div><h3>3.3 Tiny working example</h3><div class="codebox"><div class="codehead"><span class="lang">client/src/Counter.jsx</span><button class="copy">Copy</button></div><pre><code>import { useState } from "react";
+
+export default function Counter() {
+  const [count, setCount] = useState(0);
+
+  function increase() {
+    setCount(previousCount =&gt; previousCount + 1);
+  }
+
+  return (
+    &lt;section&gt;
+      &lt;p&gt;You clicked {count} times.&lt;/p&gt;
+      &lt;button onClick={increase}&gt;Increase&lt;/button&gt;
+    &lt;/section&gt;
+  );
+}</code></pre></div><p><strong>Why use a function updater?</strong> <code>setCount(previousCount =&gt; previousCount + 1)</code> calculates the next value from the latest queued state. This is a safe pattern when the next state depends on the previous state.</p><h3>3.4 State with objects and arrays</h3><p>TaskFlow's tasks are an array. Treat state objects and arrays as immutable: create a new array/object instead of changing the existing one in place.</p><div class="codebox"><div class="codehead"><span class="lang">Correct state updates</span><button class="copy">Copy</button></div><pre><code>// Add an item: create a new array
+setTasks(previousTasks =&gt; [...previousTasks, newTask]);
+
+// Update one item: map creates a new array
+setTasks(previousTasks =&gt;
+  previousTasks.map(task =&gt;
+    task.id === targetId
+      ? { ...task, completed: !task.completed }
+      : task
+  )
+);
+
+// Delete one item: filter creates a new array
+setTasks(previousTasks =&gt;
+  previousTasks.filter(task =&gt; task.id !== targetId)
+);</code></pre></div><div class="callout danger"><strong>Avoid mutating state</strong>Do not use <code>tasks.push(newTask)</code> and then expect React to notice. It changes the existing array. Prefer <code>[...tasks, newTask]</code> and pass the new array to the setter.</div><h3>3.5 When should you use state?</h3><p>Use state for values that change and affect the interface: the task list, text typed into a form, selected filter, loading status, error message, or currently selected task. Do not use state for constants that never change.</p></section>
+<section class="section" id="events"><div class="section-head"><div class="num">04</div><div><h2>Event handling in React</h2><p>React responds to user actions such as clicks, typing and form submission.</p></div></div><h3>4.1 An event is something that happens</h3><p>A click, key press, input change or form submit is an event. React lets you provide a function that should run when an event occurs.</p><div class="codebox"><div class="codehead"><span class="lang">JSX</span><button class="copy">Copy</button></div><pre><code>function GreetingButton() {
+  function sayHello() {
+    alert("Hello from TaskFlow!");
+  }
+
+  return &lt;button onClick={sayHello}&gt;Say hello&lt;/button&gt;;
+}</code></pre></div><div class="explain"><code>onClick</code><div>React event prop for a click. React uses camelCase event names.</div></div><div class="explain"><code>onClick={sayHello}</code><div>Passes the function to React. React calls it when the button is clicked.</div></div><div class="explain"><code>onClick={sayHello()}</code><div>This calls the function immediately during rendering, which is usually not what you want for a click handler.</div></div><h3>4.2 Event object</h3><div class="codebox"><div class="codehead"><span class="lang">JSX</span><button class="copy">Copy</button></div><pre><code>function handleChange(event) {
+  console.log(event.target.value);
+}
+
+&lt;input onChange={handleChange} placeholder="Type a task" /&gt;</code></pre></div><p>The event object describes what happened. <code>event.target</code> is the input that triggered the event; <code>event.target.value</code> is its current text value.</p><h3>4.3 Controlled input</h3><p>A controlled input gets its displayed value from React state. The input's <code>value</code> is state, and <code>onChange</code> updates that state as the user types.</p><div class="codebox"><div class="codehead"><span class="lang">JSX</span><button class="copy">Copy</button></div><pre><code>import { useState } from "react";
+
+function NameInput() {
+  const [name, setName] = useState("");
+
+  return (
+    &lt;label&gt;
+      Task name
+      &lt;input
+        value={name}
+        onChange={event =&gt; setName(event.target.value)}
+      /&gt;
+      &lt;p&gt;Preview: {name || "Nothing typed yet"}&lt;/p&gt;
+    &lt;/label&gt;
+  );
+}</code></pre></div><h3>4.4 Form submission</h3><div class="codebox"><div class="codehead"><span class="lang">JSX</span><button class="copy">Copy</button></div><pre><code>function handleSubmit(event) {
+  event.preventDefault(); // stop the browser's full-page form submission
+  // Validate the input and create the task here.
+}
+
+return (
+  &lt;form onSubmit={handleSubmit}&gt;
+    &lt;input value={title} onChange={e =&gt; setTitle(e.target.value)} /&gt;
+    &lt;button type="submit"&gt;Add task&lt;/button&gt;
+  &lt;/form&gt;
+);</code></pre></div><p><code>preventDefault()</code> stops the browser's default form submission, which would normally navigate/reload the page. React can then handle the action and update the UI.</p></section>
+<section class="section" id="props"><div class="section-head"><div class="num">05</div><div><h2>State vs props</h2><p>Where information lives, and how components share it.</p></div></div><div class="tablewrap"><table><thead><tr><th>Question</th><th>State</th><th>Props</th></tr></thead><tbody><tr><td>What is it?</td><td>Information a component remembers.</td><td>Inputs a parent passes to a child.</td></tr><tr><td>Who sets it?</td><td>The component using its state setter.</td><td>The parent component.</td></tr><tr><td>Can this component change it directly?</td><td>Use the setter to request a change.</td><td>No. Props are read-only from the child's perspective.</td></tr><tr><td>Example</td><td><code>const [filter, setFilter] = useState("all")</code></td><td><code>&lt;TaskItem title={task.title} /&gt;</code></td></tr></tbody></table></div><div class="codebox"><div class="codehead"><span class="lang">Parent.jsx</span><button class="copy">Copy</button></div><pre><code>function TaskTitle({ title }) {
+  return &lt;h3&gt;{title}&lt;/h3&gt;;
+}
+
+export default function App() {
+  const [title, setTitle] = useState("Read React notes");
+  return &lt;TaskTitle title={title} /&gt;;
+}</code></pre></div><p>The parent owns <code>title</code> as state. The child receives the current title as a prop. If the parent changes its state, React renders the child with the new prop.</p><div class="callout"><strong>One-way data flow</strong>Data usually flows down from parent to child through props. To request a change, the child calls a callback supplied by the parent. This keeps the source of truth clear.</div></section>
+<section class="section" id="lift"><div class="section-head"><div class="num">06</div><div><h2>Lifting state up</h2><p>Move shared state to the closest common parent.</p></div></div><p>Imagine the task form creates tasks and the task list displays them. If each component has its own separate task array, the form cannot update the list's array. The solution is to put the shared array in their common parent and pass down data and callbacks.</p><div class="flow"><div class="node"><strong>App</strong><small>owns tasks + setter</small></div><div class="arrow">↓ props</div><div class="node"><strong>TaskForm</strong><small>calls onAddTask(task)</small></div><div class="arrow">↓ props</div><div class="node"><strong>TaskList</strong><small>renders tasks</small></div></div><div class="codebox"><div class="codehead"><span class="lang">App.jsx · simplified example</span><button class="copy">Copy</button></div><pre><code>import { useState } from "react";
+
+function TaskForm({ onAddTask }) {
+  const [title, setTitle] = useState("");
+
+  function submit(event) {
+    event.preventDefault();
+    if (!title.trim()) return;
+    onAddTask({ id: crypto.randomUUID(), title, completed: false });
+    setTitle("");
+  }
+
+  return (
+    &lt;form onSubmit={submit}&gt;
+      &lt;input value={title} onChange={e =&gt; setTitle(e.target.value)} /&gt;
+      &lt;button type="submit"&gt;Add&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+
+function TaskList({ tasks }) {
+  return &lt;ul&gt;{tasks.map(task =&gt; &lt;li key={task.id}&gt;{task.title}&lt;/li&gt;)}&lt;/ul&gt;;
+}
+
+export default function App() {
+  const [tasks, setTasks] = useState([]);
+
+  function addTask(task) {
+    setTasks(previous =&gt; [...previous, task]);
+  }
+
+  return (
+    &lt;main&gt;
+      &lt;TaskForm onAddTask={addTask} /&gt;
+      &lt;TaskList tasks={tasks} /&gt;
+    &lt;/main&gt;
+  );
+}</code></pre></div><div class="explain"><code>tasks={tasks}</code><div>Passes the current array from the parent to the list component.</div></div><div class="explain"><code>onAddTask={addTask}</code><div>Passes a function. The form can call it, but the parent still controls the actual task array.</div></div><div class="explain"><code>key={task.id}</code><div>Gives each rendered list item a stable identity so React can track items between renders.</div></div><p>The form keeps its own temporary text state because that text is only needed by the form. The shared task collection belongs in the parent because multiple components need it.</p></section>
+<section class="section" id="effects"><div class="section-head"><div class="num">07</div><div><h2>useEffect — synchronizing with the outside world</h2><p>Use effects for work that happens beyond calculating JSX.</p></div></div><h3>7.1 What is an effect?</h3><p>Rendering should describe the UI for the current props and state. Sometimes the component must synchronize with something outside React: a network request, browser title, timer, subscription or external widget. <code>useEffect</code> runs an effect after React commits a render.</p><div class="codebox"><div class="codehead"><span class="lang">Example</span><button class="copy">Copy</button></div><pre><code>import { useEffect, useState } from "react";
+
+function PageTitleDemo() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() =&gt; {
+    document.title = `TaskFlow clicks: ${count}`;
+  }, [count]);
+
+  return &lt;button onClick={() =&gt; setCount(c =&gt; c + 1)}&gt;Clicks: {count}&lt;/button&gt;;
+}</code></pre></div><div class="explain"><code>useEffect(() =&gt; {...}, [count])</code><div>Runs the effect after a render when <code>count</code> changes (and after the initial mount).</div></div><div class="explain"><code>[count]</code><div>The dependency array lists reactive values used by the effect. React compares them between renders.</div></div><div class="explain"><code>[]</code><div>An empty dependency array means the effect does not re-run because of changing component values; it runs after the initial mount. Development Strict Mode may intentionally run an extra setup/cleanup cycle.</div></div><div class="explain"><code>No dependency array</code><div>The effect runs after every render. This is often unnecessary and can cause loops if it updates state each time.</div></div><h3>7.2 Cleanup</h3><div class="codebox"><div class="codehead"><span class="lang">Timer example</span><button class="copy">Copy</button></div><pre><code>useEffect(() =&gt; {
+  const timerId = setInterval(() =&gt; {
+    console.log("Still here");
+  }, 5000);
+
+  return () =&gt; clearInterval(timerId);
+}, []);</code></pre></div><p>The function returned by the effect is called its cleanup. React calls it before re-running the effect and when the component is removed. Clearing a timer prevents it from continuing after it is no longer needed.</p><div class="callout warn"><strong>Do not use effects for every calculation</strong>If a value can be calculated directly from current props/state (for example, completed task count), calculate it during render. Do not copy it into another state variable using an effect unless there is a specific reason.</div></section>
+<section class="section" id="async"><div class="section-head"><div class="num">08</div><div><h2>Async state initialization & loading data</h2><p>Show how state moves from loading to success or failure.</p></div></div><h3>8.1 What does asynchronous mean?</h3><p>A network request takes time. JavaScript starts the request and continues doing other work; the response arrives later. The UI should not assume the data is already available. Use state to represent loading, successful data and errors.</p><div class="flow"><div class="node"><strong>loading</strong><small>show spinner/message</small></div><div class="arrow">→</div><div class="node"><strong>success</strong><small>show task list</small></div><div class="arrow">or</div><div class="node"><strong>error</strong><small>show retry message</small></div></div><h3>8.2 Important distinction</h3><p><code>useState(initialValue)</code> expects an initial value immediately. Do not pass an async function and expect React to await it. Instead, initialize state with a safe placeholder such as <code>[]</code>, then load remote data in an effect or a data-fetching layer.</p><div class="codebox"><div class="codehead"><span class="lang">Async loading pattern</span><button class="copy">Copy</button></div><pre><code>const [tasks, setTasks] = useState([]);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState("");
+
+useEffect(() =&gt; {
+  async function loadTasks() {
+    try {
+      const response = await fetch("http://localhost:4000/api/tasks");
+      if (!response.ok) throw new Error("Could not load tasks");
+      const data = await response.json();
+      setTasks(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  loadTasks();
+}, []);</code></pre></div><div class="explain"><code>async function</code><div>Declares a function that can use <code>await</code>.</div></div><div class="explain"><code>await fetch(...)</code><div>Waits for the HTTP response inside this async function without blocking the whole browser.</div></div><div class="explain"><code>response.ok</code><div>True for HTTP success status codes. <code>fetch</code> does not automatically throw just because the server returns 404 or 500, so check it.</div></div><div class="explain"><code>response.json()</code><div>Reads the response body and parses JSON into a JavaScript value.</div></div><div class="explain"><code>finally</code><div>Runs whether the request succeeded or failed, so loading can stop in either case.</div></div><h3>8.3 Render each state</h3><div class="codebox"><div class="codehead"><span class="lang">JSX</span><button class="copy">Copy</button></div><pre><code>if (loading) return &lt;p&gt;Loading tasks…&lt;/p&gt;;
+if (error) return &lt;p role="alert"&gt;Error: {error}&lt;/p&gt;;
+
+return (
+  &lt;ul&gt;
+    {tasks.map(task =&gt; &lt;li key={task._id}&gt;{task.title}&lt;/li&gt;)}
+  &lt;/ul&gt;
+);</code></pre></div><p>MongoDB/Mongoose documents commonly use <code>_id</code> instead of a frontend-made <code>id</code>. Use the identifier actually returned by the API consistently.</p></section>
+<section class="section" id="express"><div class="section-head"><div class="num">09</div><div><h2>Express.js and RESTful API basics</h2><p>The backend receives requests and returns responses.</p></div></div><h3>9.1 What is an API?</h3><p>An API is a defined way for one program to ask another program to do something. The React app can ask the backend for tasks without directly connecting to the database. The backend owns database access and validation.</p><h3>9.2 What is REST?</h3><p>REST is an architectural style often used to design web APIs around resources. Here, the resource is a <strong>task</strong>. HTTP methods communicate the intended action.</p><div class="tablewrap"><table><thead><tr><th>Method</th><th>Route</th><th>Meaning</th></tr></thead><tbody><tr><td><code>GET</code></td><td><code>/api/tasks</code></td><td>Read all tasks</td></tr><tr><td><code>GET</code></td><td><code>/api/tasks/:id</code></td><td>Read one task</td></tr><tr><td><code>POST</code></td><td><code>/api/tasks</code></td><td>Create a task</td></tr><tr><td><code>PUT</code></td><td><code>/api/tasks/:id</code></td><td>Replace/update a task in this exercise</td></tr><tr><td><code>DELETE</code></td><td><code>/api/tasks/:id</code></td><td>Delete a task</td></tr></tbody></table></div><h3>9.3 Environment configuration</h3><p>In <code>server</code>, create a file named <code>.env</code>. For local MongoDB:</p><div class="codebox"><div class="codehead"><span class="lang">server/.env</span><button class="copy">Copy</button></div><pre><code>PORT=4000
+MONGODB_URI=mongodb://127.0.0.1:27017/taskflow</code></pre></div><p>If using MongoDB Atlas, use your own connection URI instead. Keep credentials private and never commit a real secret to a public repository.</p><h3>9.4 Create a Mongoose model</h3><div class="codebox"><div class="codehead"><span class="lang">server/models/Task.js</span><button class="copy">Copy</button></div><pre><code>const mongoose = require("mongoose");
+
+const taskSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: [true, "Task title is required"],
+      trim: true,
+      maxlength: [120, "Title cannot exceed 120 characters"]
+    },
+    description: { type: String, default: "", maxlength: 1000 },
+    priority: { type: String, enum: ["low", "medium", "high"], default: "medium" },
+    completed: { type: Boolean, default: false }
+  },
+  { timestamps: true }
+);
+
+module.exports = mongoose.model("Task", taskSchema);</code></pre></div><div class="explain"><code>mongoose.Schema</code><div>Describes the fields expected on each task document.</div></div><div class="explain"><code>required</code><div>Rejects documents without a title.</div></div><div class="explain"><code>trim</code><div>Removes whitespace from the beginning and end of the title.</div></div><div class="explain"><code>enum</code><div>Restricts priority to the listed values.</div></div><div class="explain"><code>timestamps: true</code><div>Automatically adds <code>createdAt</code> and <code>updatedAt</code>.</div></div><div class="explain"><code>mongoose.model("Task", taskSchema)</code><div>Creates and exports a model used to query the MongoDB collection.</div></div><h3>9.5 Create the Express server</h3><div class="codebox"><div class="codehead"><span class="lang">server/server.js</span><button class="copy">Copy</button></div><pre><code>require("dotenv").config();
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+
+const app = express();
+
+app.use(cors({ origin: "http://localhost:5173" }));
+app.use(express.json());
+
+app.get("/api/health", (req, res) =&gt; {
+  res.json({ message: "TaskFlow API is running" });
+});
+
+const taskRoutes = require("./routes/taskRoutes");
+app.use("/api/tasks", taskRoutes);
+
+const PORT = process.env.PORT || 4000;
+
+async function startServer() {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log("Connected to MongoDB");
+    app.listen(PORT, () =&gt; console.log(`API running on port ${PORT}`));
+  } catch (error) {
+    console.error("Could not connect to MongoDB:", error.message);
+    process.exit(1);
+  }
+}
+
+startServer();</code></pre></div><p><strong>Read it in order:</strong> load environment settings; import libraries; create the Express app; register middleware; register routes; connect to MongoDB; then start listening for requests.</p><div class="explain"><code>app.use(express.json())</code><div>Parses incoming JSON request bodies and places the result on <code>req.body</code>.</div></div><div class="explain"><code>app.use(cors(...))</code><div>Allows the frontend origin specified in the configuration to make browser requests. CORS is not authentication or authorization.</div></div><div class="explain"><code>req</code><div>The request object contains information sent by the client, such as route parameters, query string and body.</div></div><div class="explain"><code>res</code><div>The response object is used to send status codes, JSON or other responses.</div></div><div class="explain"><code>process.env</code><div>Reads configuration values from environment variables loaded by dotenv.</div></div></section>
+<section class="section" id="crud"><div class="section-head"><div class="num">10</div><div><h2>REST CRUD routes and routing</h2><p>Create, Read, Update and Delete tasks through HTTP.</p></div></div><h3>10.1 Create a router file</h3><p>Create <code>server/routes/taskRoutes.js</code>. A router groups related endpoints together so <code>server.js</code> does not become one giant file.</p><div class="codebox"><div class="codehead"><span class="lang">server/routes/taskRoutes.js</span><button class="copy">Copy</button></div><pre><code>const express = require("express");
+const mongoose = require("mongoose");
+const Task = require("../models/Task");
+
+const router = express.Router();
+
+// READ: get all tasks
+router.get("/", async (req, res) =&gt; {
+  try {
+    const tasks = await Task.find().sort({ createdAt: -1 });
+    res.json(tasks);
+  } catch (error) {
+    res.status(500).json({ error: "Could not fetch tasks" });
+  }
+});
+
+// READ: get one task
+router.get("/:id", async (req, res) =&gt; {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ error: "Invalid task id" });
+    }
+    const task = await Task.findById(req.params.id);
+    if (!task) return res.status(404).json({ error: "Task not found" });
+    res.json(task);
+  } catch (error) {
+    res.status(500).json({ error: "Could not fetch task" });
+  }
+});
+
+// CREATE: add a task
+router.post("/", async (req, res) =&gt; {
+  try {
+    const title = typeof req.body.title === "string" ? req.body.title.trim() : "";
+    if (!title) return res.status(400).json({ error: "Title is required" });
+    const task = await Task.create({
+      title,
+      description: req.body.description,
+      priority: req.body.priority
+    });
+    res.status(201).json(task);
+  } catch (error) {
+    if (error.name === "ValidationError") {
+      return res.status(400).json({ error: error.message });
+    }
+    res.status(500).json({ error: "Could not create task" });
+  }
+});
+
+// UPDATE: change an existing task
+router.put("/:id", async (req, res) =&gt; {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ error: "Invalid task id" });
+    }
+    const allowed = {};
+    if (typeof req.body.title === "string") allowed.title = req.body.title.trim();
+    if (typeof req.body.description === "string") allowed.description = req.body.description;
+    if (["low", "medium", "high"].includes(req.body.priority)) allowed.priority = req.body.priority;
+    if (typeof req.body.completed === "boolean") allowed.completed = req.body.completed;
+    if (allowed.title === "") return res.status(400).json({ error: "Title cannot be empty" });
+
+    const task = await Task.findByIdAndUpdate(req.params.id, allowed, {
+      new: true,
+      runValidators: true
+    });
+    if (!task) return res.status(404).json({ error: "Task not found" });
+    res.json(task);
+  } catch (error) {
+    if (error.name === "ValidationError") return res.status(400).json({ error: error.message });
+    res.status(500).json({ error: "Could not update task" });
+  }
+});
+
+// DELETE: remove a task
+router.delete("/:id", async (req, res) =&gt; {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ error: "Invalid task id" });
+    }
+    const task = await Task.findByIdAndDelete(req.params.id);
+    if (!task) return res.status(404).json({ error: "Task not found" });
+    res.json({ message: "Task deleted", id: task._id });
+  } catch (error) {
+    res.status(500).json({ error: "Could not delete task" });
+  }
+});
+
+module.exports = router;</code></pre></div><h3>10.2 Route anatomy</h3><div class="explain"><code>router.get("/", ...)</code><div>Handles GET requests to the router's root. Because it is mounted at <code>/api/tasks</code>, the full path is <code>/api/tasks</code>.</div></div><div class="explain"><code>router.get("/:id", ...)</code><div>The colon makes <code>id</code> a route parameter. Express exposes it as <code>req.params.id</code>.</div></div><div class="explain"><code>await Task.find()</code><div>Asks MongoDB for matching documents and waits for the asynchronous result.</div></div><div class="explain"><code>res.status(201).json(task)</code><div>Returns HTTP 201 Created and the created task as JSON.</div></div><div class="explain"><code>new: true</code><div>Returns the updated document instead of the old version.</div></div><div class="explain"><code>runValidators: true</code><div>Asks Mongoose to apply schema validators during the update.</div></div><h3>10.3 Run and test the REST API</h3><p>Add this script to <code>server/package.json</code> inside the existing <code>scripts</code> object:</p><div class="codebox"><div class="codehead"><span class="lang">package.json fragment</span><button class="copy">Copy</button></div><pre><code>"scripts": {
+  "start": "node server.js",
+  "dev": "nodemon server.js"
+}</code></pre></div><p>Start MongoDB, then in the server terminal run:</p><div class="codebox"><div class="codehead"><span class="lang">Terminal</span><button class="copy">Copy</button></div><pre><code>npm run dev</code></pre></div><p>Visit <code>http://localhost:4000/api/health</code>. It should return JSON. Test CRUD using Postman, Insomnia, Thunder Client or curl.</p><div class="codebox"><div class="codehead"><span class="lang">curl · create</span><button class="copy">Copy</button></div><pre><code>curl -X POST http://localhost:4000/api/tasks \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Learn React state","description":"Build the first component","priority":"high"}'</code></pre></div><div class="codebox"><div class="codehead"><span class="lang">curl · read</span><button class="copy">Copy</button></div><pre><code>curl http://localhost:4000/api/tasks</code></pre></div><div class="callout good"><strong>Expected result</strong>After the POST request, the server should return a task with a MongoDB <code>_id</code>. The GET request should return an array containing that task. If you stop and restart the backend, the task remains because it is stored in MongoDB.</div></section>
+<section class="section" id="graphql"><div class="section-head"><div class="num">11</div><div><h2>Introduction to GraphQL</h2><p>Another way for clients to ask a backend for data.</p></div></div><h3>11.1 What is GraphQL?</h3><p>GraphQL is a query language for APIs and a runtime that executes those queries against a schema. A client describes the fields it wants, and the server returns a response shaped around that selection. GraphQL is not a database; our resolvers will use the same MongoDB/Mongoose model as REST.</p><div class="grid2"><div class="card"><h3>REST example</h3><p>Client calls a resource endpoint such as <code>GET /api/tasks/123</code>. The server defines the response shape for that endpoint.</p><p class="muted small">Different needs can lead to multiple endpoints or extra fields being transferred.</p></div><div class="card"><h3>GraphQL example</h3><p>Client sends a query describing the fields it needs, such as <code>title</code> and <code>completed</code>.</p><p class="muted small">The schema defines what can be requested and what types are returned.</p></div></div><h3>11.2 Main concepts</h3><div class="explain"><code>Schema</code><div>The contract describing available types and operations.</div></div><div class="explain"><code>Type</code><div>Describes the shape of an object, for example a Task with title and completed fields.</div></div><div class="explain"><code>Field</code><div>A property that a client can select, such as <code>task.title</code>.</div></div><div class="explain"><code>Query</code><div>Reads data. Similar purpose to GET in REST, though GraphQL operations are sent to a GraphQL endpoint.</div></div><div class="explain"><code>Mutation</code><div>Changes data, such as creating, updating or deleting a task.</div></div><div class="explain"><code>Resolver</code><div>A function that provides the value for a schema field or operation. It might query MongoDB.</div></div><div class="explain"><code>Variables</code><div>Values supplied separately from the query text, making operations reusable and easier to validate.</div></div><h3>11.3 Benefits and trade-offs</h3><div class="grid2"><div class="card"><h3>Benefits</h3><ul><li>Request only the fields needed.</li><li>One schema can expose related data through a consistent API.</li><li>Types make the API contract explicit.</li><li>Queries and mutations are structured.</li></ul></div><div class="card"><h3>Trade-offs</h3><ul><li>Requires schema and resolver design.</li><li>Authorization must be checked carefully.</li><li>Complex queries can be expensive without limits.</li><li>HTTP caching can require more deliberate setup than simple GET endpoints.</li></ul></div></div><div class="callout"><strong>REST and GraphQL can coexist</strong>For this exercise, keep REST CRUD routes and add GraphQL at <code>/graphql</code>. Both interfaces call the same Mongoose model. This makes it possible to compare them without rewriting the database layer.</div></section>
+<section class="section" id="schema"><div class="section-head"><div class="num">12</div><div><h2>GraphQL schema & field specification</h2><p>Describe what clients may ask for and what they receive.</p></div></div><h3>12.1 GraphQL type notation</h3><div class="tablewrap"><table><thead><tr><th>Notation</th><th>Meaning</th><th>Example</th></tr></thead><tbody><tr><td><code>String</code></td><td>Text value; may be null unless required.</td><td>description</td></tr><tr><td><code>String!</code></td><td>Non-null string.</td><td>title on a valid task</td></tr><tr><td><code>Boolean</code></td><td>True/false.</td><td>completed</td></tr><tr><td><code>[Task!]!</code></td><td>Non-null list; each item is also non-null.</td><td>allTasks result</td></tr><tr><td><code>ID!</code></td><td>Non-null identifier value.</td><td>task id</td></tr><tr><td><code>Int</code></td><td>Integer value.</td><td>optional count or limit</td></tr></tbody></table></div><h3>12.2 Build a schema and resolvers</h3><p>Create <code>server/graphql/schema.js</code>. The schema and resolvers below are written to work with the Task model created earlier.</p><div class="codebox"><div class="codehead"><span class="lang">server/graphql/schema.js</span><button class="copy">Copy</button></div><pre><code>const { buildSchema } = require("graphql");
+const mongoose = require("mongoose");
+const Task = require("../models/Task");
+
+const schema = buildSchema(`
+  type Task {
+    id: ID!
+    title: String!
+    description: String!
+    priority: String!
+    completed: Boolean!
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  input TaskInput {
+    title: String
+    description: String
+    priority: String
+    completed: Boolean
+  }
+
+  type Query {
+    tasks: [Task!]!
+    task(id: ID!): Task
+  }
+
+  type Mutation {
+    createTask(input: TaskInput!): Task!
+    updateTask(id: ID!, input: TaskInput!): Task
+    deleteTask(id: ID!): Boolean!
+  }
+`);
+
+function toGraphQLTask(task) {
+  if (!task) return null;
+  return {
+    id: task._id.toString(),
+    title: task.title,
+    description: task.description || "",
+    priority: task.priority,
+    completed: task.completed,
+    createdAt: task.createdAt?.toISOString() || null,
+    updatedAt: task.updatedAt?.toISOString() || null
+  };
+}
+
+const root = {
+  tasks: async () =&gt; {
+    const tasks = await Task.find().sort({ createdAt: -1 });
+    return tasks.map(toGraphQLTask);
+  },
+  task: async ({ id }) =&gt; {
+    if (!mongoose.isValidObjectId(id)) return null;
+    const task = await Task.findById(id);
+    return toGraphQLTask(task);
+  },
+  createTask: async ({ input }) =&gt; {
+    const title = typeof input.title === "string" ? input.title.trim() : "";
+    if (!title) throw new Error("Title is required");
+    const task = await Task.create({
+      title,
+      description: input.description || "",
+      priority: input.priority || "medium",
+      completed: input.completed ?? false
+    });
+    return toGraphQLTask(task);
+  },
+  updateTask: async ({ id, input }) =&gt; {
+    if (!mongoose.isValidObjectId(id)) throw new Error("Invalid task id");
+    const updates = {};
+    if (input.title !== undefined) updates.title = input.title.trim();
+    if (input.description !== undefined) updates.description = input.description;
+    if (input.priority !== undefined) updates.priority = input.priority;
+    if (input.completed !== undefined) updates.completed = input.completed;
+    if (updates.title === "") throw new Error("Title cannot be empty");
+    const task = await Task.findByIdAndUpdate(id, updates, { new: true, runValidators: true });
+    return toGraphQLTask(task);
+  },
+  deleteTask: async ({ id }) =&gt; {
+    if (!mongoose.isValidObjectId(id)) throw new Error("Invalid task id");
+    const deleted = await Task.findByIdAndDelete(id);
+    return Boolean(deleted);
+  }
+};
+
+module.exports = { schema, root };</code></pre></div><h3>12.3 Understand the schema</h3><div class="explain"><code>buildSchema(`...`)</code><div>Parses the GraphQL schema definition language (SDL) and creates a schema object.</div></div><div class="explain"><code>type Task</code><div>Defines the fields available on a Task result. The resolver converts MongoDB's <code>_id</code> into a string called <code>id</code>.</div></div><div class="explain"><code>input TaskInput</code><div>Defines a reusable object shape for data supplied to create/update mutations. Input types are for incoming data; object types are for returned data.</div></div><div class="explain"><code>type Query</code><div>Lists read operations that clients may request.</div></div><div class="explain"><code>type Mutation</code><div>Lists operations that change data.</div></div><div class="explain"><code>root</code><div>Contains resolver functions. With this simple <code>buildSchema</code> setup, the matching resolver functions are properties on the root value.</div></div><div class="explain"><code>toGraphQLTask</code><div>Transforms a Mongoose document into a plain object with the field names and values promised by the GraphQL schema.</div></div><div class="callout warn"><strong>Field specification matters</strong>GraphQL clients can select only fields declared by the schema. The schema is a contract, not a direct view of every MongoDB field. Keep schema fields and resolver results consistent.</div></section>
+<section class="section" id="queries"><div class="section-head"><div class="num">13</div><div><h2>GraphQL queries & query variables</h2><p>Read exactly the fields the caller needs.</p></div></div><h3>13.1 Query all tasks</h3><div class="codebox"><div class="codehead"><span class="lang">GraphQL query</span><button class="copy">Copy</button></div><pre><code>query GetTasks {
+  tasks {
+    id
+    title
+    completed
+    priority
+  }
+}</code></pre></div><p><code>query</code> labels this as a read operation. <code>GetTasks</code> is an optional operation name that helps with debugging. Inside <code>tasks</code>, the client explicitly selects the fields it wants.</p><h3>13.2 Query one task</h3><div class="codebox"><div class="codehead"><span class="lang">GraphQL query</span><button class="copy">Copy</button></div><pre><code>query GetOneTask {
+  task(id: "PASTE_A_REAL_TASK_ID_HERE") {
+    id
+    title
+    description
+    completed
+  }
+}</code></pre></div><p>Replace the placeholder with a real MongoDB task ID. A GraphQL <code>ID</code> is an identifier scalar; in this project it maps to the MongoDB ObjectId string.</p><h3>13.3 Why variables?</h3><p>Hard-coding a value inside the query means editing the query whenever the value changes. Variables separate the operation from its input.</p><div class="codebox"><div class="codehead"><span class="lang">Query document</span><button class="copy">Copy</button></div><pre><code>query GetOneTask($taskId: ID!) {
+  task(id: $taskId) {
+    id
+    title
+    completed
+  }
+}</code></pre></div><div class="codebox"><div class="codehead"><span class="lang">Variables JSON</span><button class="copy">Copy</button></div><pre><code>{
+  "taskId": "PASTE_A_REAL_TASK_ID_HERE"
+}</code></pre></div><p><code>$taskId</code> is a variable declared in parentheses. <code>ID!</code> means the caller must supply a non-null identifier. The JSON object provides its value. Variables reduce string-building errors and make queries reusable.</p><h3>13.4 Try GraphQL over HTTP</h3><p>Our endpoint will be <code>http://localhost:4000/graphql</code>. The following curl request sends a query as JSON. Use a terminal that supports single-quoted JSON (macOS/Linux/Git Bash); in other shells, use their appropriate quoting.</p><div class="codebox"><div class="codehead"><span class="lang">Terminal · GraphQL query</span><button class="copy">Copy</button></div><pre><code>curl -X POST http://localhost:4000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{"query":"query { tasks { id title completed priority } }"}'</code></pre></div><p>GraphQL responses commonly contain a <code>data</code> field. If an operation fails during execution, the response may also include an <code>errors</code> array. Do not assume every HTTP 200 response means the GraphQL operation succeeded.</p></section>
+<section class="section" id="mutations"><div class="section-head"><div class="num">14</div><div><h2>GraphQL mutations</h2><p>Create, update and delete data using named operations.</p></div></div><h3>14.1 Create a task</h3><div class="codebox"><div class="codehead"><span class="lang">Mutation</span><button class="copy">Copy</button></div><pre><code>mutation CreateTask($input: TaskInput!) {
+  createTask(input: $input) {
+    id
+    title
+    priority
+    completed
+  }
+}</code></pre></div><div class="codebox"><div class="codehead"><span class="lang">Variables JSON</span><button class="copy">Copy</button></div><pre><code>{
+  "input": {
+    "title": "Practice GraphQL",
+    "description": "Create a query and mutation",
+    "priority": "high",
+    "completed": false
+  }
+}</code></pre></div><h3>14.2 Update a task</h3><div class="codebox"><div class="codehead"><span class="lang">Mutation</span><button class="copy">Copy</button></div><pre><code>mutation UpdateTask($id: ID!, $input: TaskInput!) {
+  updateTask(id: $id, input: $input) {
+    id
+    title
+    completed
+    updatedAt
+  }
+}</code></pre></div><p>Supply the existing task ID and only the fields you want to change in <code>input</code>. The resolver returns the updated record or <code>null</code> if the ID is valid but no task exists. A production API should define and document its not-found error convention consistently.</p><h3>14.3 Delete a task</h3><div class="codebox"><div class="codehead"><span class="lang">Mutation</span><button class="copy">Copy</button></div><pre><code>mutation DeleteTask($id: ID!) {
+  deleteTask(id: $id)
+}</code></pre></div><p>This mutation returns a Boolean: <code>true</code> if a document was deleted, <code>false</code> if there was no matching document. Invalid IDs throw an error in our resolver.</p><div class="callout"><strong>Why do mutations return fields?</strong>A mutation can return the created or updated object, allowing the frontend to use the server's authoritative data (including its ID and timestamps) instead of guessing what was saved.</div></section>
+<section class="section" id="validation"><div class="section-head"><div class="num">15</div><div><h2>Input validation & error handling</h2><p>Assume input can be incorrect, incomplete or unexpected.</p></div></div><h3>15.1 Validation at multiple layers</h3><div class="grid3"><div class="card"><h3>React</h3><p>Immediate user feedback: required fields, character count and clear messages.</p><span class="badge">User experience</span></div><div class="card"><h3>Express/resolver</h3><p>Check request shape, empty strings, IDs and allowed values before database operations.</p><span class="badge">API boundary</span></div><div class="card"><h3>Mongoose</h3><p>Schema rules enforce data expectations when creating/updating documents.</p><span class="badge">Data consistency</span></div></div><p>Frontend validation improves usability but is not a security boundary. A caller can bypass React and call the API directly, so the backend must validate independently.</p><h3>15.2 Common REST status codes</h3><div class="tablewrap"><table><thead><tr><th>Status</th><th>Meaning</th><th>TaskFlow example</th></tr></thead><tbody><tr><td><code>200</code></td><td>OK</td><td>Task fetched or updated.</td></tr><tr><td><code>201</code></td><td>Created</td><td>New task saved.</td></tr><tr><td><code>400</code></td><td>Bad Request</td><td>Missing title or invalid ID format.</td></tr><tr><td><code>404</code></td><td>Not Found</td><td>Valid ID format, but task does not exist.</td></tr><tr><td><code>500</code></td><td>Internal Server Error</td><td>Unexpected server/database failure.</td></tr></tbody></table></div><h3>15.3 React error handling pattern</h3><div class="codebox"><div class="codehead"><span class="lang">Reusable API helper</span><button class="copy">Copy</button></div><pre><code>async function requestJson(url, options = {}) {
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    }
+  });
+
+  const data = await response.json().catch(() =&gt; ({}));
+
+  if (!response.ok) {
+    throw new Error(data.error || `Request failed (${response.status})`);
+  }
+
+  return data;
+}</code></pre></div><p>This helper centralizes repetitive work: send the request, parse JSON, check the status and throw an understandable error. The component using it can catch that error and show it to the user.</p><h3>15.4 GraphQL error handling</h3><p>GraphQL distinguishes errors such as invalid query syntax/schema validation from errors thrown by resolvers during execution. The response often includes <code>errors</code> with messages and may include partial <code>data</code>. Avoid exposing stack traces, database credentials or sensitive internals to clients. Log detailed diagnostics on the server and send safe messages to users.</p><div class="callout warn"><strong>Security note</strong>This is a learning application, not a production-ready public API. Before deployment, add authentication, authorization, request limits, stronger validation, safe logging, rate limiting and GraphQL query depth/complexity controls. CORS alone does not protect an API.</div></section>
+<section class="section" id="integration"><div class="section-head"><div class="num">16</div><div><h2>Integrate GraphQL with Express</h2><p>Mount GraphQL beside the REST routes in the same server.</p></div></div><h3>16.1 Add the GraphQL handler</h3><p>In <code>server/server.js</code>, import the GraphQL schema and mount the handler before starting the server. Add these lines after middleware registration and before <code>app.listen</code> (the server setup in Section 9 already starts listening after MongoDB connects).</p><div class="codebox"><div class="codehead"><span class="lang">server/server.js · additions</span><button class="copy">Copy</button></div><pre><code>const { createHandler } = require("graphql-http/lib/use/express");
+const { schema, root } = require("./graphql/schema");
+
+app.use(
+  "/graphql",
+  createHandler({
+    schema,
+    rootValue: root
+  })
+);</code></pre></div><p>The GraphQL handler accepts GraphQL HTTP requests at <code>/graphql</code>. The REST router remains mounted at <code>/api/tasks</code>. They share the same <code>Task</code> model, so a task created through one API should be visible through the other.</p><div class="callout warn"><strong>GraphQL IDE note</strong>The <code>graphql-http</code> handler does not automatically guarantee an interactive browser IDE. Use a GraphQL client such as Apollo Sandbox/GraphiQL or the curl examples in this workbook to send operations. Do not assume opening <code>/graphql</code> in a browser will show an IDE.</div><h3>16.2 Final backend structure</h3><div class="codebox"><div class="codehead"><span class="lang">Project tree</span><button class="copy">Copy</button></div><pre><code>taskflow/
+├── server/
+│   ├── .env
+│   ├── package.json
+│   ├── server.js
+│   ├── models/
+│   │   └── Task.js
+│   ├── routes/
+│   │   └── taskRoutes.js
+│   └── graphql/
+│       └── schema.js
+└── client/
+    ├── package.json
+    └── src/
+        ├── App.jsx
+        ├── App.css
+        └── main.jsx</code></pre></div><h3>16.3 React integration: load tasks from REST</h3><p>To make the frontend concrete, replace <code>client/src/App.jsx</code> with the beginner-sized working version below. It loads, creates, completes and deletes tasks through the REST API. You can add edit/filter styling after the data flow is working.</p><div class="codebox"><div class="codehead"><span class="lang">client/src/App.jsx</span><button class="copy">Copy</button></div><pre><code>import { useEffect, useState } from "react";
+import "./App.css";
+
+const API = "http://localhost:4000/api/tasks";
+
+export default function App() {
+  const [tasks, setTasks] = useState([]);
+  const [title, setTitle] = useState("");
+  const [priority, setPriority] = useState("medium");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  async function loadTasks() {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch(API);
+      if (!response.ok) throw new Error("Unable to load tasks");
+      setTasks(await response.json());
+    } catch (err) {
+      setError(err.message || "Network error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() =&gt; {
+    loadTasks();
+  }, []);
+
+  async function addTask(event) {
+    event.preventDefault();
+    if (!title.trim()) {
+      setError("Please enter a task title.");
+      return;
+    }
+    try {
+      const response = await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: title.trim(), priority })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not add task");
+      setTasks(previous =&gt; [data, ...previous]);
+      setTitle("");
+      setPriority("medium");
+      setError("");
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function toggleTask(task) {
+    try {
+      const response = await fetch(`${API}/${task._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ completed: !task.completed })
+      });
+      const updated = await response.json();
+      if (!response.ok) throw new Error(updated.error || "Could not update task");
+      setTasks(previous =&gt; previous.map(item =&gt; item._id === updated._id ? updated : item));
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function deleteTask(id) {
+    try {
+      const response = await fetch(`${API}/${id}`, { method: "DELETE" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not delete task");
+      setTasks(previous =&gt; previous.filter(task =&gt; task._id !== id));
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  const completedCount = tasks.filter(task =&gt; task.completed).length;
+
+  return (
+    &lt;main className="app-shell"&gt;
+      &lt;header className="hero-panel"&gt;
+        &lt;p className="eyebrow"&gt;YOUR PERSONAL WORKSPACE&lt;/p&gt;
+        &lt;h1&gt;TaskFlow&lt;/h1&gt;
+        &lt;p&gt;Turn the next small step into progress.&lt;/p&gt;
+        &lt;div className="stats"&gt;
+          &lt;span&gt;Total tasks: &lt;strong&gt;{tasks.length}&lt;/strong&gt;&lt;/span&gt;
+          &lt;span&gt;Completed: &lt;strong&gt;{completedCount}&lt;/strong&gt;&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/header&gt;
+
+      &lt;form className="task-form" onSubmit={addTask}&gt;
+        &lt;label&gt;Task title
+          &lt;input value={title} onChange={e =&gt; setTitle(e.target.value)} placeholder="e.g. Learn useEffect" maxLength={120} /&gt;
+        &lt;/label&gt;
+        &lt;label&gt;Priority
+          &lt;select value={priority} onChange={e =&gt; setPriority(e.target.value)}&gt;
+            &lt;option value="low"&gt;Low&lt;/option&gt;
+            &lt;option value="medium"&gt;Medium&lt;/option&gt;
+            &lt;option value="high"&gt;High&lt;/option&gt;
+          &lt;/select&gt;
+        &lt;/label&gt;
+        &lt;button type="submit"&gt;+ Add task&lt;/button&gt;
+      &lt;/form&gt;
+
+      {error &amp;&amp; &lt;p className="error" role="alert"&gt;{error}&lt;/p&gt;}
+      {loading ? &lt;p&gt;Loading tasks…&lt;/p&gt; : tasks.length === 0 ? (
+        &lt;p className="empty"&gt;No tasks yet. Add your first one above.&lt;/p&gt;
+      ) : (
+        &lt;section className="task-list"&gt;
+          {tasks.map(task =&gt; (
+            &lt;article className={`task-card ${task.completed ? "completed" : ""}`} key={task._id}&gt;
+              &lt;label className="task-main"&gt;
+                &lt;input type="checkbox" checked={task.completed} onChange={() =&gt; toggleTask(task)} /&gt;
+                &lt;span&gt;
+                  &lt;strong&gt;{task.title}&lt;/strong&gt;
+                  &lt;small&gt;Priority: {task.priority}&lt;/small&gt;
+                &lt;/span&gt;
+              &lt;/label&gt;
+              &lt;button className="delete" type="button" onClick={() =&gt; deleteTask(task._id)}&gt;Delete&lt;/button&gt;
+            &lt;/article&gt;
+          ))}
+        &lt;/section&gt;
+      )}
+    &lt;/main&gt;
+  );
+}</code></pre></div><h3>16.4 Add styling</h3><div class="codebox"><div class="codehead"><span class="lang">client/src/App.css</span><button class="copy">Copy</button></div><pre><code>* { box-sizing: border-box; }
+body { margin: 0; font-family: Inter, system-ui, sans-serif; background: #0b1020; color: #eef3ff; }
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+.app-shell { width: min(900px, 92%); margin: 42px auto; }
+.hero-panel { padding: 30px; border-radius: 24px; background: linear-gradient(130deg,#183c49,#2b2450); border: 1px solid #41566f; }
+.eyebrow { color: #65e4df; font-size: .75rem; letter-spacing: 2px; font-weight: 800; }
+h1 { font-size: clamp(2.5rem,7vw,4rem); margin: 6px 0; }
+.stats { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 22px; color: #cbd7ed; }
+.stats strong { color: #65e4df; }
+.task-form { display: grid; grid-template-columns: 1fr 160px auto; gap: 12px; padding: 18px; margin: 18px 0; background: #141e33; border: 1px solid #2d3d5b; border-radius: 18px; }
+.task-form label { display: grid; gap: 6px; color: #b9c8e2; font-size: .88rem; }
+input:not([type=checkbox]), select { min-width: 0; padding: 12px; border-radius: 10px; border: 1px solid #405371; background: #0b1426; color: white; }
+.task-form button { align-self: end; border: 0; border-radius: 10px; padding: 12px 16px; background: #65e4df; color: #10202b; font-weight: 850; }
+.task-list { display: grid; gap: 10px; }
+.task-card { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px; border: 1px solid #2d3d5b; background: #141e33; border-radius: 14px; }
+.task-main { display: flex; align-items: center; gap: 12px; }
+.task-main input { width: 18px; height: 18px; accent-color: #65e4df; }
+.task-main span { display: grid; gap: 4px; }
+.task-main small { color: #9eb0cc; }
+.completed strong { text-decoration: line-through; color: #91a0b8; }
+.delete { background: transparent; color: #ff9fc5; border: 1px solid #74435b; padding: 7px 10px; border-radius: 8px; }
+.error { background: #3b1f2c; color: #ffb4c8; border: 1px solid #80445d; padding: 12px; border-radius: 10px; }
+.empty { color: #aab8d2; padding: 22px; text-align: center; border: 1px dashed #405371; border-radius: 14px; }
+@media(max-width:650px) { .task-form { grid-template-columns: 1fr; } .task-form button { width: 100%; } .hero-panel { padding: 22px; } }</code></pre></div><h3>16.5 How React state and API state work together</h3><p>When a task is created, React sends POST to Express. Express validates it and asks Mongoose to save it. MongoDB stores the document. Express returns the saved document including <code>_id</code>. React then adds that returned object to its state. The screen re-renders with the new task.</p><div class="flow"><div class="node"><strong>Submit form</strong><small>React event</small></div><div class="arrow">→</div><div class="node"><strong>POST request</strong><small>JSON body</small></div><div class="arrow">→</div><div class="node"><strong>Express + MongoDB</strong><small>validate and save</small></div><div class="arrow">→</div><div class="node"><strong>JSON response</strong><small>saved task</small></div><div class="arrow">→</div><div class="node"><strong>setTasks()</strong><small>screen updates</small></div></div></section>
+<section class="section" id="debug"><div class="section-head"><div class="num">17</div><div><h2>Debugging guide & common mistakes</h2><p>Use the symptom to narrow down the layer where the problem exists.</p></div></div><div class="tablewrap"><table><thead><tr><th>Symptom</th><th>Likely reason</th><th>What to check</th></tr></thead><tbody><tr><td>Frontend cannot connect</td><td>Backend stopped or wrong URL/port.</td><td>Open <code>/api/health</code>; inspect terminal errors.</td></tr><tr><td>CORS error</td><td>Frontend origin not allowed.</td><td>Check the configured origin matches the Vite URL.</td></tr><tr><td>MongoDB connection error</td><td>MongoDB is stopped or URI is wrong.</td><td>Check <code>MONGODB_URI</code> and MongoDB service.</td></tr><tr><td>Request body is undefined</td><td>JSON middleware missing or wrong Content-Type.</td><td>Use <code>app.use(express.json())</code> before routes and send JSON header.</td></tr><tr><td>Screen does not update</td><td>State mutated directly or setter not called.</td><td>Use immutable array/object updates and the setter.</td></tr><tr><td>Infinite effect requests</td><td>Effect updates a dependency that causes it to run again.</td><td>Review dependencies and avoid setting state unnecessarily in every render.</td></tr><tr><td>GraphQL unknown field</td><td>Query asks for a field absent from the schema.</td><td>Compare query fields with the schema.</td></tr><tr><td>GraphQL data is null</td><td>Resolver returned null, or an error affected a non-null field.</td><td>Inspect both <code>data</code> and <code>errors</code>.</td></tr><tr><td>Invalid task ID</td><td>Malformed MongoDB ObjectId.</td><td>Copy the exact <code>_id</code> from a returned document.</td></tr><tr><td>Task creation returns 400</td><td>Missing title or invalid priority.</td><td>Inspect request body and Mongoose validation message.</td></tr></tbody></table></div><h3>Recommended debugging sequence</h3><ol class="steps"><li><strong>Check the browser console.</strong> Read the first meaningful error; it often points to the component or line that failed.</li><li><strong>Check the backend terminal.</strong> Look for syntax errors, failed database connections and rejected requests.</li><li><strong>Test the API without React.</strong> Use curl/Postman to see whether the backend works independently.</li><li><strong>Inspect the request.</strong> Confirm URL, HTTP method, headers and JSON body.</li><li><strong>Inspect the response.</strong> Check status code, returned JSON and any error field.</li><li><strong>Verify the database.</strong> Confirm that the document was created/updated/deleted in MongoDB.</li></ol></section>
+<section class="section" id="checklist"><div class="section-head"><div class="num">✓</div><div><h2>Final completion checklist</h2><p>Mark each item after testing it yourself.</p></div></div><div class="checklist" id="checks"><label><input type="checkbox"> I can explain what React state is and why a setter is used.</label><label><input type="checkbox"> I can use <code>useState</code> with text, booleans, arrays and objects.</label><label><input type="checkbox"> I can handle clicks, input changes and form submissions.</label><label><input type="checkbox"> I can explain state vs props and one-way data flow.</label><label><input type="checkbox"> I can explain lifting state up and choose a shared parent.</label><label><input type="checkbox"> I can explain component hierarchy and stateless/stateful design.</label><label><input type="checkbox"> I can explain <code>useEffect</code>, dependencies and cleanup.</label><label><input type="checkbox"> I can model loading, success and error states for an async request.</label><label><input type="checkbox"> I can explain REST and map HTTP methods to CRUD operations.</label><label><input type="checkbox"> I can create Express routes and return JSON/status codes.</label><label><input type="checkbox"> I can explain Mongoose schemas, models and validation.</label><label><input type="checkbox"> I can explain GraphQL schema, types, fields, queries and mutations.</label><label><input type="checkbox"> I can use query variables instead of hard-coded values.</label><label><input type="checkbox"> I can validate input and handle errors on both client and server.</label><label><input type="checkbox"> I can trace a React action through Express to MongoDB and back.</label></div><div class="end-banner"><h3>Final mental model</h3><p><strong>React state</strong> controls what the user sees. <strong>Props</strong> pass data and callbacks between components. <strong>useEffect</strong> synchronizes with external systems such as APIs. <strong>Express</strong> defines backend HTTP routes. <strong>REST</strong> organizes operations around resources and HTTP methods. <strong>GraphQL</strong> exposes a typed schema with queries for reading and mutations for changing data. <strong>Mongoose/MongoDB</strong> stores the persistent records.</p><p>Once you can follow a task from the button click to the database and back to the screen, you understand the central full-stack data flow.</p></div></section>
+</main></div>
+<script>
+document.querySelectorAll('button.copy').forEach(button=>{button.addEventListener('click',async()=>{const code=button.closest('.codebox').querySelector('pre code').innerText;try{await navigator.clipboard.writeText(code);button.textContent='Copied!';setTimeout(()=>button.textContent='Copy',1300)}catch(e){const range=document.createRange();range.selectNodeContents(button.closest('.codebox').querySelector('pre'));const selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);button.textContent='Select and copy';}})});
+const progress=document.getElementById('readProgress');window.addEventListener('scroll',()=>{const max=document.documentElement.scrollHeight-window.innerHeight;progress.style.width=(max>0?(window.scrollY/max)*100:0)+'%'});
+</script></body></html>
